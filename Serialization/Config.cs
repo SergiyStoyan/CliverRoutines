@@ -83,7 +83,7 @@ namespace Cliver
             Config.required_object_names.Clear();
             if (required_object_names == null)
                 return;
-            foreach(string name in required_object_names)
+            foreach (string name in required_object_names)
                 Config.required_object_names.Add(name);
         }
         static readonly HashSet<string> required_object_names = new HashSet<string>();
