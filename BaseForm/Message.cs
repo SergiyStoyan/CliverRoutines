@@ -33,8 +33,6 @@ namespace Cliver
         /// </summary>
         public static bool TopMost = false;
 
-        public static bool TopLevel = false;
-
         /// <summary>
         /// Owner that is used by default
         /// </summary>
@@ -201,7 +199,6 @@ namespace Cliver
             MessageForm mf = new MessageForm(title, icon, message, buttons, default_button, owner, button_autosize ?? ButtonAutosize);
             mf.ShowInTaskbar = ShowInTaskbar;
             mf.TopMost = top_most ?? TopMost;
-            mf.TopLevel = top_most ?? TopLevel;
             int result = mf.ShowDialog();
 
             if (no_duplicate ?? NoDuplicate)
