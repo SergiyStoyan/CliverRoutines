@@ -104,7 +104,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\_PROJECTS\google.com-flights\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -155,6 +155,13 @@
       <DependentUpon>MessageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="BaseService.cs" />
+    <Compile Include="Log_\Log.constants.cs" />
+    <Compile Include="Log_\Log.NamedWriter.cs" />
+    <Compile Include="Log_\Log.Session.cs" />
+    <Compile Include="Log_\Log.static.cs" />
+    <Compile Include="Log_\Log.ThreadWriter.cs" />
+    <Compile Include="Log_\Log.Writer.cs" />
+    <Compile Include="Log_\LogMessage.cs" />
     <Compile Include="Misc\WebClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -170,9 +177,6 @@
     <Compile Include="Misc\Crypto.cs" />
     <Compile Include="Db\DbCommand.cs" />
     <Compile Include="Db\DbConnection.cs" />
-    <Compile Include="Log\Log.NamedWriter.cs" />
-    <Compile Include="Log\Log.Session.cs" />
-    <Compile Include="Log\Log.ThreadWriter.cs" />
     <Compile Include="Misc\FieldPreparation.cs" />
     <Compile Include="InternetDateTime.cs" />
     <Compile Include="Misc\Enum.cs" />
@@ -189,10 +193,6 @@
     <Compile Include="Serialization\Serializable.cs" />
     <Compile Include="Misc\SettingsBase.cs" />
     <Compile Include="Serialization\SerializationRoutines.Binary.cs" />
-    <Compile Include="Log\Log.constants.cs" />
-    <Compile Include="Log\Log.static.cs" />
-    <Compile Include="Log\Log.Writer.cs" />
-    <Compile Include="Log\LogMessage.cs" />
     <Compile Include="Misc\ProcessRoutines.cs" />
     <Compile Include="Misc\ReflectionRoutines.cs" />
     <Compile Include="Misc\NetworkRoutines.cs" />
