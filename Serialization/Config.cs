@@ -135,7 +135,6 @@ namespace Cliver
                             continue;
 
                         Serializable t;
-                        string sd;
 
                         string file = (st.BaseType == typeof(UserSettings) ? UserSettings.StorageDir : (st.BaseType == typeof(AppSettings) ? AppSettings.StorageDir : StorageDir)) + "\\" + name + "." + st.FullName + "." + FILE_EXTENSION;
                         if (reset)
