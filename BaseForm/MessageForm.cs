@@ -40,7 +40,8 @@ namespace Cliver
                 if (w > 0)
                 {
                     this.Width += w;
-                    this.message.Left += w;
+                    this.message.Width -= w;
+                    this.message.Left = this.message.Left + w;
                 }
             }
 
@@ -84,23 +85,18 @@ namespace Cliver
             //this.Height = this.Height + s.Height - this.message.Height;
         }
 
-        void b_Click(object sender, EventArgs e)
+        private void b_Click(object sender, EventArgs e)
         {
-            clicked_button = (int)((Button)sender).Tag;
+            ClickedButton = (int)((Button)sender).Tag;
             this.Close();
         }
 
-        int clicked_button = -1;
-
-        public int ClickedButton
-        {
-            get { return clicked_button; }
-        }
+        public int ClickedButton { get; private set; } = -1;
 
         new public int ShowDialog()
         {
             System.Windows.Forms.DialogResult r = base.ShowDialog();
-            return clicked_button;
+            return ClickedButton;
         }
 
         private void Message_ContentsResized(object sender, ContentsResizedEventArgs e)
@@ -149,7 +145,8 @@ namespace Cliver
             }
             base.WndProc(ref m);
         }
-        Size restored_size;
+
+        private Size restored_size;
 
         public new void Close()
         {
