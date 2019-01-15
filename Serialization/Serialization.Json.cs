@@ -21,7 +21,7 @@ using System.Xml;
 
 namespace Cliver
 {
-    static public partial class SerializationRoutines
+    static public partial class Serialization
     {
         static public class Json
         {
@@ -83,6 +83,11 @@ namespace Cliver
             static public T Clone<T>(T o)
             {
                 return Deserialize<T>(Serialize(o, false, true));
+            }
+
+            static public object Clone(Type type, object o)
+            {
+                return Deserialize(type, Serialize(o, false, true));
             }
         }
     }
