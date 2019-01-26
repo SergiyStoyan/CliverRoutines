@@ -65,7 +65,7 @@ namespace Cliver
                         default:
                             throw new Exception("Unknown LOGGING_MODE:" + Cliver.Log.mode);
                     }
-                    return directory + @"\" + FileName;
+                    return directory + System.IO.Path.DirectorySeparatorChar + FileName;
                 }
             }
 
@@ -263,7 +263,7 @@ namespace Cliver
                         if (exiting_thread != null)
                             return;
                         write(type, message, details);
-                        exiting_thread = ThreadRoutines.Start(() =>
+                        exiting_thread = startThread(() =>
                         {
                             try
                             {
@@ -294,7 +294,7 @@ namespace Cliver
                     if (Writing != null)
                         Writing.Invoke(type, message, details);
 
-                    if (Log.write_log)
+                    if (Log.writeLog)
                     {
                         if (log_writer == null)
                             log_writer = new StreamWriter(Path, true);

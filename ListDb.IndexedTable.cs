@@ -33,7 +33,7 @@ namespace Cliver
             {
                 directory = get_normalized_directory(directory);
                 WeakReference wr;
-                string key = directory + "\\" + typeof(D).Name;
+                string key = directory + System.IO.Path.DirectorySeparatorChar + typeof(D).Name;
                 if (!table_keys2table.TryGetValue(key, out wr)
                     || !wr.IsAlive
                     )

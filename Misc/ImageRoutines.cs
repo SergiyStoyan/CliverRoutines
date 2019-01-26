@@ -150,13 +150,13 @@ namespace Cliver
             return b2;
         }
 
-        public static System.Windows.Media.ImageSource ToImageSource(this System.Drawing.Icon icon)
-        {
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-                icon.Handle,
-                System.Windows.Int32Rect.Empty,
-                System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-        }
+        //public static System.Windows.Media.ImageSource ToImageSource(this System.Drawing.Icon icon)
+        //{
+        //    return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+        //        icon.Handle,
+        //        System.Windows.Int32Rect.Empty,
+        //        System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+        //}
 
         //var g = Convert.ToBase64String(ImageProcessor.GetBitmapHash(new Bitmap(@"d:\temp\b2.png")));
         public static byte[] GetBitmapMd5Hash(Bitmap bitmap, int hashResolution = 16)
