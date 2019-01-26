@@ -141,7 +141,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseService.cs" />
     <Compile Include="Log_\Log.constants.cs" />
     <Compile Include="Log_\Log.NamedWriter.cs" />
     <Compile Include="Log_\Log.Session.cs" />
