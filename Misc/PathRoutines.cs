@@ -42,7 +42,7 @@ namespace Cliver
         {
             if (path.Contains(":"))
                 return path;
-            return Log.AppDir + "\\" + path;
+            return Log.AppDir + System.IO.Path.DirectorySeparatorChar + path;
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Cliver
 
         public static string GetDirNameFromPath(string path)
         {
-            return Regex.Replace(path.TrimEnd('\\'), @".*\\", "", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+            return Regex.Replace(path.TrimEnd(Path.DirectorySeparatorChar), @".*\\\/", "", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
         }
 
         public static string InsertSuffixBeforeFileExtension(string path, string suffix)
