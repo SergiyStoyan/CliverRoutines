@@ -6,13 +6,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Threading;
 using System.IO;
 using Newtonsoft.Json;
-using System.Reflection;
 
 namespace Cliver
 {
@@ -78,7 +74,7 @@ namespace Cliver
             {
                 if (directory == null)
                     directory = Cliver.Log.AppCommonDataDir;
-                return PathRoutines.GetNormalizedPath(directory);
+                return PathRoutines.GetNormalizedPath(directory, true);
             }
 
             public readonly string Log = null;

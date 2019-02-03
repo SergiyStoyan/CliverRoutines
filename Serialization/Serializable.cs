@@ -4,15 +4,7 @@
 //        http://www.cliversoft.com
 //********************************************************************************************
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Configuration;
-using System.Web.Script.Serialization;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Xml;
-using System.Reflection;
-using Newtonsoft.Json;
 
 namespace Cliver
 {

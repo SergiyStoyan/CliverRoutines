@@ -9,13 +9,7 @@
 
 using System;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
 //using System.Configuration;
-using Cliver;
-using System.Text.RegularExpressions;
-using System.Linq;
 
 
 namespace Cliver

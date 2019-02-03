@@ -29,14 +29,10 @@ InternetDateTime.CHECK_TEST_PERIOD_VALIDITY(2008, 11, 8);
 */
 
 using System;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using System.Net;
 using System.Reflection;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Windows;
 
 namespace Cliver
 {

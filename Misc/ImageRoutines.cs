@@ -8,8 +8,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Cliver
 {

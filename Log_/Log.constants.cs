@@ -7,14 +7,9 @@
 //Copyright: (C) 2006-2013, Sergey Stoyan
 //********************************************************************************************
 using System;
-using System.Linq;
 using System.Threading;
-using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace Cliver
@@ -28,12 +23,12 @@ namespace Cliver
 
         static Log()
         {
-            if (ProgramRoutines.IsWebContext)
+            /*if (ProgramRoutines.IsWebContext) - crashes on Xamarin
                 throw new Exception("Log is disabled in web context.");
 
             if (ProgramRoutines.IsWebContext)
                 ProcessName = System.Web.Compilation.BuildManager.GetGlobalAsaxType().BaseType.Assembly.GetName(false).Name;
-            else
+            else*/
                 ProcessName = System.Reflection.Assembly.GetEntryAssembly().GetName(false).Name;
 
             AppDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(System.IO.Path.DirectorySeparatorChar);
@@ -41,7 +36,7 @@ namespace Cliver
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly().Location);
             CompanyName = string.IsNullOrWhiteSpace(fvi.CompanyName) ? "CliverSoft" : fvi.CompanyName;
 
-            CompanyCommonDataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + System.IO.Path.DirectorySeparatorChar + CompanyName;
+            CompanyCommonDataDir = Environment.GetFolderPath(Environment.SpecialFolder./*CommonApplicationData - no write permission on macOS*/LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + CompanyName;
             AppCommonDataDir = CompanyCommonDataDir + System.IO.Path.DirectorySeparatorChar + Log.ProcessName;
             //Log.DeleteOldLogs();
         }
@@ -86,9 +81,10 @@ namespace Cliver
                             if (writeLog && !Directory.Exists(workDir))
                                 try
                                 {
-                                    Directory.CreateDirectory(workDir);
+                                    //Directory.CreateDirectory(workDir);
+                                    FileSystemRoutines.CreateDirectory(workDir);
                                 }
-                                catch
+                                catch(Exception e)
                                 {
                                     preWorkDir = null;
                                 }
@@ -109,11 +105,13 @@ namespace Cliver
                                     break;
                                 try
                                 {
-                                    Directory.CreateDirectory(workDir);
+                                    //Directory.CreateDirectory(workDir);
+                                    FileSystemRoutines.CreateDirectory(workDir);
                                     if (Directory.Exists(workDir))
                                         break;
                                 }
-                                catch { }
+                                catch (Exception e)
+                                { }
                             }
                         }
                         if (writeLog)
@@ -122,9 +120,10 @@ namespace Cliver
                             else
                                 throw new Exception("Could not create log folder!");
                     }
+                    workDir= PathRoutines.GetNormalizedPath(workDir, false);
                     // delete_old_logs?.Join();
                 }
-                return PathRoutines.GetNormalizedPath(workDir);
+                return workDir;
             }
         }
         static string workDir = null;
