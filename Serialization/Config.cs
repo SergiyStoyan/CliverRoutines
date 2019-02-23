@@ -82,7 +82,7 @@ namespace Cliver
     {
         static Config()
         {
-               DefaultStorageDir = AppSettings.StorageDir;
+            DefaultStorageDir = UserSettings.StorageDir;
         }
 
         /// <summary>
