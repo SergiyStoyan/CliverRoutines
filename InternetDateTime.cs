@@ -88,7 +88,7 @@ namespace Cliver
                     if (new DateTime(year, month, day) < InternetDateTime.GetOverHttp())
                     {
                         Action a = (Action)(() => {
-                            LogMessage.Exit("The test time expired. \nPlease contact the vendor if you want to use this software.");
+                            Log.Message.Exit("The test time expired. \nPlease contact the vendor if you want to use this software.");
                         });
                         if (System.Windows.Forms.Application.OpenForms.Count > 0)
                             System.Windows.Forms.Application.OpenForms[0].Invoke(a);
@@ -107,13 +107,13 @@ namespace Cliver
                 },
                 (Exception e) =>
                 {
-                    LogMessage.Exit(e);
+                    Log.Message.Exit(e);
                 }
                 );
             }
             catch (Exception e)
             {
-                LogMessage.Exit(e);
+                Log.Message.Exit(e);
             }
         }
         static bool silently = false;
@@ -178,7 +178,7 @@ namespace Cliver
                 if (silently)
                     Log.Main.Error("Validation failed.\n\n" + e.Message);
                 else
-                    LogMessage.Exit("Test period validation failed.\n\n" + e.Message);
+                    Log.Message.Exit("Test period validation failed.\n\n" + e.Message);
                 //Environment.Exit(0);
             }
 

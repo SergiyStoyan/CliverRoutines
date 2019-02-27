@@ -147,7 +147,7 @@
     <Compile Include="Log_\Log.static.cs" />
     <Compile Include="Log_\Log.ThreadWriter.cs" />
     <Compile Include="Log_\Log.Writer.cs" />
-    <Compile Include="Log_\LogMessage.cs" />
+    <Compile Include="Log_\Log.Message.cs" />
     <Compile Include="Misc\WebClient.cs">
       <SubType>Component</SubType>
     </Compile>
