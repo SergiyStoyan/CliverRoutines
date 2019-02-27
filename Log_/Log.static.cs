@@ -215,7 +215,7 @@ namespace Cliver
             StackFrame sf;
             MethodBase mb = null;
             Type dt = null;
-            int frameI = 2;
+            int frameI = 1;
             for (; ; frameI++)
             {
                 sf = st.GetFrame(frameI);
@@ -229,8 +229,9 @@ namespace Cliver
             List<string> frameSs = new List<string>();
             if (frameCount < 0)
                 frameCount = 1000;
+            frameI += startFrame;
             int endFrameI = frameI + frameCount - 1;
-            for (frameI += startFrame; frameI <= endFrameI; frameI++)
+            for (; frameI <= endFrameI; frameI++)
             {
                 sf = st.GetFrame(frameI);
                 if (sf == null || endOnEmptyFile && frameSs.Count > 0 && string.IsNullOrEmpty(sf.GetFileName()))//it seems to be passing out of the application
