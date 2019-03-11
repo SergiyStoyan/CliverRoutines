@@ -330,7 +330,7 @@ namespace Cliver
         //    }
         //    catch (Exception e)
         //    {
-        //        LogMessage.Exit(e);
+        //        Log.Message.Exit(e);
         //    }
 
         //    return null;

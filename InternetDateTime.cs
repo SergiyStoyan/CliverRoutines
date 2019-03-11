@@ -23,7 +23,7 @@ InternetDateTime.CHECK_TEST_PERIOD_VALIDITY(2008, 11, 8);
 
 #if TEST_VERSION && !DEBUG
 				if(new DateTime(2006, 3, 11) < InternetDateTime.GetOverHttps())
-					LogMessage.Exit("Test time expired");
+					Log.Message.Exit("Test time expired");
 #endif	  
  
 */
@@ -80,7 +80,7 @@ namespace Cliver
                 //    return;
                 //if (for_release_only && !IsReleaseVersion(Assembly.GetEntryAssembly()))
                 //    return;
-                //LogMessage.Inform("It is a demo version that is valid until " + year + "-" + month + "-" + day);
+                //Log.Message.Inform("It is a demo version that is valid until " + year + "-" + month + "-" + day);
                 if (!silently)
                     Log.Main.Inform("It is a demo version that is valid until " + year + "-" + month + "-" + day);
                 ThreadRoutines.StartTry(() =>
