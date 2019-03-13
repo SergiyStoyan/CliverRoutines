@@ -6,6 +6,11 @@
     <AssemblyVersion>3.1.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/sergeystoyan/CliverRoutines.git</RepositoryUrl>
     <FileVersion>3.1.0.0</FileVersion>
+    <PackageLicenseUrl>https://github.com/sergeystoyan/CliverRoutines/blob/master/LICENSE</PackageLicenseUrl>
+    <Copyright>Sergey Stoyan</Copyright>
+    <Authors>Sergey Stoyan</Authors>
+    <Company>CliverSoft</Company>
+    <Version>3.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
