@@ -13,7 +13,7 @@
     <Company>CliverSoft</Company>
     <Version>3.1.0</Version>
     <PackageProjectUrl>https://github.com/sergeystoyan/CliverRoutines</PackageProjectUrl>
-    <Description>Cross-platform routines :
+    <Description>Cross-platform routines:
 - serializing which replaces .NET settings for desktop applications;
 - logging with threading and session support;
 - auxiliary routines;</Description>
