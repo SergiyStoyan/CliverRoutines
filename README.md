@@ -1,7 +1,7 @@
 # CliverRoutines
 
 ## Overview
-A cross-platform C# lib that exposes generally used routines: 
+A cross-platform C# lib providing generally used routines: 
 - serializing which replaces standard .NET settings for desktop applications; 
 - logging with threading and session support;
 - auxiliary routines;
