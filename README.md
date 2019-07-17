@@ -12,9 +12,10 @@ A cross-platform C# lib that exposes generally used routines:
 ## Supported platforms
 It is supposed to run anywhere with .NET Standard lib supported. 
 Presumably it will run on any Xamarin platforms (probably with minor updates required). 
-The most concern is peculiarities of the target file system because serializing and logging routines write/read files and do everything as automaticly as possible.
 
-Tested on:
+The most concern is peculiarities of the target file system because serializing and logging routines write/read files and do everything as automatically as possible.
+
+### Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
 - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
@@ -24,10 +25,10 @@ Tested on:
 Cliver.Config, Cliver.Settings 
 
 ### Description
-It is more powerful and flexible that the bult-in .NET settings for desktop and provides such featues like:
+It is more powerful and flexible that the built-in .NET settings for desktop and provides such features like:
 - saving to disk and restoring from disk of values of class members that need it;
-- serializing types are flexibly defined in the applicatiion;
-- serializing types can enherite from another serializing types;
+- serializing types are flexibly defined in the application;
+- serializing types can inherite from another serializing types;
 
 ### How to use:
 Define a class that is to be serialized and make it a subclass of Cliver.Settings class. Create anywhere a public class member of this type. Add the following calls in the beginning of the app: 
@@ -48,7 +49,7 @@ Look at some of my recent C# projects in github to see a live usage example.
 Cliver.Log
 
 ### Description
-It provides such featues like:
+It provides such features like:
 - thread-safe;
 - (option) writting log files per thread;
 - (option) writting logs in sessions that an app can open and close many times during its work;
