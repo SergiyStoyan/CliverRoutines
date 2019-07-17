@@ -10,7 +10,10 @@ A cross-platform C# lib that exposes generally used routines:
 .NET Standard 2.0
 
 ## Supported platforms
-It is supposed to run anywhere with .NET Standard lib supported. Presumably it will run on any Xamarin platforms (probably with minor updates required). The most concern is peculiarities of the target file system because serializing and logging routines write/read files and do everything as automaticly as possible.
+It is supposed to run anywhere with .NET Standard lib supported. 
+Presumably it will run on any Xamarin platforms (probably with minor updates required). 
+The most concern is peculiarities of the target file system because serializing and logging routines write/read files and do everything as automaticly as possible.
+
 Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
 - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
