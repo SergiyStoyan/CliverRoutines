@@ -28,7 +28,7 @@ Cliver.Config, Cliver.Settings
 It is more powerful and flexible that the built-in .NET settings for desktop and provides such features like:
 - saving to disk and restoring from disk of values of class members that need it;
 - serializing types are flexibly defined in the application;
-- serializing types can inherite from another serializing types;
+- serializing types can inherit from another serializing types;
 
 ### How to use:
 Define a class that is to be serialized and make it a subclass of Cliver.Settings class. Create anywhere a public class member of this type. Add the following calls in the beginning of the app: 
