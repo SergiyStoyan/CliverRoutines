@@ -13,7 +13,7 @@ A cross-platform C# lib providing generally used routines:
 It is supposed to run anywhere with .NET Standard lib supported. 
 Presumably it will run on any Xamarin platforms (probably with minor updates required). 
 
-The most concern is peculiarities of the target file system because of writing/reading/managing files.
+The most concern would be peculiarities of the target file system because of writing/reading/managing files.
 
 ### Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
@@ -58,11 +58,11 @@ Features:
 - (option) automatic old log cleanup; 
 
 ### How to use:
-Add the following calls in the beginning of the app: 
+Add the following call in the beginning of the app: 
 
 (optionally) Cliver.Log.Initialize();
 
-To write to log call either Cliver.Log.Write() or Cliver.Log.Main.Write() or more specific methods.
+To write to log, call either Cliver.Log.Write() or Cliver.Log.Main.Write() or more specific methods.
 
 Review my C# projects in github to see live examples.
 
