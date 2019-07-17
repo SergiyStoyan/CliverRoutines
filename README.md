@@ -71,4 +71,6 @@ Look at some of my recent C# projects in github to see a live usage example.
 Anything handy that is needed in general development.
 
 ### How to use:
+Usually it is clear from their code. 
+
 Look at some of my recent C# projects in github to see a live usage example.
