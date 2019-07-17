@@ -31,10 +31,16 @@ It is more powerful and flexible that the bult-in .NET settings for desktop and 
 
 ### How to use:
 Define a class that is to be serialized and make it a subclass of Cliver.Settings class. Create anywhere a public class member of this type. Add the following calls in the beginning of the app: 
+
 (optionally) Cliver.Config.Initialize(); 
+
 (mandatory) Cliver.Config.Reload();
-That's all. Now the members will be set to the previously saved values if any, otherwise they keep the values they are initialized with.
-Look at some of my recent C# projects to see a live usage example.
+
+That's all. Now the members will be set to the previously serialized values if any, otherwise keep the values they are initialized with.
+
+To serialize current value of a member, call Save() in it.
+
+Look at some of my recent C# projects in github to see a live usage example.
 
 
 ## Logging 
@@ -50,12 +56,16 @@ It provides such featues like:
 
 ### How to use:
 Add the following calls in the beginning of the app: 
-(optionally) Cliver.Log.Initialize(); 
-Look at some of my recent C# projects to see a live usage example.
+
+(optionally) Cliver.Log.Initialize();
+
+To write to log call either Cliver.Log.Write() or Cliver.Log.Main.Write() or more specific methods.
+
+Look at some of my recent C# projects in github to see a live usage example.
 
 ## Auxiliary routines 
 ### Description
 Anything handy that is needed in general development.
 
 ### How to use:
-Look at some of my recent C# projects to see a live usage example.
+Look at some of my recent C# projects in github to see a live usage example.
