@@ -6,10 +6,10 @@ A cross-platform C# lib that exposes generally used routines:
 - logging with threading and session support;
 - auxiliary routines;
 
-## Framework
+### Framework
 .NET Standard 2.0
 
-## Supported platforms
+### Supported platforms
 It is supposed to run anywhere with .NET Standard lib supported. 
 Presumably it will run on any Xamarin platforms (probably with minor updates required). 
 
