@@ -32,15 +32,15 @@ Features:
 - serialized types can inherit from another serialized types which may be abstract;
 
 ### How to use:
-Define a class that is to be serialized and make it a subclass of Cliver.Settings class. Anywhere create a public class member of this type. Add the following calls in the beginning of the app: 
+Define classes that is to be serialized and make them a subclass of Cliver.Settings class. Anywhere declare public class fields of these types. Add the following calls in the beginning of the app: 
 
 (optionally) Cliver.Config.Initialize(); 
 
 (mandatory) Cliver.Config.Reload();
 
-That's all. Now the members will be set to the previously serialized values if any, otherwise keep the values they are initialized with.
+That's all. Now the fields will be set to the previously serialized values if any, otherwise keep the values they are initialized with.
 
-To serialize current value of a member, call Save() on it.
+To serialize current value of a field, call Save() on it.
 
 Review my C# projects in github to see live examples.
 
