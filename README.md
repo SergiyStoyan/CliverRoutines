@@ -21,17 +21,18 @@ The most concern is peculiarities of the target file system because serializing 
 
 
 ## Serializing 
-### Classes: 
-Cliver.Config, Cliver.Settings 
+Classes: Cliver.Config, Cliver.Settings 
 
 ### Description
-It is more powerful and flexible that the built-in .NET settings for desktop and provides such features like:
+It is more powerful and flexible than the built-in .NET settings for desktop.
+
+Features:
 - saving to disk and restoring from disk of values of class members that need it;
-- serializing types are flexibly defined in the application;
-- serializing types can inherit from another serializing types;
+- serialized types are flexibly defined in the application;
+- serialized types can inherit from another serialized types which may be abstract;
 
 ### How to use:
-Define a class that is to be serialized and make it a subclass of Cliver.Settings class. Create anywhere a public class member of this type. Add the following calls in the beginning of the app: 
+Define a class that is to be serialized and make it a subclass of Cliver.Settings class. Anywhere create a public class member of this type. Add the following calls in the beginning of the app: 
 
 (optionally) Cliver.Config.Initialize(); 
 
@@ -39,19 +40,20 @@ Define a class that is to be serialized and make it a subclass of Cliver.Setting
 
 That's all. Now the members will be set to the previously serialized values if any, otherwise keep the values they are initialized with.
 
-To serialize current value of a member, call Save() in it.
+To serialize current value of a member, call Save() on it.
 
 Look at some of my recent C# projects in github to see a live usage example.
 
 
 ## Logging 
-### Classes: 
-Cliver.Log
+Classes: Cliver.Log
 
 ### Description
-It provides such features like:
+Writting logs on disk.
+
+Features:
 - thread-safe;
-- (option) writting log files per thread;
+- (option) writting log per thread;
 - (option) writting logs in sessions that an app can open and close many times during its work;
 - (option) automatic old log cleanup; 
 
