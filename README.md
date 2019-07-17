@@ -13,7 +13,7 @@ A cross-platform C# lib that exposes generally used routines:
 It is supposed to run anywhere with .NET Standard lib supported. 
 Presumably it will run on any Xamarin platforms (probably with minor updates required). 
 
-The most concern is peculiarities of the target file system because serializing and logging routines write/read files and do everything as automatically as possible.
+The most concern is peculiarities of the target file system because of writing/reading/managing files.
 
 ### Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
