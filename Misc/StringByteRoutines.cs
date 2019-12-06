@@ -52,24 +52,28 @@ namespace Cliver
 
         public static string GetHexadecimalRepresentation(string s)
         {
-            s = BitConverter.ToString(Encoding.ASCII.GetBytes(s)).ToLower();
-            return normalize_hexadecimal_representation(s);
+            s = BitConverter.ToString(Encoding.ASCII.GetBytes(s));
+            //return normalize_hexadecimal_representation(s);
+            return Regex.Replace(s, " ", "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
         }
 
-        public static string GetHexadecimalRepresentation(byte[] bs)
+        public static string GetHexadecimalRepresentation(byte[] bs, int startPosition = 0, int? length = null)
         {
-            string s = BitConverter.ToString(bs).ToLower();
-            return normalize_hexadecimal_representation(s);
+            if (length == null)
+                length = bs.Length;
+            string s = BitConverter.ToString(bs, startPosition, (int)length);
+            //return normalize_hexadecimal_representation(s);
+            return Regex.Replace(s, " ", "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
         }
 
-        static string normalize_hexadecimal_representation(string s)
-        {
-            const string between_8_and_9 = "    ";
-            s = Regex.Replace(s, between_8_and_9, "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            s = Regex.Replace(s, @"((?:[\da-z]{2}[^\da-z]*){7}[\da-z]{2})(?:[^\da-z]*)", "$1" + between_8_and_9, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            s = Regex.Replace(s, @"(.*?" + between_8_and_9 + ".*?)" + between_8_and_9, "$1\r\n", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            return s;
-        }
+        //static string normalize_hexadecimal_representation(string s)
+        //{
+        //    const string between_8_and_9 = "    ";
+        //    s = Regex.Replace(s, between_8_and_9, "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        //    s = Regex.Replace(s, @"((?:[\da-z]{2}[^\da-z]*){7}[\da-z]{2})(?:[^\da-z]*)", "$1" + between_8_and_9, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        //    s = Regex.Replace(s, @"(.*?" + between_8_and_9 + ".*?)" + between_8_and_9, "$1\r\n", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        //    return s;
+        //}
 
         public static byte[] GetByteArrayFromHexadecimalRepresentation(string hexadecimal_s)
         {
@@ -83,7 +87,8 @@ namespace Cliver
 
         public static string GetNormalizedHexadecimalRepresentation(string hexadecimal_s, string spacer = "")
         {
-            if (spacer != "") hexadecimal_s = Regex.Replace(hexadecimal_s, @"^[^\da-f]+|[^\da-f]+$", "", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (spacer != "")
+                hexadecimal_s = Regex.Replace(hexadecimal_s, @"^[^\da-f]+|[^\da-f]+$", "", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
             return Regex.Replace(hexadecimal_s, @"[^\da-f]+", spacer, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline).ToLower();
         }
     }
