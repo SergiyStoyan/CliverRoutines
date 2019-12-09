@@ -115,7 +115,7 @@ namespace Cliver
                                     File.Delete(testFile);
                                     break;
                                 }
-                                catch (Exception e)
+                                catch //(Exception e)
                                 {
                                     workDir = null;
                                 }

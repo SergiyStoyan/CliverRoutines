@@ -186,9 +186,9 @@ namespace Cliver
         /// Write the message to the current thread's log.
         /// </summary>
         /// <param name="e"></param>
-        static public void Write(MessageType type, string message, string details = null)
+        static public void Write(MessageType messageType , string message, string details = null)
         {
-            ThreadWriter.This.Write(type, message, details);
+            ThreadWriter.This.Write(messageType, message, details);
         }
 
         static public void Write(string message)
@@ -327,7 +327,7 @@ namespace Cliver
     //}
 
     /// <summary>
-    /// Exception's details are not logged. Used for foreseen errors.
+    /// Trace info for such Exception is not logged. Used for foreseen errors.
     /// </summary>
     public class Exception2 : Exception
     {

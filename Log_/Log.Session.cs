@@ -212,9 +212,9 @@ namespace Cliver
                 Default.Inform(message);
             }
 
-            public void Write(MessageType type, string message, string details = null)
+            public void Write(MessageType messageType , string message, string details = null)
             {
-                Default.Write(type, message, details);
+                Default.Write(messageType, message, details);
             }
 
             public void Write(string message)

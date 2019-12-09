@@ -8,6 +8,7 @@
 //********************************************************************************************
 using System;
 using System.IO;
+using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -90,6 +91,14 @@ namespace Cliver
             if (spacer != "")
                 hexadecimal_s = Regex.Replace(hexadecimal_s, @"^[^\da-f]+|[^\da-f]+$", "", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
             return Regex.Replace(hexadecimal_s, @"[^\da-f]+", spacer, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline).ToLower();
+        }
+
+        public static string ToBitString(this BitArray bits)
+        {
+            char[] cs = new char[bits.Count];
+            for (int i = 0; i < bits.Count; i++)
+                cs[i] = bits[i] ? '1' : '0';
+            return new string(cs);
         }
     }
 }
