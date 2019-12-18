@@ -94,6 +94,8 @@ namespace Cliver
                 }
             }
 
+            public Level Level =  Level.ALL;
+
             /// <summary>
             /// Write the error to the current thread's log
             /// </summary>
@@ -286,6 +288,28 @@ namespace Cliver
             }
             void write(Log.MessageType messageType , string message, string details)
             {
+                switch(Level)
+                {
+                    case Level.NONE:
+                        return;
+                    case Level.ERROR:
+                        if (messageType < MessageType.ERROR)
+                            return;
+                        break;
+                    case Level.WARNING:
+                        if (messageType < MessageType.WARNING)
+                            return;
+                        break;
+                    case Level.INFORM:
+                        if (messageType < MessageType.INFORM)
+                            return;
+                        break;
+                    case Level.ALL:
+                        break;
+                    default:
+                        throw new Exception("Unknown option: " + Level);
+                }
+
                 lock (this)
                 {
                     Writing?.Invoke(Name, messageType, message, details);

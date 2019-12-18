@@ -21,8 +21,10 @@ namespace Cliver
             string s = null;
 
             string output_format;
-            if (hexadecimal_output) output_format = "X";
-            else output_format = "N";
+            if (hexadecimal_output)
+                output_format = "X";
+            else
+                output_format = "N";
 
             byte[] bs1 = File.ReadAllBytes(f1);
             byte[] bs2 = File.ReadAllBytes(f2);
@@ -76,13 +78,14 @@ namespace Cliver
         //    return s;
         //}
 
-        public static byte[] GetByteArrayFromHexadecimalRepresentation(string hexadecimal_s)
+        public static byte[] GetByteArrayFromHexadecimalRepresentation(string hexadecimalRepresentation)
         {
-            hexadecimal_s = GetNormalizedHexadecimalRepresentation(hexadecimal_s);
-            int cn = hexadecimal_s.Length / 2;
+            hexadecimalRepresentation = GetNormalizedHexadecimalRepresentation(hexadecimalRepresentation);
+            int cn = hexadecimalRepresentation.Length / 2;
             byte[] bytes = new byte[cn];
-            StringReader sr = new StringReader(hexadecimal_s);
-            for (int i = 0; i < cn; i++) bytes[i] = Convert.ToByte(new string(new char[2] { (char)sr.Read(), (char)sr.Read() }), 16);
+            StringReader sr = new StringReader(hexadecimalRepresentation);
+            for (int i = 0; i < cn; i++)
+                bytes[i] = Convert.ToByte(new string(new char[2] { (char)sr.Read(), (char)sr.Read() }), 16);
             return bytes;
         }
 

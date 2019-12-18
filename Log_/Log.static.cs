@@ -196,6 +196,18 @@ namespace Cliver
             ThreadWriter.This.Write(MessageType.LOG, message);
         }
 
+        /// <summary>
+        /// Log only messages of the respective types
+        /// </summary>
+        public enum Level
+        {
+            NONE,
+            ERROR,
+            WARNING,
+            INFORM,
+            ALL
+        }
+
         public enum MessageType
         {
             LOG = 0,
@@ -248,17 +260,13 @@ namespace Cliver
 
         public static string GetExceptionMessage(Exception e)
         {
-            string m;
-            string d;
-            GetExceptionMessage(e, out m, out d);
+            GetExceptionMessage(e, out string m, out string d);
             return m + " \r\n\r\n" + d;
         }
 
         public static string GetExceptionMessage2(Exception e)
         {
-            string m;
-            string d;
-            GetExceptionMessage(e, out m, out d);
+            GetExceptionMessage(e, out string m, out string d);
             return m;
         }
 
