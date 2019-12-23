@@ -1,3 +1,9 @@
+//********************************************************************************************
+//Author: Sergey Stoyan
+//        sergey.stoyan@gmail.com
+//        http://www.cliversoft.com
+//********************************************************************************************
+
 using System;
 using System.Text.RegularExpressions;
 

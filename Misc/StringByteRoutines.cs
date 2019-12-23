@@ -53,20 +53,27 @@ namespace Cliver
             return s;
         }
 
-        public static string GetHexadecimalRepresentation(string s)
+        public static string GetHexadecimalReadableRepresentation(byte[] bs, int startPosition = 0, int? length = null)
         {
-            s = BitConverter.ToString(Encoding.ASCII.GetBytes(s));
-            //return normalize_hexadecimal_representation(s);
-            return Regex.Replace(s, " ", "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
-        }
-
-        public static string GetHexadecimalRepresentation(byte[] bs, int startPosition = 0, int? length = null)
-        {
+            if (bs == null)
+                return null;
             if (length == null)
                 length = bs.Length;
             string s = BitConverter.ToString(bs, startPosition, (int)length);
-            //return normalize_hexadecimal_representation(s);
-            return Regex.Replace(s, " ", "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            s = Regex.Replace(s, @"\s+", "");
+            return s;
+        }
+
+        public static string GetHexadecimalPrefixedRepresentation(byte[] bs, int startPosition = 0, int? length = null, string prefix = "0x")
+        {
+            if (bs == null)
+                return null;
+            if (length == null)
+                length = bs.Length;
+            string s = BitConverter.ToString(bs, startPosition, (int)length);
+            s = Regex.Replace(s, @"\s+", "");
+            s = Regex.Replace(s, @"\-", "");
+            return prefix + s;
         }
 
         //static string normalize_hexadecimal_representation(string s)
@@ -80,20 +87,16 @@ namespace Cliver
 
         public static byte[] GetByteArrayFromHexadecimalRepresentation(string hexadecimalRepresentation)
         {
-            hexadecimalRepresentation = GetNormalizedHexadecimalRepresentation(hexadecimalRepresentation);
+            if (hexadecimalRepresentation == null)
+                return null;
+            hexadecimalRepresentation = Regex.Replace(hexadecimalRepresentation.Trim(), @"^0x", "");
+            hexadecimalRepresentation = Regex.Replace(hexadecimalRepresentation, @"[^\da-f]+", "");
             int cn = hexadecimalRepresentation.Length / 2;
             byte[] bytes = new byte[cn];
             StringReader sr = new StringReader(hexadecimalRepresentation);
             for (int i = 0; i < cn; i++)
                 bytes[i] = Convert.ToByte(new string(new char[2] { (char)sr.Read(), (char)sr.Read() }), 16);
             return bytes;
-        }
-
-        public static string GetNormalizedHexadecimalRepresentation(string hexadecimal_s, string spacer = "")
-        {
-            if (spacer != "")
-                hexadecimal_s = Regex.Replace(hexadecimal_s, @"^[^\da-f]+|[^\da-f]+$", "", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            return Regex.Replace(hexadecimal_s, @"[^\da-f]+", spacer, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline).ToLower();
         }
 
         public static string ToBitString(this BitArray bits)
