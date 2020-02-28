@@ -200,6 +200,14 @@ namespace Cliver
                 Write(MessageType.WARNING, message, GetStackString());
             }
 
+            public void Warning(string message, Exception e)
+            {
+                string m;
+                string d;
+                GetExceptionMessage(e, out m, out d);
+                Write(MessageType.WARNING, message, m + (e is Exception2 ? null : "\r\n\r\n" + d));
+            }
+
             public void Warning2(string message)
             {
                 Write(MessageType.WARNING, message);
