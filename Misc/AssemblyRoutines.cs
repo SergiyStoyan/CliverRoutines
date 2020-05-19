@@ -8,6 +8,7 @@
 //********************************************************************************************
 using System;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Cliver
 {
@@ -89,11 +90,20 @@ namespace Cliver
                 }
             }
 
-            public string AssemblyVersion
+            //public string AssemblyVersion//does not give auto build part
+            //{
+            //    get
+            //    {
+            //        return a.GetName().Version.ToString();
+            //    }
+            //}
+
+            public Version AssemblyVersion
             {
                 get
                 {
-                    return a.GetName().Version.ToString();
+                    FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(a.Location);
+                    return new Version(fvi.ProductVersion);
                 }
             }
 
