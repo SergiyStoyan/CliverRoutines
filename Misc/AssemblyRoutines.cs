@@ -27,12 +27,18 @@ namespace Cliver
             return dt.ToLocalTime();
         }
 
-        public static string GetAppVersion()
+        public static string GetAppCompilationVersion()
         {
             DateTime dt = AssemblyRoutines.GetAssemblyCompiledTime(Assembly.GetEntryAssembly());
             DateTime dt2 = AssemblyRoutines.GetAssemblyCompiledTime(Assembly.GetCallingAssembly());
             dt = dt > dt2 ? dt : dt2;
             return dt.ToString("yy-MM-dd-HH-mm-ss");
+        }
+
+        public static Version GetExecutingAssemblyVersion()
+        {
+            AssemblyInfo ai = new AssemblyInfo(Assembly.GetExecutingAssembly());
+            return ai.AssemblyVersion;
         }
 
         //public static System.Drawing.Icon GetAppIcon(Assembly assembly = null)
