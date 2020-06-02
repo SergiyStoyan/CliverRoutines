@@ -21,15 +21,19 @@ namespace Cliver
     /// </summary>
     public partial class Config
     {
-        static Config()
-        {
-        }
-
         /// <summary>
-        /// Tells Config which optional (i.e. attributed with [Settings.Optional]) Settings fields to load. 
+        /// Tells Config which optional (i.e. attributed with [Settings.Optional]) Settings type fields to initialize. 
         /// It must be set before calling Reload() or Reset().
         /// </summary>
         public static Regex RequiredOptionalFieldFullNamesRegex = null;
+
+        /// <summary>
+        /// Tells Config in which order Settings types are to be inialized.        
+        /// It may be necessary due to dependencies between Settings types.
+        /// Types listed here will be initialized first in the provided order.
+        /// It must be set before calling Reload() or Reset().
+        /// </summary>
+        public static List<Type> InitialzingOrderedSettingsTypes = null;
 
         public const string CONFIG_FOLDER_NAME = "config";
         public const string FILE_EXTENSION = "json";
@@ -40,25 +44,47 @@ namespace Cliver
             lock (fieldFullNames2settingsObject)
             {
                 fieldFullNames2settingsObject.Clear();
-                foreach (IEnumerable<FieldInfo> settingsTypeFieldInfos in enumSettingsTypesFieldInfos())
-                    foreach (FieldInfo settingsTypeFieldInfo in settingsTypeFieldInfos)
-                    {
-                        fieldInfos.Add(settingsTypeFieldInfo);
-                        string fullName = settingsTypeFieldInfo.DeclaringType.FullName + "." + settingsTypeFieldInfo.Name;
+                foreach (FieldInfo settingsTypeFieldInfo in enumSettingsTypeFieldInfos())
+                {
+                    fieldInfos.Add(settingsTypeFieldInfo);
+                    string fullName = settingsTypeFieldInfo.DeclaringType.FullName + "." + settingsTypeFieldInfo.Name;
 
-                        if (null != settingsTypeFieldInfo.GetCustomAttributes<Settings.Optional>(false).FirstOrDefault() && (RequiredOptionalFieldFullNamesRegex == null || !RequiredOptionalFieldFullNamesRegex.IsMatch(fullName)))
-                            continue;
+                    if (null != settingsTypeFieldInfo.GetCustomAttributes<Settings.Optional>(false).FirstOrDefault() && (RequiredOptionalFieldFullNamesRegex == null || !RequiredOptionalFieldFullNamesRegex.IsMatch(fullName)))
+                        continue;
 
-                        Serializable serializable = getSerializable(settingsTypeFieldInfo.FieldType, fullName, reset, throwExceptionIfCouldNotLoadFromStorageFile);
+                    Serializable serializable = getSerializable(settingsTypeFieldInfo.FieldType, fullName, reset, throwExceptionIfCouldNotLoadFromStorageFile);
 
-                        settingsTypeFieldInfo.SetValue(null, serializable);
-                        fieldFullNames2settingsObject[fullName] = (Settings)serializable;
-                    }
+                    settingsTypeFieldInfo.SetValue(null, serializable);
+                    fieldFullNames2settingsObject[fullName] = (Settings)serializable;
+                }
             }
         }
         static Dictionary<string, Settings> fieldFullNames2settingsObject = new Dictionary<string, Settings>();
 
-        static IEnumerable<IEnumerable<FieldInfo>> enumSettingsTypesFieldInfos()
+        class SettingsTypeComparer : IComparer<Type>
+        {
+            public SettingsTypeComparer(List<Type> orderedTypes)
+            {
+                this.orderedTypes = orderedTypes;
+            }
+           readonly List<Type> orderedTypes;
+            public int Compare(Type a, Type b)
+            {
+                int ai = orderedTypes.IndexOf(a);
+                int bi = orderedTypes.IndexOf(b);
+                if (ai < 0)
+                    if (bi < 0)
+                        return 0;
+                    else
+                        return 1;
+                if (bi < 0)
+                    return -1;
+                if (a == b)
+                    return 0;
+                return ai < bi ? -1 : 1;
+            }
+        }
+        static IEnumerable<FieldInfo> enumSettingsTypeFieldInfos()
         {
             string configAssemblyFullName = Assembly.GetExecutingAssembly().FullName;
             StackTrace stackTrace = new StackTrace();
@@ -76,11 +102,19 @@ namespace Cliver
             foreach (Assembly assembly in assemblies)
             {
                 Type[] types = assembly.GetTypes();
-                foreach (Type settingsType in types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))))
+                IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))).Distinct();
+                if (InitialzingOrderedSettingsTypes != null)
                 {
-                    foreach (Type type in types)
-                        yield return type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(f => f.FieldType == settingsType/* && f.FieldType.IsAssignableFrom(settingsType)*/);
+                    SettingsTypeComparer settingsTypeComparer = new SettingsTypeComparer(InitialzingOrderedSettingsTypes);
+                    settingsTypes = settingsTypes.OrderBy(t => t, settingsTypeComparer);
                 }
+                foreach (Type type in types)
+                    foreach (FieldInfo settingsTypeFieldInfo in type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(f => settingsTypes.Contains(f.FieldType) /* && f.FieldType.IsAssignableFrom(settingsType)*/))
+                    {//usually it should be only 1 FieldInfo per Settings type
+                        if (!settingsTypeFieldInfo.IsInitOnly)
+                            throw new Exception("Settings type field " + settingsTypeFieldInfo.DeclaringType.FullName + "." + settingsTypeFieldInfo.Name + " must be readonly to ensure the proper work of Cliver.Config");
+                        yield return settingsTypeFieldInfo;
+                    }
             }
         }
 
