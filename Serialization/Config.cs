@@ -12,297 +12,132 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Cliver
 {
     /// <summary>
-    /// Alternative to .NET settings. Inheritors of this class are automatically managed by Config.
+    /// Manages serializable objects pertaining to Settings type fields.
     /// </summary>
-    abstract public class Settings : Serializable
-    {
-        public void Reset()
-        {
-            Serializable s = Create(GetType(), __File);
-            foreach (FieldInfo settingsTypeFieldInfo in GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
-                settingsTypeFieldInfo.SetValue(this, settingsTypeFieldInfo.GetValue(s));
-        }
-
-        public void Reload()
-        {
-            Serializable s = LoadOrCreate(GetType(), __File);
-            foreach (FieldInfo settingsTypeFieldInfo in GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
-                settingsTypeFieldInfo.SetValue(this, settingsTypeFieldInfo.GetValue(s));
-        }
-
-        public S GetResetInstance<S>() where S : Settings, new()
-        {
-            return Create<S>(__File);
-        }
-
-        public S GetReloadedInstance<S>() where S : Settings, new()
-        {
-            return LoadOrCreate<S>(__File);
-        }
-
-        public bool IsChanged()
-        {
-            return !Serialization.Json.IsEqual(LoadOrCreate(GetType(), __File), this);
-        }
-
-        /// <summary>
-        /// this object is ever to be loaded
-        /// </summary>
-        public class Obligatory : Attribute
-        { }
-
-        /// <summary>
-        /// this object is located in user domain
-        /// </summary>
-        //public class UserDependent : Attribute
-        //{ }
-
-        /// <summary>
-        /// if a custom Settings class is not direct descendant then it must to specify its Settings type explicitly
-        /// </summary>
-        //public class SeettingsType : Attribute
-        //{
-        //    public Type SettingsType;
-        //}
-    }
-
-    abstract public class AppSettings : Settings
-    {
-        public static readonly string StorageDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + System.IO.Path.DirectorySeparatorChar + Log.CompanyName + System.IO.Path.DirectorySeparatorChar + Log.ProcessName + System.IO.Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
-    }
-
-    abstract public class UserSettings : Settings
-    {
-        public static readonly string StorageDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + Log.CompanyName + System.IO.Path.DirectorySeparatorChar + Log.ProcessName + System.IO.Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
-    }
-
-    /// <summary>
-    /// Manages Serializable settings.
-    /// </summary>
-    public class Config
+    public partial class Config
     {
         static Config()
         {
-            UnknownTypeStorageDir = UserSettings.StorageDir;
         }
 
         /// <summary>
-        /// It allows to load only certain settings objects, while ignoring unneeded ones.
-        /// However, objects attributed with [Settings.Obligatory] will be loaded in any way.
+        /// Tells Config which optional (i.e. attributed with [Settings.Optional]) Settings fields to load. 
+        /// It must be set before calling Reload() or Reset().
         /// </summary>
-        /// <param name="assemblyNameRegexPattern"></param>
-        /// <param name="obligatoryObjectNamesRegexPattern"></param>
-        public static void Initialize(string assemblyNameRegexPattern = @"^Cliver", string obligatoryObjectNamesRegexPattern = null)
-        {
-            Config.assemblyNameRegexPattern = assemblyNameRegexPattern;
-            obligatoryObjectNamesRegex = obligatoryObjectNamesRegexPattern == null ? null : new Regex(obligatoryObjectNamesRegexPattern);
-        }
-        static Regex obligatoryObjectNamesRegex = null;
-        static string assemblyNameRegexPattern = null;
+        public static Regex RequiredOptionalFieldFullNamesRegex = null;
 
         public const string CONFIG_FOLDER_NAME = "config";
         public const string FILE_EXTENSION = "json";
-        public static string UnknownTypeStorageDir { get; private set; }
 
-
-        static void get(bool reset)
+        static void loadOrReset(bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
         {
-            lock (objectFullNames2serializable)
+            List<FieldInfo> fieldInfos = new List<FieldInfo>();
+            lock (fieldFullNames2settingsObject)
             {
-                objectFullNames2serializable.Clear();
-                List<Assembly> assemblies = new List<Assembly>();
-                assemblies.Add(Assembly.GetEntryAssembly());
-                foreach (AssemblyName assemblyNames in Assembly.GetEntryAssembly().GetReferencedAssemblies().Where(assemblyNames => assemblyNameRegexPattern != null ? Regex.IsMatch(assemblyNames.Name, assemblyNameRegexPattern) : true))
-                    assemblies.Add(Assembly.Load(assemblyNames));
-                HashSet<FieldInfo> settingsTypeFieldInfos = new HashSet<FieldInfo>();
-                foreach (Assembly assembly in assemblies)
-                {
-                    Type[] types = assembly.GetTypes();
-                    foreach (Type settingsType in types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))))
+                fieldFullNames2settingsObject.Clear();
+                foreach (IEnumerable<FieldInfo> settingsTypeFieldInfos in enumSettingsTypesFieldInfos())
+                    foreach (FieldInfo settingsTypeFieldInfo in settingsTypeFieldInfos)
                     {
-                        foreach (Type type in types)
-                            foreach (FieldInfo settingsTypeFieldInfo in type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(a => a.FieldType.IsAssignableFrom(settingsType)))
-                                settingsTypeFieldInfos.Add(settingsTypeFieldInfo);
+                        fieldInfos.Add(settingsTypeFieldInfo);
+                        string fullName = settingsTypeFieldInfo.DeclaringType.FullName + "." + settingsTypeFieldInfo.Name;
+
+                        if (null != settingsTypeFieldInfo.GetCustomAttributes<Settings.Optional>(false).FirstOrDefault() && (RequiredOptionalFieldFullNamesRegex == null || !RequiredOptionalFieldFullNamesRegex.IsMatch(fullName)))
+                            continue;
+
+                        Serializable serializable = getSerializable(settingsTypeFieldInfo.FieldType, fullName, reset, throwExceptionIfCouldNotLoadFromStorageFile);
+
+                        settingsTypeFieldInfo.SetValue(null, serializable);
+                        fieldFullNames2settingsObject[fullName] = (Settings)serializable;
                     }
-                }
-                foreach (FieldInfo settingsTypeFieldInfo in settingsTypeFieldInfos)
-                {
-                    string fullName = settingsTypeFieldInfo.DeclaringType.FullName + "." + settingsTypeFieldInfo.Name;
-
-                    if (null == settingsTypeFieldInfo.GetCustomAttributes<Settings.Obligatory>(false).FirstOrDefault() && (obligatoryObjectNamesRegex == null || !obligatoryObjectNamesRegex.IsMatch(fullName)))
-                        continue;
-
-                    Serializable serializable;
-
-                    string fileName = fullName + "." + FILE_EXTENSION;
-                    string file = (settingsTypeFieldInfo.FieldType.BaseType == typeof(UserSettings) ? UserSettings.StorageDir : (settingsTypeFieldInfo.FieldType.BaseType == typeof(AppSettings) ? AppSettings.StorageDir : UnknownTypeStorageDir)) + System.IO.Path.DirectorySeparatorChar + fileName;
-                    if (reset)
-                    {
-                        string initFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + fileName;
-                        if (File.Exists(initFile))
-                        {
-                            FileSystemRoutines.CopyFile(initFile, file, true);
-                            serializable = Serializable.LoadOrCreate(settingsTypeFieldInfo.FieldType, file);
-                        }
-                        else
-                            serializable = Serializable.Create(settingsTypeFieldInfo.FieldType, file);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            serializable = Serializable.Load(settingsTypeFieldInfo.FieldType, file);
-                        }
-                        catch (Exception e)
-                        {
-                            //if (!Message.YesNo("Error while loading config file " + file + "\r\n\r\n" + e.Message + "\r\n\r\nWould you like to proceed with restoring the initial config?", null, Message.Icons.Error))
-                            //    Environment.Exit(0);
-                            //if (!ignore_load_error && !Directory.Exists(StorageDir))//it is newly installed and so files are not expected to be there
-                            //    ignore_load_error = true;
-                            //if (!ignore_load_error)
-                            //    LogMessage.Error2(e);
-                            string initFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + fileName;
-                            if (File.Exists(initFile))
-                            {
-                                FileSystemRoutines.CopyFile(initFile, file, true);
-                                serializable = Serializable.LoadOrCreate(settingsTypeFieldInfo.FieldType, file);
-                            }
-                            else
-                                serializable = Serializable.Create(settingsTypeFieldInfo.FieldType, file);
-                        }
-                    }
-
-                    settingsTypeFieldInfo.SetValue(null, serializable);
-                    objectFullNames2serializable[fullName] = serializable;
-                }
             }
         }
-        static Dictionary<string, Serializable> objectFullNames2serializable = new Dictionary<string, Serializable>();
+        static Dictionary<string, Settings> fieldFullNames2settingsObject = new Dictionary<string, Settings>();
 
-        /// <summary>
-        /// Can be called from code when ordered load is required due to dependencies.
-        /// </summary>
-        static public void ReloadField(string fullName)
+        static IEnumerable<IEnumerable<FieldInfo>> enumSettingsTypesFieldInfos()
         {
+            string configAssemblyFullName = Assembly.GetExecutingAssembly().FullName;
+            StackTrace stackTrace = new StackTrace();
+            Assembly callingAssembly = stackTrace.GetFrames().Where(f => f.GetMethod().DeclaringType.Assembly.FullName != configAssemblyFullName).Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault();
+            if (callingAssembly == null)
+                callingAssembly = Assembly.GetEntryAssembly();
             List<Assembly> assemblies = new List<Assembly>();
-            assemblies.Add(Assembly.GetEntryAssembly());
-            foreach (AssemblyName assemblyNames in Assembly.GetEntryAssembly().GetReferencedAssemblies().Where(assemblyNames => assemblyNameRegexPattern != null ? Regex.IsMatch(assemblyNames.Name, assemblyNameRegexPattern) : true))
-                assemblies.Add(Assembly.Load(assemblyNames));
+            assemblies.Add(callingAssembly);
+            foreach (AssemblyName assemblyName in callingAssembly.GetReferencedAssemblies())
+            {
+                Assembly a = Assembly.Load(assemblyName);
+                if (null != a.GetReferencedAssemblies().Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
+                    assemblies.Add(a);
+            }
             foreach (Assembly assembly in assemblies)
             {
                 Type[] types = assembly.GetTypes();
                 foreach (Type settingsType in types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))))
                 {
                     foreach (Type type in types)
-                    {
-                        FieldInfo settingsTypeFieldInfo = type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(a => a.FieldType == settingsType && (a.DeclaringType.FullName + "." + a.Name) == fullName).FirstOrDefault();
-                        if (settingsTypeFieldInfo != null)
-                        {
-                            Serializable serializable;
-                            string fileName = fullName + "." + FILE_EXTENSION;
-                            string file = (settingsTypeFieldInfo.FieldType.BaseType == typeof(UserSettings) ? UserSettings.StorageDir : (settingsTypeFieldInfo.FieldType.BaseType == typeof(AppSettings) ? AppSettings.StorageDir : UnknownTypeStorageDir)) + System.IO.Path.DirectorySeparatorChar + fileName;
-                            try
-                            {
-                                serializable = Serializable.Load(settingsTypeFieldInfo.FieldType, file);
-                            }
-                            catch //(Exception e)
-                            {
-                                //if (!Message.YesNo("Error while loading config file " + file + "\r\n\r\n" + e.Message + "\r\n\r\nWould you like to proceed with restoring the initial config?", null, Message.Icons.Error))
-                                //    Environment.Exit(0);
-                                //if (!ignore_load_error && !Directory.Exists(StorageDir))//it is newly installed and so files are not expected to be there
-                                //    ignore_load_error = true;
-                                //if (!ignore_load_error)
-                                //    LogMessage.Error2(e);
-                                string initFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + fileName;
-                                if (File.Exists(initFile))
-                                {
-                                    FileSystemRoutines.CopyFile(initFile, file, true);
-                                    serializable = Serializable.LoadOrCreate(settingsTypeFieldInfo.FieldType, file);
-                                }
-                                else
-                                    serializable = Serializable.Create(settingsTypeFieldInfo.FieldType, file);
-                            }
-
-                            settingsTypeFieldInfo.SetValue(null, serializable);
-                            return;
-                        }
-                    }
+                        yield return type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(f => f.FieldType == settingsType/* && f.FieldType.IsAssignableFrom(settingsType)*/);
                 }
             }
-            throw new Exception("Field '" + fullName + "' was not found.");
         }
 
-        static public void Reload(string unknownTypeStorageDir = null, bool readOnly = false)
+        static Serializable getSerializable(Type settingsType, string fullName, bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
         {
-            if (unknownTypeStorageDir != null)
-                UnknownTypeStorageDir = unknownTypeStorageDir;
-            ReadOnly = readOnly;
-            get(false);
-        }
-
-        static public bool ReadOnly { get; private set; }
-
-        static public void Reset(string unknownTypeStorageDir = null)
-        {
-            if (unknownTypeStorageDir != null)
-                UnknownTypeStorageDir = unknownTypeStorageDir;
-            get(true);
+            string fileName = fullName + "." + FILE_EXTENSION;
+            string file = Settings.GetConfigStorageDir(settingsType) + System.IO.Path.DirectorySeparatorChar + fileName;
+            string initFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + fileName;
+            if (!reset && File.Exists(file))
+                try
+                {
+                    return Serializable.Load(settingsType, file);
+                }
+                catch (Exception e)
+                {
+                    if (throwExceptionIfCouldNotLoadFromStorageFile)
+                        throw new Exception("Error while loading settings " + fullName + " from file " + file, e);
+                }
+            if (File.Exists(initFile))
+            {
+                FileSystemRoutines.CopyFile(initFile, file, true);
+                return Serializable.LoadOrCreate(settingsType, file);
+            }
+            return Serializable.Create(settingsType, file);
         }
 
         /// <summary>
-        /// 
+        /// Reloads all the Settings type fields. It the usual method to be called in the beginning of an application to initiate Config scope.
+        /// First it tries to load each Settings object from its default storage directory. 
+        /// If this file does not exist, it tries to load from the initial settings file in app's directory.
+        /// Only if this file does not exist, it resets to the hardcoded values.
         /// </summary>
-        /// <param name="unknownTypeStorageDir">only unknown Serializable types will be saved to a new location</param>
-        //static public void Save(string unknownTypeStorageDir = null)
-        //{
-        //    if (unknownTypeStorageDir != null)
-        //        if (ReadOnly && PathRoutines.ArePathsEqual(unknownTypeStorageDir, UnknownTypeStorageDir))
-        //            throw new Exception("Config is read-only and cannot be saved to the same location: " + unknownTypeStorageDir);
-        //    UnknownTypeStorageDir = unknownTypeStorageDir;
-        //    lock (objectFullNames2serializable)
-        //    {
-        //        foreach (Serializable s in objectFullNames2serializable.Values)
-        //        {
-        //            if (s is AppSettings)
-        //                s.Save(AppSettings.StorageDir + System.IO.Path.DirectorySeparatorChar + PathRoutines.GetFileName(s.__File));
-        //            else if (s is UserSettings)
-        //                s.Save(UserSettings.StorageDir + System.IO.Path.DirectorySeparatorChar + PathRoutines.GetFileName(s.__File));
-        //            else
-        //                s.Save(UnknownTypeStorageDir + System.IO.Path.DirectorySeparatorChar + PathRoutines.GetFileName(s.__File));
-        //        }
-        //    }
-        //}
+        /// <param name="throwExceptionIfCouldNotLoadFromStorageFile"></param>
+        static public void Reload(bool throwExceptionIfCouldNotLoadFromStorageFile = false)
+        {
+            loadOrReset(false, throwExceptionIfCouldNotLoadFromStorageFile);
+        }
+
+        /// <summary>
+        /// Resets all the Settings type fields.
+        /// First it tries to load each Settings object from the initial settings file in app's directory. 
+        /// Only if this file does not exist, it resets to the hardcoded values.
+        /// </summary>
+        static public void Reset()
+        {
+            loadOrReset(true, true);
+        }
+
+        /// <summary>
+        /// Serializes all the Settings type fields to their files.
+        /// </summary>
         static public void Save()
         {
-            lock (objectFullNames2serializable)
+            lock (fieldFullNames2settingsObject)
             {
-                foreach (Serializable s in objectFullNames2serializable.Values)
+                foreach (Serializable s in fieldFullNames2settingsObject.Values)
                     s.Save();
-            }
-        }
-
-        static public Serializable GetInstance(string fullName)
-        {
-            lock (objectFullNames2serializable)
-            {
-                Serializable s = null;
-                objectFullNames2serializable.TryGetValue(fullName, out s);
-                return s;
-            }
-        }
-
-        static public void CopyFiles(string toDirectory)
-        {
-            lock (objectFullNames2serializable)
-            {
-                string d = FileSystemRoutines.CreateDirectory(toDirectory + System.IO.Path.DirectorySeparatorChar + CONFIG_FOLDER_NAME);
-                foreach (Serializable s in objectFullNames2serializable.Values)
-                    if (File.Exists(s.__File))//it can be absent if default settings are used still
-                        File.Copy(s.__File, d + System.IO.Path.DirectorySeparatorChar + PathRoutines.GetFileName(s.__File));
             }
         }
     }
