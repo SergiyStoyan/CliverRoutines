@@ -46,7 +46,7 @@ namespace Cliver
         {
             lock (fieldFullNames2SettingsField)
             {
-                fieldFullNames2SettingsField.Clear();
+                fieldFullNames2SettingsField.Clear(); 
                 foreach (SettingsField settingsField in enumSettingsTypeFieldInfos())
                 {
                     if (null != settingsField.Info.GetCustomAttributes<Settings.Optional>(false).FirstOrDefault() && (RequiredOptionalFieldFullNamesRegex == null || !RequiredOptionalFieldFullNamesRegex.IsMatch(settingsField.FullName)))
@@ -118,33 +118,36 @@ namespace Cliver
         }
         static IEnumerable<SettingsField> enumSettingsTypeFieldInfos()
         {
-            string configAssemblyFullName = Assembly.GetExecutingAssembly().FullName;
-            StackTrace stackTrace = new StackTrace();
-            Assembly callingAssembly = stackTrace.GetFrames().Where(f => f.GetMethod().DeclaringType.Assembly.FullName != configAssemblyFullName).Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault();
-            if (callingAssembly == null)
-                callingAssembly = Assembly.GetEntryAssembly();
-            List<Assembly> assemblies = new List<Assembly>();
-            assemblies.Add(callingAssembly);
-            foreach (AssemblyName assemblyName in callingAssembly.GetReferencedAssemblies())
+            lock (fieldFullNames2SettingsField)
             {
-                Assembly a = Assembly.Load(assemblyName);
-                if (null != a.GetReferencedAssemblies().Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
-                    assemblies.Add(a);
-            }
-            foreach (Assembly assembly in assemblies)
-            {
-                Type[] types = assembly.GetTypes();
-                IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))).Distinct();
-                if (InitialzingOrderedSettingsTypes != null)
+                string configAssemblyFullName = Assembly.GetExecutingAssembly().FullName;
+                StackTrace stackTrace = new StackTrace();
+                Assembly callingAssembly = stackTrace.GetFrames().Where(f => f.GetMethod().DeclaringType.Assembly.FullName != configAssemblyFullName).Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault();
+                if (callingAssembly == null)
+                    callingAssembly = Assembly.GetEntryAssembly();
+                List<Assembly> assemblies = new List<Assembly>();
+                assemblies.Add(callingAssembly);
+                foreach (AssemblyName assemblyName in callingAssembly.GetReferencedAssemblies())
                 {
-                    SettingsTypeComparer settingsTypeComparer = new SettingsTypeComparer(InitialzingOrderedSettingsTypes);
-                    settingsTypes = settingsTypes.OrderBy(t => t, settingsTypeComparer);
+                    Assembly a = Assembly.Load(assemblyName);
+                    if (null != a.GetReferencedAssemblies().Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
+                        assemblies.Add(a);
                 }
-                foreach (Type type in types)
-                    foreach (FieldInfo settingsTypeFieldInfo in type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(f => settingsTypes.Contains(f.FieldType) /* && f.FieldType.IsAssignableFrom(settingsType)*/))
-                    {//usually it is only 1 FieldInfo per Settings type
-                        yield return new SettingsField(settingsTypeFieldInfo);
+                foreach (Assembly assembly in assemblies)
+                {
+                    Type[] types = assembly.GetTypes();
+                    IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))).Distinct();
+                    if (InitialzingOrderedSettingsTypes != null)
+                    {
+                        SettingsTypeComparer settingsTypeComparer = new SettingsTypeComparer(InitialzingOrderedSettingsTypes);
+                        settingsTypes = settingsTypes.OrderBy(t => t, settingsTypeComparer);
                     }
+                    foreach (Type type in types)
+                        foreach (FieldInfo settingsTypeFieldInfo in type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(f => settingsTypes.Contains(f.FieldType) /* && f.FieldType.IsAssignableFrom(settingsType)*/))
+                        {//usually it is only 1 FieldInfo per Settings type
+                            yield return new SettingsField(settingsTypeFieldInfo);
+                        }
+                }
             }
         }
 
