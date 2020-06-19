@@ -6,6 +6,7 @@
 //        26 September 2006
 //Copyright: (C) 2006, Sergey Stoyan
 //********************************************************************************************
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,86 +14,76 @@ using System.Reflection;
 
 namespace Cliver
 {
-    public class NullableEnum<T> where T : class
-    {
-        public static readonly NullableEnum<T> NULL = new NullableEnum<T>(null);
-
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
-
-        protected NullableEnum(T value)
-        {
-            Value = value;
-        }
-
-        public NullableEnum()
-        {
-        }
-
-        public T Value { get; private set; }
-
-        public Dictionary<string, T> ToDictionary()
-        {
-            return GetType().GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType.IsSubclassOf(typeof(NullableEnum<T>))).ToDictionary(x => x.Name, x => ((NullableEnum<T>)x.GetValue(this)).Value);
-        }
-
-        public List<T> ToList()
-        {
-            return GetType().GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType.IsSubclassOf(typeof(NullableEnum<T>))).Select(x => ((NullableEnum<T>)x.GetValue(this)).Value).ToList();
-        }
-    }
-
-    public class Enum<T>
+    public class Enum<V>
     {
         public override string ToString()
         {
             return Value.ToString();
         }
 
-        protected Enum(T value)
+        protected Enum(V value)
         {
             Value = value;
         }
 
-        public Enum()
+        public V Value { get; protected set; }
+
+        static public Dictionary<string, E> ToDictionary<E>() where E : Enum<V>
         {
+            return typeof(E).GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType.IsSubclassOf(typeof(Enum<V>))).ToDictionary(x => x.Name, x => ((E)x.GetValue(null)));
         }
 
-        public T Value { get; private set; }
-
-        public Dictionary<string, T> ToDictionary()
+        static public List<E> ToList<E>() where E : Enum<V>
         {
-            return GetType().GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType.IsSubclassOf(typeof(Enum<T>))).ToDictionary(x => x.Name, x => ((Enum<T>)x.GetValue(this)).Value);
+            return typeof(E).GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType.IsSubclassOf(typeof(Enum<V>))).Select(x => ((E)x.GetValue(null))).ToList();
         }
 
-        public List<T> ToList()
+        static public E Parse<E>(string valueStr, bool ignoreCase = false) where E : Enum<V>
         {
-            return GetType().GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType.IsSubclassOf(typeof(Enum<T>))).Select(x => ((Enum<T>)x.GetValue(this)).Value).ToList();
+            if (valueStr != null)
+                valueStr = valueStr.Trim();
+            foreach (E e in ToList<E>())
+            {
+                if (e.Value == null)
+                    if (valueStr == null)
+                        return e;
+                    else
+                        continue;
+                if (valueStr == null)
+                    continue;
+                if (0 == string.Compare(e.Value.ToString(), valueStr, ignoreCase))
+                    return e;
+            }
+            return null;
+        }
+
+        public bool IsAmong<E>(params E[] objects) where E : Enum<V>
+        {
+            return objects.FirstOrDefault(a => a == (E)this) != null;
         }
     }
 
     internal class EnumExample : Cliver.Enum<string>
     {
-        public static readonly EnumExample EMPTY = new EnumExample("");
+        public static readonly EnumExample NULL = new EnumExample(null);
+        public static readonly EnumExample EMPTY = new EnumExample(string.Empty);
         public static readonly EnumExample VALUE1 = new EnumExample("VALUE1");
         public static readonly EnumExample VALUE2 = new EnumExample("VALUE2");
         public static readonly EnumExample VALUE3 = new EnumExample("VALUE3");
 
-        internal EnumExample(string value) : base(value) { }
+        EnumExample(string value) : base(value) { }
     }
 
-    public static class StringValues
-    {
-        public static Dictionary<string, string> ToDictionary()
-        {
-            return typeof(StringValues).GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType == typeof(string)).ToDictionary(x => x.Name, x => (string)x.GetValue(null));
-        }
+    //public static class StringValues
+    //{
+    //    public static Dictionary<string, string> ToDictionary()
+    //    {
+    //        return typeof(StringValues).GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType == typeof(string)).ToDictionary(x => x.Name, x => (string)x.GetValue(null));
+    //    }
 
-        public static List<string> ToList()
-        {
-            return typeof(StringValues).GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType == typeof(string)).Select(x => (string)x.GetValue(null)).ToList();
-        }
-    }
+    //    public static List<string> ToList()
+    //    {
+    //        return typeof(StringValues).GetFields(BindingFlags.Public | BindingFlags.Static).Where(x => x.FieldType == typeof(string)).Select(x => (string)x.GetValue(null)).ToList();
+    //    }
+    //}
 }
