@@ -16,11 +16,11 @@ using System.Diagnostics;
 namespace Cliver
 {
     /// <summary>
-    /// Config manages serializable Settings objects set to static fields of this type declared in the application.
-    /// It provides:
+    /// Config manages serializable Settings objects set to static fields of Settings derived types declared in the application.
+    /// It performs:
     /// - detecting static fields of Settings types declared in the application and initiating them with Settings objects;
     /// - serializing/deserializing the Settings objects;
-    /// Every Settings field in the application has it own storage file which is defined by the Settings type and the field's full name. 
+    /// Every Settings field in the application has it own storage file which is defined by the Settings type and the field's full name in code. 
     /// Usually it's that only one field is declared per Settings type, but generally there can be any number of fields of the same Settings type.
     /// </summary>
     public partial class Config
@@ -44,20 +44,20 @@ namespace Cliver
 
         static void loadOrReset(bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
         {
-            lock (fieldFullNames2SettingsField)
+            lock (settingsFieldFullNames2SettingsFieldInfo)
             {
-                fieldFullNames2SettingsField.Clear(); 
-                foreach (SettingsField settingsField in enumSettingsFields())
+                settingsFieldFullNames2SettingsFieldInfo.Clear();
+                foreach (SettingsFieldInfo settingsFieldInfo in EnumSettingsFieldInfos())
                 {
-                    if (null != settingsField.Info.GetCustomAttributes<Settings.Optional>(false).FirstOrDefault() && (RequiredOptionalFieldFullNamesRegex == null || !RequiredOptionalFieldFullNamesRegex.IsMatch(settingsField.FullName)))
+                    if (null != settingsFieldInfo.FieldInfo.GetCustomAttributes<Settings.Optional>(false).FirstOrDefault() && (RequiredOptionalFieldFullNamesRegex == null || !RequiredOptionalFieldFullNamesRegex.IsMatch(settingsFieldInfo.FullName)))
                         continue;
-                    Settings settings = Settings.Create(settingsField, reset, throwExceptionIfCouldNotLoadFromStorageFile);
-                    settingsField.SetObject(settings);
-                    fieldFullNames2SettingsField[settingsField.FullName] = settingsField;
+                    Settings settings = Settings.Create(settingsFieldInfo, reset, throwExceptionIfCouldNotLoadFromStorageFile);
+                    settingsFieldInfo.SetObject(settings);
+                    settingsFieldFullNames2SettingsFieldInfo[settingsFieldInfo.FullName] = settingsFieldInfo;
                 }
             }
         }
-        static Dictionary<string, SettingsField> fieldFullNames2SettingsField = new Dictionary<string, SettingsField>();
+        static Dictionary<string, SettingsFieldInfo> settingsFieldFullNames2SettingsFieldInfo = new Dictionary<string, SettingsFieldInfo>();
 
         class SettingsTypeComparer : IComparer<Type>
         {
@@ -82,15 +82,20 @@ namespace Cliver
                 return ai < bi ? -1 : 1;
             }
         }
-        static IEnumerable<SettingsField> enumSettingsFields()
+
+        /// <summary>
+        /// Enumerates through all the Settings fields available in the application.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<SettingsFieldInfo> EnumSettingsFieldInfos()
         {
-            string configAssemblyFullName = Assembly.GetExecutingAssembly().FullName;
+            Assembly configAssembly = Assembly.GetExecutingAssembly();
             StackTrace stackTrace = new StackTrace();
-            Assembly callingAssembly = stackTrace.GetFrames().Where(f => f.GetMethod().DeclaringType.Assembly.FullName != configAssemblyFullName).Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault();
+            Assembly callingAssembly =  stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != configAssembly).FirstOrDefault();
             if (callingAssembly == null)
                 callingAssembly = Assembly.GetEntryAssembly();
-            List<Assembly> assemblies = new List<Assembly>();
-            assemblies.Add(callingAssembly);
+            List<Assembly> assemblies = new List<Assembly> { callingAssembly };
+            string configAssemblyFullName = configAssembly.FullName;
             foreach (AssemblyName assemblyName in callingAssembly.GetReferencedAssemblies())
             {
                 Assembly a = Assembly.Load(assemblyName);
@@ -108,14 +113,12 @@ namespace Cliver
                 }
                 foreach (Type type in types)
                     foreach (FieldInfo settingsTypeFieldInfo in type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Where(f => settingsTypes.Contains(f.FieldType) /* && f.FieldType.IsAssignableFrom(settingsType)*/))
-                    {//usually it is only 1 FieldInfo per Settings type
-                        yield return new SettingsField(settingsTypeFieldInfo);
-                    }
+                        yield return new SettingsFieldInfo(settingsTypeFieldInfo);
             }
         }
 
         /// <summary>
-        /// Reloads all the Settings fields. 
+        /// Reloads all the Settings fields in the application.
         /// It's the usual method to be called in the beginning of an application to initiate Config.
         /// First it tries to load each Settings object from its default storage directory. 
         /// If this file does not exist, it tries to load from the initial settings file in app's directory.
@@ -128,7 +131,7 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Resets all the Settings fields.
+        /// Resets all the Settings fields in the application.
         /// First it tries to load each Settings object from the initial settings file in app's directory. 
         /// Only if this file does not exist, it resets to the hardcoded values.
         /// </summary>
@@ -138,30 +141,34 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Serializes all the Settings fields to their storage files.
+        /// Serializes all the Settings fields initialized in the application to their storage files.
         /// </summary>
         static public void Save()
         {
-            lock (fieldFullNames2SettingsField)
+            lock (settingsFieldFullNames2SettingsFieldInfo)
             {
-                foreach (SettingsField settingsField in fieldFullNames2SettingsField.Values)
-                    settingsField.GetObject()?.Save();
+                foreach (SettingsFieldInfo settingsFieldInfo in settingsFieldFullNames2SettingsFieldInfo.Values)
+                    settingsFieldInfo.GetObject()?.Save();
             }
         }
 
         /// <summary>
-        /// Returns the Settings object which is set to the field identified by the field's full name.
-        /// The object must be previously created by Reload() or Reset().
+        /// Allows to get the Settings field's properties before its value has been created (i.e. before the Settings field has been initialized).
         /// </summary>
-        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its file without extention</param>
-        /// <returns>The Settings object which is set to the field</returns>
-        static public Settings GetSettings(string settingsFieldFullName)
+        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+        /// <returns>Settings field's properties</returns>
+        public static SettingsFieldInfo GetSettingsFieldInfo(string settingsFieldFullName)
         {//!!! before altering this method, pay attention that it is used by Settings !!!
-            lock (fieldFullNames2SettingsField)
+            lock (settingsFieldFullNames2SettingsFieldInfo)
             {
-                if (fieldFullNames2SettingsField.TryGetValue(settingsFieldFullName, out SettingsField settingsField))
-                    return settingsField.GetObject();
-                return null;
+                if (!settingsFieldFullNames2SettingsFieldInfo.TryGetValue(settingsFieldFullName, out SettingsFieldInfo sfi))
+                {
+                    sfi = EnumSettingsFieldInfos().FirstOrDefault(a => a.FullName == settingsFieldFullName);
+                    if (sfi == null)
+                        throw new Exception("Settings field with full name: '" + settingsFieldFullName + "' does not exist.");
+                    settingsFieldFullNames2SettingsFieldInfo[settingsFieldFullName] = sfi;
+                }
+                return sfi;
             }
         }
     }

@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Cliver
 {
@@ -16,47 +17,44 @@ namespace Cliver
     {
         public partial class Session
         {
-            const string MAIN_SESSION_NAME = "";
-
-            public Session(string name = MAIN_SESSION_NAME)
+            Session(string name)
             {
-                TimeMark = CreatedTime.ToString("yyMMddHHmmss");
                 this.name = name;
-
-                //if (Log.mode == Mode.ONLY_LOG)
-                //    throw new Exception("SessionDir cannot be used in Log.Mode.ONLY_LOG");
-
-                path = get_path(name);
-                if(Log.mode == Mode.SESSIONS && writeLog)
-                    Directory.CreateDirectory(path);
+                CreatedTime = DateTime.MinValue;
+                timeMark = null;
+                string dir = Dir;//initialize
             }
 
-            string get_path(string name)
+            string getDir(string name)
             {
                 lock (this.names2NamedWriter)
                 {
+                    string dir;
                     switch (Log.mode)
                     {
-                        case Cliver.Log.Mode.ONLY_LOG:
-                            return WorkDir;
-                        //case Cliver.Log.Mode.SINGLE_SESSION:
-                        case Cliver.Log.Mode.SESSIONS:
-                            string path0 = WorkDir + System.IO.Path.DirectorySeparatorChar + session_name_prefix + "_" + (string.IsNullOrWhiteSpace(name) ? "" : name + "_") + TimeMark;
-                            string path = path0;
-                            for (int count = 1; Directory.Exists(path); count++)
-                                path = path0 + "_" + count.ToString();
-                            return path;
+                        case Cliver.Log.Mode.ALL_LOGS_ARE_IN_SAME_FOLDER:
+                            dir = WorkDir;
+                            break;
+                        case Cliver.Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER:
+                            string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
+                            dir = dir0;
+                            for (int count = 1; Directory.Exists(dir); count++)
+                                dir = dir0 + "_" + count.ToString();
+                            break;
                         default:
                             throw new Exception("Unknown LOGGING_MODE:" + Cliver.Log.mode);
                     }
+                    return dir;
                 }
             }
+
+            public static string NamePrefix = "Session";
 
             public string Name
             {
                 get
                 {
-                    lock (this.names2NamedWriter)//this lock is needed if Session::Close(string new_name) is performing
+                    lock (this.names2NamedWriter)//this lock is needed if Session::Close(string new_name) is being performed
                     {
                         return name;
                     }
@@ -64,162 +62,129 @@ namespace Cliver
             }
             string name;
 
-            public string Path
+            public string Dir
             {
                 get
                 {
-                    lock (this.names2NamedWriter)//this lock is needed if Session::Close(string new_name) is performing
+                    lock (this.names2NamedWriter)//this lock is needed if Session::Close(string new_name) is being performed
                     {
-                        return path;
+                        if (dir == null)
+                            dir = getDir(name);
+                        return dir;
                     }
                 }
             }
-            string path;
+            string dir;
 
-            public readonly DateTime CreatedTime = DateTime.Now;
-            public readonly string TimeMark;
-
-            Dictionary<string, NamedWriter> names2NamedWriter = new Dictionary<string, NamedWriter>();
+            public DateTime CreatedTime { get; protected set; }
+            public string TimeMark {
+                get
+                {
+                    lock (names2NamedWriter)//this lock is needed if Session::Close(string new_name) is being performed
+                    {
+                        if (timeMark == null)
+                        {
+                            CreatedTime = DateTime.Now;
+                            timeMark = CreatedTime.ToString("yyMMddHHmmss");
+                        }
+                        return timeMark;
+                    }
+                }
+            }
+            string timeMark = null;
 
             /// <summary>
-            /// Close all writing streams and rename session and its directory. Using the session can be continued after that.
+            /// Default log of the session.
+            /// Depending on condition THREAD_LOG_IS_DEFAULT, it is either Main log or Thread log.
             /// </summary>
-            /// <param name="new_name"></param>
-            public void Close(string new_name)
-            {
-                lock (this.names2NamedWriter)
-                {
-                    if (Log.mode == Mode.ONLY_LOG)
-                        throw new Exception("Cannot rename log folder in mode: " + Log.mode);
-
-                    if (new_name == Name)
-                    {
-                        Close();
-                        return;
-                    }
-
-                    string new_path = get_path(new_name);
-                    Default.Write("Renaming session: '" + Path + "' to '" + new_path + "'");
-
-                    Close();
-
-                    try
-                    {
-                        Directory.Move(Path, new_path);
-                        path = new_path;
-                        name = new_name;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Main.Error(e);
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Close all writing streams. The session can be used after.
-            /// </summary>
-            public void Close()
-            {
-                lock (this.names2NamedWriter)
-                {
-                    if (names2NamedWriter.Values.Count < 1 && !ThreadWriter.IsAnythingOpen)
-                        return;
-
-                    Default.Write("Closing the log session");
-
-                    //any ThreadWriter can belong only to MainSession
-                    if(Log.IsMainSessionOpen && this == Log.MainSession)
-                        Log.ThreadWriter.CloseAll();
-
-                    foreach (NamedWriter nw in names2NamedWriter.Values)
-                        nw.Close();
-                    //names2NamedWriter.Clear(); !!! clearing writers will bring to duplicating of them if they are referenced alongside also.
-                }
-            }
-
-            public int TotalErrorCount
-            {
-                get
-                {
-                    lock (this.names2NamedWriter)
-                    {
-                        int ec = 0;
-                        foreach (NamedWriter nw in names2NamedWriter.Values)
-                            ec += nw.ErrorCount;
-                        return ec;
-                    }
-                }
-            }
-            
-            public NamedWriter this[string name]
-            {
-                get
-                {
-                    return NamedWriter.Get(this, name);
-                }
-            }
-
             public Writer Default
             {
                 get
                 {
-                    if (this == Log.MainSession)
-                        return ThreadWriter.Main;
-                    return NamedWriter.Get(this, DEFAULT_NAMED_LOG);
+#if THREAD_LOG_IS_DEFAULT
+                    return Thread;
+#else
+                    return Main;
+#endif
                 }
             }
 
-            internal const string DEFAULT_NAMED_LOG = "_";//to differ from ThreadWriter.Main
-
-            public void Error(Exception e)
+            /// <summary>
+            /// Close all log files in the session.  
+            /// Nevertheless the session can be re-used after.
+            /// </summary>
+            /// <param name="newName"></param>
+            public void Rename(string newName)
             {
-                Default.Error(e);
+                lock (this.names2NamedWriter)
+                {
+                    if (newName == Name)
+                        return;
+
+                    Write("Renaming session...: '" + Name + "' to '" + newName + "'");
+
+                    Close(true);
+                    string newDir = getDir(newName);
+                    switch (Log.mode)
+                    {
+                        case Cliver.Log.Mode.ALL_LOGS_ARE_IN_SAME_FOLDER:
+                            dir = newDir;
+                            foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threads2treadWriter.Values))
+                            {
+                                string file0 = w.File;
+                                w.SetFile();
+                                if (File.Exists(file0))
+                                    File.Move(file0, w.File);
+                            }
+                            break;
+                        case Cliver.Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER:
+                            if (Directory.Exists(dir))
+                                Directory.Move(dir, newDir);
+                            dir = newDir;
+                            break;
+                        default:
+                            throw new Exception("Unknown LOGGING_MODE:" + Cliver.Log.mode);
+                    }
+                    lock (names2Session)
+                    {
+                        names2Session.Remove(name);
+                        name = newName;
+                        names2Session[name] = this;
+                    }
+                }
             }
 
-            public void Error(string message)
+            /// <summary>
+            /// Close all log files in the session. 
+            /// </summary>
+            /// <param name="reuse">if true, the same session folder can be used again, otherwise a new folder will be created for this session</param>
+            public void Close(bool reuse)
             {
-                Default.Error(message);
-            }
+                lock (names2NamedWriter)
+                {
+                    if (names2NamedWriter.Values.Count < 1 && threads2treadWriter.Values.Count < 1)
+                        return;
 
-            public void Trace(object message = null)
-            {
-                Default.Trace(message);
-            }
+                    Write("Closing the log session...");
 
-            public void Exit(string message)
-            {
-                Default.Error(message);
-            }
+                    foreach (NamedWriter nw in names2NamedWriter.Values)
+                        nw.Close();
+                    //names2NamedWriter.Clear(); !!! clearing writers will bring to duplicating of them if they are referenced in the custom code.
 
-            public void Exit(Exception e)
-            {
-                Default.Exit(e);
-            }
+                    lock (threads2treadWriter)
+                    {
+                        foreach (ThreadWriter tw in threads2treadWriter.Values)
+                            tw.Close();
+                        //threads2treadWriter.Clear(); !!!clearing writers will bring to duplicating of them if they are referenced in the custom code.
+                    }
 
-            public void Warning(string message)
-            {
-                Default.Warning(message);
-            }
-
-            public void Warning(Exception e)
-            {
-                Default.Warning(e);
-            }
-
-            public void Inform(string message)
-            {
-                Default.Inform(message);
-            }
-
-            public void Write(MessageType messageType , string message, string details = null)
-            {
-                Default.Write(messageType, message, details);
-            }
-
-            public void Write(string message)
-            {
-                Default.Write(MessageType.LOG, message);
+                    if (!reuse)
+                    {
+                        dir = null;
+                        CreatedTime = DateTime.MinValue;
+                        timeMark = null;
+                    }
+                }
             }
         }
     }

@@ -7,6 +7,7 @@
 //Copyright: (C) 2006, Sergey Stoyan
 //********************************************************************************************
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
 
@@ -14,6 +15,13 @@ namespace Cliver
 {
     public static class AssemblyRoutines
     {
+        public static Assembly GetPreviousAssemblyInCallStack()
+        {
+            Assembly thisAssembly = Assembly.GetExecutingAssembly();
+            StackTrace stackTrace = new StackTrace();
+            return stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != thisAssembly).FirstOrDefault();
+        }
+
         public static DateTime GetAssemblyCompiledTime(Assembly assembly)
         {
             byte[] bs = new byte[2048];
