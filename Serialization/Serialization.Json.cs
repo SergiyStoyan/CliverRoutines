@@ -70,25 +70,30 @@ namespace Cliver
                 return Deserialize(type, Serialize(o, false, true));
             }
 
+            public static object Clone2(object o)
+            {
+                return Deserialize(o.GetType(), Serialize(o, false, true));
+            }
+
             public static bool IsEqual(object a, object b)
             {
                 return Serialize(a, false, true) == Serialize(b, false, true);
             }
         }
 
-        public static O CreateCloneByJson<O>(this O o)
-        {
-            return Json.Clone<O>(o);
-        }
+        //public static O CreateCloneByJson<O>(this O o)
+        //{
+        //    return Json.Clone<O>(o);
+        //}
 
-        public static object CreateCloneByJson(this object o, Type type)
-        {
-            return Json.Clone(type, o);
-        }
+        //public static object CreateCloneByJson(this object o, Type type)
+        //{
+        //    return Json.Clone(type, o);
+        //}
 
-        public static bool IsEqualByJson(this object a, object b)
-        {
-            return Json.IsEqual(a, b);
-        }
+        //public static bool IsEqualByJson(this object a, object b)
+        //{
+        //    return Json.IsEqual(a, b);
+        //}
     }
 }

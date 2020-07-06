@@ -6,13 +6,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Cliver
 {
     /// <summary>
     /// Features:
     /// - auto-generating values;
-    /// - auto-disposing IDisposable values;
+    /// - auto-disposing IDisposable values which have left the dictionary;
     /// </summary>
     /// <typeparam name="KT"></typeparam>
     /// <typeparam name="VT"></typeparam>
@@ -55,28 +56,19 @@ namespace Cliver
             {
                 if (keys2value != null)
                 {
-                    if (IsDisposable(typeof(VT)))
-                        foreach (VT v in keys2value.Values)
-                            if (v != null)
-                                ((IDisposable)v).Dispose();
+                    Clear();
                     keys2value = null;
                 }
             }
-        }
-
-        static bool IsDisposable(Type type)
-        {
-            return typeof(IDisposable).IsAssignableFrom(type);
         }
 
         virtual public void Clear()
         {
             lock (this)
             {
-                if (IsDisposable(typeof(VT)))
-                    foreach (VT v in keys2value.Values)
-                        if (v != null)
-                            ((IDisposable)v).Dispose();
+                foreach (VT v in keys2value.Values)
+                    if (v != null && v is IDisposable)
+                        ((IDisposable)v).Dispose();
                 keys2value.Clear();
             }
         }
@@ -85,31 +77,38 @@ namespace Cliver
         {
             lock (this)
             {
-                if (IsDisposable(typeof(VT)))
-                {
-                    VT v;
-                    if (keys2value.TryGetValue(key, out v))
-                        if (v != null)
-                            ((IDisposable)v).Dispose();
-                }
+                dispose(key);
                 keys2value.Remove(key);
             }
         }
 
+        void dispose(KT key)
+        {
+            lock (this)
+            {
+                if (keys2value.TryGetValue(key, out VT v) && v != null && v is IDisposable)
+                {
+                    int vKeyCount = 0;
+                    keys2value.Values.Where(a => a.Equals(v)).TakeWhile(a => ++vKeyCount < 2);
+                    if (vKeyCount < 2)//make sure it is the only inclusion of the object
+                        ((IDisposable)v).Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// It is safe: returns default if does not exists.
+        /// To check for existance, use TryGetValue().
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public VT this[KT key]
         {
             get
             {
                 lock (this)
                 {
-                    VT v;
-                    if (!keys2value.TryGetValue(key, out v))
-                    {
-                        if (getValue == null)
-                            return defaultValue;
-                        v = getValue(key);
-                        keys2value[key] = v;
-                    }
+                    TryGetValue(key, out VT v);
                     return v;
                 }
             }
@@ -117,6 +116,7 @@ namespace Cliver
             {
                 lock (this)
                 {
+                    dispose(key);
                     keys2value[key] = value;
                 }
             }
@@ -162,6 +162,22 @@ namespace Cliver
                 keys2value[key] = value;
             }
             return true;
+        }
+
+        public void Add(KT key, VT value)
+        {
+            this[key] = value;
+        }
+
+        /// <summary>
+        /// Attention: the count can be implicitly changed due to auto-generating value function
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return keys2value.Count;
+            }
         }
     }
 }
