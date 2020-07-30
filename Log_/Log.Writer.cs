@@ -176,8 +176,8 @@ namespace Cliver
                     }
 
                     details = string.IsNullOrWhiteSpace(details) ? "" : "\r\n\r\n" + details;
-                    message = (messageType == MessageType.LOG ? "" : messageType.ToString()) + ": " + message + details;
-                    logWriter.WriteLine(DateTime.Now.ToString("[dd-MM-yy HH:mm:ss] ") + message);
+                    message = (messageType == MessageType.LOG ? "" : messageType.ToString() + ": ") + message + details;
+                    logWriter.WriteLine(DateTime.Now.ToString(Log.timePattern) + message);
                     logWriter.Flush();
                 }
             }

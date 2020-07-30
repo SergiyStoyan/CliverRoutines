@@ -23,7 +23,7 @@ namespace Cliver
     /// Every Settings field in the application has it own storage file which is defined by the Settings type and the field's full name in code. 
     /// Usually it's that only one field is declared per Settings type, but generally there can be any number of fields of the same Settings type.
     /// </summary>
-    public partial class Config
+    public static partial class Config
     {
         /// <summary>
         /// Tells Config which optional (i.e. attributed with [Settings.Optional]) Settings fields are to be initialized. 
@@ -158,7 +158,7 @@ namespace Cliver
         /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
         /// <returns>Settings field's properties</returns>
         public static SettingsFieldInfo GetSettingsFieldInfo(string settingsFieldFullName)
-        {//!!! before altering this method, pay attention that it is used by Settings !!!
+        {//!!! before altering this method, pay attention that it is used by the engine !!!
             lock (settingsFieldFullNames2SettingsFieldInfo)
             {
                 if (!settingsFieldFullNames2SettingsFieldInfo.TryGetValue(settingsFieldFullName, out SettingsFieldInfo sfi))

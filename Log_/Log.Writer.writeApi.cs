@@ -54,6 +54,14 @@ namespace Cliver
                 Write(MessageType.ERROR, message);
             }
 
+            public void Error2(string message, Exception e)
+            {
+                string m;
+                string d;
+                GetExceptionMessage(e, out m, out d);
+                Write(MessageType.ERROR, message, m);
+            }
+
             /// <summary>
             /// Write the stack information for the caller.
             /// </summary>
@@ -127,6 +135,14 @@ namespace Cliver
                 string d;
                 GetExceptionMessage(e, out m, out d);
                 Write(MessageType.WARNING, message, m + (e is Exception2 ? null : "\r\n\r\n" + d));
+            }
+
+            public void Warning2(string message, Exception e)
+            {
+                string m;
+                string d;
+                GetExceptionMessage(e, out m, out d);
+                Write(MessageType.WARNING, message, m);
             }
 
             /// <summary>

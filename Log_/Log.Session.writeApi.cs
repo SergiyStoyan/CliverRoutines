@@ -81,6 +81,11 @@ namespace Cliver
                 Default.Error2(message);
             }
 
+            public void Error2(string message, Exception e)
+            {
+                Default.Error2(message, e);
+            }
+
             public void Exit2(string message)
             {
                 Default.Exit2(message);
@@ -99,6 +104,11 @@ namespace Cliver
             public void Warning2(Exception e)
             {
                 Default.Warning2(e);
+            }
+
+            public void Warning2(string message, Exception e)
+            {
+                Default.Warning2(message, e);
             }
 
             public void Inform0(string message)

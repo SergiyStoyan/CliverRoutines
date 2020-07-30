@@ -186,11 +186,12 @@ namespace Cliver
             List<string> ms = new List<string>();
             for (; e != null; e = e.InnerException)
             {
+                string m = "(" + e.GetType().FullName + ")\r\n" + e.Message;
                 AggregateException ae = e as AggregateException;
                 if (ae != null && ae.InnerExceptions.Count > 1)
-                    ms.Add("More than 1 exception aggregated! Show only [0]:" + e.Message);
+                    ms.Add("More than 1 exception aggregated! Show only [0]:" + m);
                 else
-                    ms.Add(e.Message);
+                    ms.Add(m);
                 if (!passedOutOfApp)
                 {
                     if (lastInterestingE != null && (e.StackTrace == null || e.TargetSite == null))//it seems to be passing out of the application

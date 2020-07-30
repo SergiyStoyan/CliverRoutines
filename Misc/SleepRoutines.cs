@@ -29,15 +29,13 @@ namespace Cliver
             return o;
         }
 
-        public static bool WaitForCondition(Func<bool> check_condition, int mss, int spin_sleep_in_mss = 10)
+        public static bool WaitForCondition(Func<bool> condition, int timeoutMss, int pollTimeSpanMss = 10)
         {
-            DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, mss);
-            while (dt > DateTime.Now)
+            for (DateTime timeout = DateTime.Now.AddMilliseconds(timeoutMss); DateTime.Now < timeout; Thread.Sleep(pollTimeSpanMss))
             {
-                if (check_condition())
+                if (condition())
                     return true;
                 //Application.DoEvents();
-                Thread.Sleep(spin_sleep_in_mss);
             }
             return false;
         }
@@ -50,7 +48,7 @@ namespace Cliver
                 //Application.DoEvents();
                 Thread.Sleep(spin_sleep_in_mss);
             }
-        }        
+        }
     }
 }
 

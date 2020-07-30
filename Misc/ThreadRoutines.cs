@@ -72,6 +72,13 @@ namespace Cliver
             return StartTry(code, on_error, on_finally, background, ApartmentState.STA);
         }
 
+        public static bool TryAbort(this Thread thread, int timeoutMss, int pollTimeSpanMss = 300)
+        {
+            if (thread == null || !thread.IsAlive)
+                return true;
+            return SleepRoutines.WaitForCondition(() => { thread.Abort(); thread.Join(pollTimeSpanMss); return !thread.IsAlive; }, timeoutMss);
+        }
+
         //static HashSet<Thread> threads = new HashSet<Thread>();
 
         //public static Thread GetThread(ThreadStart st)
