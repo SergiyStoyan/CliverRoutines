@@ -21,18 +21,12 @@ namespace Cliver
             /// <param name="e"></param>
             public void Error(Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(Log.MessageType.ERROR, m, e is Exception2 ? null : d);
+                Write(MessageType.ERROR, GetExceptionMessage(e, !(e is Exception2)));
             }
 
             public void Error2(Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.ERROR, m);
+                Write(MessageType.ERROR, GetExceptionMessage2(e));
             }
 
             public void Error(string message)
@@ -42,10 +36,7 @@ namespace Cliver
 
             public void Error(string message, Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.ERROR, message, m + (e is Exception2 ? null : "\r\n\r\n" + d));
+                Write(MessageType.ERROR, message, GetExceptionMessage(e, !(e is Exception2)));
             }
 
             public void Error2(string message)
@@ -55,10 +46,7 @@ namespace Cliver
 
             public void Error2(string message, Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.ERROR, message, m);
+                Write(MessageType.ERROR, message, GetExceptionMessage2(e));
             }
 
             /// <summary>
@@ -103,11 +91,8 @@ namespace Cliver
                 lock (this)
                 {
                     if (Name != MAIN_THREAD_LOG_NAME)
-                        Main.Write("EXITING: due to thread #" + Name + ". See the respective Log");
-                    string m;
-                    string d;
-                    GetExceptionMessage(e, out m, out d);
-                    Write(MessageType.EXIT, m, e is Exception2 ? null : d);
+                        Main.Write("EXITING: due to thread #" + Name + ". See the respective log.");
+                    Write(MessageType.EXIT, GetExceptionMessage(e, !(e is Exception2)));
                 }
             }
 
@@ -130,18 +115,12 @@ namespace Cliver
             /// <param name="e"></param>
             public void Warning(string message, Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.WARNING, message, m + (e is Exception2 ? null : "\r\n\r\n" + d));
+                Write(MessageType.WARNING, message, GetExceptionMessage(e, !(e is Exception2)));
             }
 
             public void Warning2(string message, Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.WARNING, message, m);
+                Write(MessageType.WARNING, message, GetExceptionMessage2(e));
             }
 
             /// <summary>
@@ -159,10 +138,7 @@ namespace Cliver
             /// <param name="e"></param>
             public void Warning(Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.WARNING, m, e is Exception2 ? null : d);
+                Write(MessageType.WARNING, GetExceptionMessage(e, !(e is Exception2)));
             }
 
             /// <summary>
@@ -171,10 +147,7 @@ namespace Cliver
             /// <param name="e"></param>
             public void Warning2(Exception e)
             {
-                string m;
-                string d;
-                GetExceptionMessage(e, out m, out d);
-                Write(MessageType.WARNING, m);
+                Write(MessageType.WARNING, GetExceptionMessage2(e));
             }
 
             public void Inform(string message)

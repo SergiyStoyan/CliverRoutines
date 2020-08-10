@@ -115,10 +115,7 @@ namespace Cliver
                         }
                         catch (Exception e)
                         {
-                            string m;
-                            string d;
-                            GetExceptionMessage(e, out m, out d);
-                            write(Log.MessageType.ERROR, m, d);
+                            write(Log.MessageType.ERROR, GetExceptionMessage(e));
                         }
                         finally
                         {
@@ -130,7 +127,7 @@ namespace Cliver
             }
             //static protected System.Threading.Thread exitingThread = null;
             static protected bool exiting = false;
-            void write(Log.MessageType messageType, string message, string details)
+            void write(Log.MessageType messageType, string message, string details = null)
             {
                 lock (this)
                 {
@@ -174,8 +171,7 @@ namespace Cliver
                         logWriter = new StreamWriter(File, true);
                     }
 
-                    details = string.IsNullOrWhiteSpace(details) ? "" : "\r\n\r\n" + details;
-                    message = (messageType == MessageType.LOG ? "" : messageType.ToString() + ": ") + message + details;
+                    message = (messageType == MessageType.LOG ? "" : messageType.ToString() + ": ") + message + (string.IsNullOrWhiteSpace(details) ? "" : "\r\n\r\n" + details);
                     logWriter.WriteLine(DateTime.Now.ToString(Log.timePattern) + message);
                     logWriter.Flush();
                 }
