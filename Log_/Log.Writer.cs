@@ -93,6 +93,14 @@ namespace Cliver
                 }
             }
 
+            internal bool IsClosed
+            {
+                get
+                {
+                    return logWriter == null;
+                }
+            }
+
             /// <summary>
             /// General writting log method.
             /// </summary>
