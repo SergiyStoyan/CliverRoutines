@@ -97,5 +97,10 @@ namespace Cliver
         {
             return Json.IsEqual(a, b);
         }
+
+        public static string ToStringByJson(this object o)
+        {
+            return Json.Serialize(o);
+        }
     }
 }
