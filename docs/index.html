@@ -72,9 +72,9 @@ So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter se
 
 			<p>Usually you will not inherit <code>Cliver.Settings</code> directly but use one of its derivatives provided by <code>CliverRoutines</code>:
 <br> - <code>Cliver.UserSettings</code> which is serialized to the user-relevant app data directory; 
-<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writting to it on Windows may require additional permissions in which is resolved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
+<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writting to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
 
-        <br>When you create your settings class basing directly on <code>Cliver.Settings</code>, you have to define the serialization directory by yourself.
+        <br>When you create a settings class inheriting <code>Cliver.Settings</code> directly, you need to define the serialization directory in it.
 			
 <p>			<b>Example</b>
 			
@@ -216,7 +216,7 @@ connect(Settings.General.SmtpHost, Settings.General.SmtpPort);
 <code class="language-csharp">
 public class GeneralSettings : Cliver.UserSettings
 {   	
-	//avoid doubling of the collection's elements
+	//avoid doubling the collection's elements
 	[JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
 	public List<string> Files = new List<string>("apple", "pear", "banana"); 
 }
