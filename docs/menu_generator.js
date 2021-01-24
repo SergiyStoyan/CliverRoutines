@@ -1,5 +1,5 @@
 /************************************************************************
-Version 1.1.2
+Version 1.1.0
 by Sergey Stoyan, 2018-2021
 
 This vanilla javascript generates a dynamic menu for content of a hosting html file when it is open in web browser.
