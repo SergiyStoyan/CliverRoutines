@@ -28,6 +28,7 @@
 			
 			<textarea  rows="30" cols="100">
             The MIT License (MIT)
+			
 Copyright © 2006-2021 Sergey Stoyan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -40,13 +41,14 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 
             <h1><a name='config'>Config</a></h1>
+<code>Cliver.Config</code> is a replacement for Visual Studio standard applications settings module. It is very simple in use while much more versatile and powerful than the latter.
 
-The idea behind <code>Cliver.Config</code> follows: 
-<br> - it detects <a href='#settings_field'>settings fields</a> in your code;
-<br> - initializes them with values from the <a href='#storage_file'>storage file</a> and serilizes them back;
+<p><b>Idea explained:</b> 
+<br> - <code>Cliver.Config</code> detects <a href='#settings_field'>settings fields</a> that you declared in your code;
+<br> - facilitates initializing them with values stored on disk and serilizing them back;
 
 
-<p><a href='#settings_class'>Types</a> of <a href='#settings_field'>settings fields</a> are defined in your code thus providing a great flexibility.
+<p><a href='#settings_class'>Types</a> of <a href='#settings_field'>settings fields</a> you define by yourself thus achieving a great flexibility.
         <p>
             <code>Cliver.Config</code> methods are thread-safe.
         <p>
@@ -54,6 +56,7 @@ The idea behind <code>Cliver.Config</code> follows:
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
+			<br>Generally, you can consider your settings class not only as a collection of serializable properties but rather as a fully functional class with added serializing/deserializing ability. 
 			
 <p>Serializable fields in a settings class must be <code>public</code>. 
 			<p>Serialization/deserialization is done by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.
@@ -147,8 +150,8 @@ namespace App
 			</table>
 			
 			<p>Each <a href='#settings_class'>settings type</a> can have 2 storage files:
-			<br> - initial file which optionally can be supplied in the same directory with application itself;
-			<br> - saved file which is re-created every call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>;
+			<br> - initial file which optionally can be supplied in the same directory with the application itself;
+			<br> - saved file which is re-created by every call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>;
 			
 			<p><code>Cliver.Config</code> tries to restore a <a href='#settings_field'>settings field</a> in the following order:
 			<br> - from one's saved file if exists;
@@ -186,12 +189,13 @@ connect(Settings.General.SmtpHost, Settings.General.SmtpPort);
             <h3><a name='restoring_predefined_collections'>(!)Predefining collections</a></h3>
 			
 			Pay attention that when you predefine a collection of values in your code, it will be doubled every time when it is saved/restored. It is how Newtonsoft.Json works by default.
-			To avoid such a behaviour, add the attribute as in the example below:
+			<br>To alter this behaviour, add the attribute as in the example below:
 
 <pre>
 <code class="language-csharp">
 public class GeneralSettings : Cliver.UserSettings
 {   	
+	//avoid doubling of the collection's elements
 	[JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
 	public List<string> Files = new List<string>("apple", "pear", "banana"); 
 }
