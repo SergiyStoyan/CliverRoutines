@@ -56,11 +56,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
-			<br>Generally, you can consider your settings class not only as a collection of serializable properties but rather as a fully functional class with added serializing/deserializing ability. 
+			<br>Generally, you can consider your settings class not simply a collection of serializable properties but rather a fully functional class with added serializing/deserializing functionality. 
 			
-<p>Serializable fields in a settings class must be <code>public</code>. 
+<p>Fields of a settings class must be <code>public</code> and <code>non-static</code> to be processed as serializable. 
 			<p>Serialization/deserialization is done by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.
-So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter serialization behaviour of certain fields. For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
+So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter serialization behaviour of certain fields. To do so, you have to reference <code>Newtonsoft.Json</code> in your project. For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
 			
 <p>While a settings class can implement any fields and methods without restrictions, remember nevertheless that there are restrictions for what and how can be serialized. For instance, data which depend on the current application state like events, FieldInfo types will be lost after serializing/deserializing.
 			
@@ -402,7 +402,7 @@ Log.Main.Inform("test message");
 
     <div class='footer'>
         <script src='copyright.js'></script>
-        &nbsp;2006 - 2020&nbsp;&nbsp;<a href="javascript:window.location.href = '&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#101;&#114;&#103;&#101;&#121;&#46;&#115;&#116;&#111;&#121;&#97;&#110;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;'" target="_top">Sergey Stoyan</a>
+        &nbsp;2006 - 2021&nbsp;&nbsp;<a href="javascript:window.location.href = '&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#101;&#114;&#103;&#101;&#121;&#46;&#115;&#116;&#111;&#121;&#97;&#110;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;'" target="_top">Sergey Stoyan</a>
        
     </div>
 
