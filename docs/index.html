@@ -23,6 +23,12 @@
                 <li><a href="#log">logging</a></li>
                 <li><a href="#miscellaneous">miscellaneous routines</a></li>
             </ul>
+			
+			<p>It has been used on:
+<br> - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
+<br> - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
+
+<p>Presumably it will run on any Xamarin platform. Some concern about certain platform might be regarded to peculiarities of the file system while accessing/managing files.
 
             <h2><a name='licensing'>Licensing</a></h2>
 			
@@ -73,8 +79,6 @@ setLicense();
 <p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
         <p>
             <code>Cliver.Config</code> methods are thread-safe.
-        <p>
-            <code>Cliver.Config</code> has been used on Windows and Xamarin.MAC.
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
@@ -397,6 +401,16 @@ Settings.General.Save();
 
 
 
+            <h3><a name=''>Inheriting settings type</a></h3>
+:
+<pre>
+<code class="language-csharp">
+</code>
+</pre>
+
+
+
+
             <h1><a name='log'>Log</a></h1>
         <p>
             Log is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
@@ -408,8 +422,6 @@ Settings.General.Save();
                 <li>each thread can write its own log file;</li>
                 <li>auto-cleanup of old logs;</li>
             </ul>
-
-            <code>Cliver.Log</code> has been used on Windows and Xamarin.MAC.
 
 
 
