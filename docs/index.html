@@ -125,6 +125,18 @@ namespace App
 </pre>
 			<p>There can be any number of settings fields in your code.
                    Usually you will need only one settings field per <a href='#settings_class'>settings type</a> but there is no problem to declare any number fo fields of the same settings type.
+				   
+		
+        <p> Detection and initialization of settings fields and also optional configuration of <code>Cliver.Config</code> is done from your code:
+<pre>
+<code class="language-csharp">
+//optional configuration can be done at the very beginning. See the API and annotations for options.
+Cliver.Config.ExplicitlyTrackedAssemblies = new List<System.Reflection.Assembly> { Assembly.GetExecutingAssembly() };//optional
+
+//detect and initialize settings fields. 
+Cliver.Config.Reload();//!!!mandatory
+</code>
+</pre>			   
 									
 			<p>(!)Looking for settings fields in an application, <code>Cliver.Config</code> searches within the following assemblies by default:
 <br> - assembly that calls one of <code>Cliver.Config</code>'s initializing methods;
@@ -201,9 +213,8 @@ public class Settings
         <p> At the beginning of the application, add initializing:
 <pre>
 <code class="language-csharp">
-//optional configuration can be done at the very beginning. See the API and annotations for details.
-Cliver.Config.ExplicitlyTrackedAssemblies = new List<System.Reflection.Assembly> { Assembly.GetExecutingAssembly() };//optional example
-
+//optional configuration can be done at the very beginning. See the API and annotations for options.
+...
 //detect and initialize settings fields. 
 Cliver.Config.Reload();//!!!mandatory call before using settings 
 </code>
