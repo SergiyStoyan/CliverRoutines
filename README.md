@@ -2,7 +2,7 @@
 
 ## Overview
 A cross-platform C# lib providing generally used routines: 
-- settings engine which replaces standard Visual Studio application settings; 
+- application settings engine which replaces the Visual Studio application settings routine; 
 - logging with multi-threading and session support;
 - auxiliary routines;
 
@@ -20,30 +20,24 @@ The most concern would be peculiarities of the target file system because of wri
 - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
 
-## Serializing 
+## Application settings 
 Classes: Cliver.Config, Cliver.Settings 
 
 ### Description
-It is more powerful and flexible than the built-in .NET settings for desktop.
+It is easy to use aplication settings engine which is much more powerful and flexible than the Visual Studio's one.
 
 Features:
-- saving to disk and restoring from disk of values of class members that need it;
-- serialized types are flexibly defined in the application;
-- serialized types can inherit from another serialized types which may be abstract;
+- automatically serialazing/deserialazing values of class members which need it;
+- serializable types are tailored in the application according to needs;
 
 ### How to use:
-Define types that is to be serialized and make them subclasses of Cliver.Settings class. Anywhere you want declare public fields of these types. Add the following calls in the beginning of the app: 
+Define types that are to be serialized and make them subclasses of Cliver.Settings class. Anywhere you want declare public fields of these types. Add the following call in the beginning of the app: 
 
-(optionally) Cliver.Config.Initialize(); 
+Cliver.Config.Reload();
 
-(mandatory) Cliver.Config.Reload();
-
-That's all. Now the fields will be set to their previously serialized values if any, otherwise keep the values they are initialized with.
+That's all. Now the settings fields are set with previously serialized values if any.
 
 To serialize current value of a field, call Save() on it.
-
-Review my C# projects in github to see live examples.
-
 
 ## Logging 
 Classes: Cliver.Log
@@ -64,13 +58,14 @@ Add the following call in the beginning of the app:
 
 To write to log, call either Cliver.Log.Write() or Cliver.Log.Main.Write() or more specific methods.
 
-Review my C# projects in github to see live examples.
-
 ## Auxiliary routines 
 ### Description
 Anything handy that is needed in general development.
 
 ### How to use:
-Usually it is clear from their code. 
+See the code and annotations. 
+
+
+### [More details...](https://sergeystoyan.github.io/CliverRoutines/#1)
 
 Review my C# projects in github to see live examples.
