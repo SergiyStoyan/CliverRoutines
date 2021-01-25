@@ -44,15 +44,15 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 <code>Cliver.Config</code> is a replacement for Visual Studio standard applications settings module. It is very simple in use while much more versatile and powerful than the latter.
 
 <p><b>Idea explained:</b> 
-<br> - <code>Cliver.Config</code> detects <a href='#settings_field'>settings fields</a> that you declared in your code;
+<br> - <code>Cliver.Config</code> automatically detects <a href='#settings_field'>settings fields</a> that you declared in your code;
 <br> - facilitates initializing them with values stored on disk and serilizing them back;
 
 
-<p><a href='#settings_class'>Types</a> of <a href='#settings_field'>settings fields</a> you define by yourself thus achieving a great flexibility.
+<p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
         <p>
             <code>Cliver.Config</code> methods are thread-safe.
         <p>
-            <code>Cliver.Config</code> has been used on Windows and Xamarin.MAC and proved to be a cross-platform module.
+            <code>Cliver.Config</code> has been used on Windows and Xamarin.MAC.
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
@@ -383,9 +383,11 @@ Settings.General.Save();
             Also, Log module was developed with <a href="#logThread">multi-threaded</a> environment in mind meaning that:
             <ul>
                 <li>it is thread-safe;</li>
-                <li>each .NET thread can write its own log file;</li>
+                <li>each thread can write its own log file;</li>
+                <li>auto-cleanup of old logs;</li>
             </ul>
 
+            <code>Cliver.Log</code> has been used on Windows and Xamarin.MAC.
 
 
 
