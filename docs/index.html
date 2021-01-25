@@ -391,9 +391,11 @@ Settings.General.Save();
 
             <h2><a name='logSession'>Session</a></h2>
 
-            Each log always belong to a session. During its lifespan a process can open only one log session or open/close multiple sessions. 
+            Each log always belong to a session. During its lifespan a process can open multiple sessions simultaneously. 
             Session means that logs belonging to it either are wrote to a separate session folder or, if all logs are written to the same folder, contain session name in their names.
             Session folders can be used to store additional data like caches etc.
+			
+			<p>Session directory 
 
 <pre>
 <code class="language-csharp">{}</code>
