@@ -2,8 +2,8 @@
 
 ## Overview
 A cross-platform C# lib providing generally used routines: 
-- serializing which replaces standard .NET settings for desktop applications; 
-- logging with threading and session support;
+- settings engine which replaces standard Visual Studio application settings; 
+- logging with multi-threading and session support;
 - auxiliary routines;
 
 ### Framework
