@@ -215,7 +215,8 @@ public class Settings
 <code class="language-csharp">
 //optional configuration can be done at the very beginning. See the API and annotations for options.
 ...
-//detect and initialize settings fields. 
+
+//detect and initialize settings fields. It can be called many times where every call re-initializes the engine.
 Cliver.Config.Reload();//!!!mandatory call before using settings 
 </code>
 </pre>
@@ -376,7 +377,7 @@ Settings.General.Save();
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            Log is <a href="#logSession">session</a> oriented meaning that an application can write number of log sessions successively or simultaneously.
+            Log is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
             It is helpful when an application launches many independent threads implementing the same logic.
 
             Also, Log module was developed with <a href="#logThread">multi-threaded</a> environment in mind meaning that:
@@ -384,9 +385,6 @@ Settings.General.Save();
                 <li>it is thread-safe;</li>
                 <li>each .NET thread can write its own log file;</li>
             </ul>
-
-
-
 
 
 
@@ -402,43 +400,65 @@ Settings.General.Save();
 </pre>
 
 <p>
-            <h2><a name='example'>Example</a></h2>
-            dsvfd
-<pre>
-<code class="language-csharp">{}</code>
-</pre>
-<p>
 
 
 
 
 
     <h2><a name='logNamed'>Named logs</a></h2>
-    In session can be named logs open. Actually the default named log is considered the main log of a session. 
-    It suffices for trivial logging and can be referenced as simple as this:
+    A session can have named logs. 
+	<br>The default named log is considered the main log of a session.
+	
+    <p>Trivial logging when everything is written to the same file:
 <pre>
-    <code class="language-csharp">
-        //writting to the default named log of the default session
-        Log.Main.Inform("test message");
+    <code class="language-csharp"> 
+//writting to the default (Main) named log in the default (Head) session
+Log.Head.Main.Inform("test message");
+//the same but shorter
+Log.Head.Inform("test message");
+//the same but even more shorter
+Log.Inform("test message"); //trivial log usage
 
-        //writting to the default named log of the session "Test"
-        Log.Session testSession = Log.Session.Get("Test");
-        testSession.Warning("test message");
-
+try
+{
+	Log.Inform("test message");
+}
+catch (Exception e)
+{
+	Log.Error(e);
+}
     </code>
 </pre>
 
-    Logging to a named log of a session:
+ <p>   Logging to a named log in the default session:
 <pre>
     <code class="language-csharp">
+//writting to the log Test in the default session
+Log.Head["Test"].Inform("test message");
 
-        //writting to the log Test of the default session
-        Log.Head["Test"].Inform("test message");
+//writting to the log Error in the default session
+Log.Session.NamedWriter errorLog = Log.Head["Error"];
+try
+{
+	Log.Head["Test"].Inform("test message");
+}
+catch (Exception e)
+{
+	errorLog.Error2(e);
+}
+    </code>
+</pre>
 
-        //writting to the log Test of the session "Test"
-        Log.Session testSession = Log.Session.Get("Test");
-        testSession["Test"].Inform("test message");
+ <p>   Logging to a named log of an explicitly named session:
+<pre>
+    <code class="language-csharp">
+//writting to the session "Game1"
+Log.Session game1Session = Log.Session.Get("Game1");
+//to the main log
+game1Session.Inform("test message");
 
+//to the log named "Test"
+game1Session["Test"].Inform("test message");
     </code>
 </pre>
 
@@ -447,27 +467,66 @@ Settings.General.Save();
 
 
     <h2><a name='logThread'>Thread logs</a></h2>
-    Each .NET thread can write its own log file, like this:
+    A session can have thread logs. 
+    When using thread logs, each .NET thread automatically writes to its own log file.
+	
+	
 <pre>
 <code class="language-csharp">
-Log.Thread.Inform("test message");
+//writting to the thread log in the default session
+Log.Head.Thread.Inform("test message");
+//the same but shorter
+Log.Thread.Inform("test message"); //trivial thread log usage
+
+//writting to the thread log in the session "Game1"
+Log.Session game1Session = Log.Session.Get("Game1");
+try
+{
+	game1Session.Thread.Inform("test message");
+}
+catch (Exception e)
+{
+	game1Session.Thread.Error2(e);
+}
 </code>
 </pre>
 
-    Logging everything to one file done like this:
+
+
+
+            <h2><a name='example'>Usage</a></h2>
+			Reference <code>CliverRoutines</code> in your project.
+			
+		
+        <p> At the beginning of the application, add initializing:
 <pre>
 <code class="language-csharp">
-Log.Main.Inform("test message");
+//optional configuration can be done at the very beginning. See the API and annotations for options.
+...
+
+//initialize the log engine. It can be called many times where every call re-initializes the engine.
+Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER); //this call is not mandatory if you are ok with default settings. 
 </code>
 </pre>
 
 
+         <p>      Now the logger is ready to be used:
+<pre>
+<code class="language-csharp">
+Log.Inform("test message"); //trivial log usage
+</code>
+</pre>
+         <p><code>Cliver.Log</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
+		 
+  
 
 
 
 
-    <h1><a name='miscellaneous'>Miscellaneous routines</a></h1>
-<p>fdsf
+
+
+    <h1><a name='miscellaneous'>Miscellaneous</a></h1>
+<p><code>CliverRoutines</code> exposes a number of auxiliary routines. See the API and annotations for details.
 
 
 
