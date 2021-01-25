@@ -187,7 +187,7 @@ Cliver.Config.Reload();//!!!mandatory
 			
 			
 					
-			<p>Define a settings type according to your needs like this one:		
+			<p>Define a <a href='#settings_class'>settings type</a> according to your needs like this one:		
 <pre>
 <code class="language-csharp">
 public class GeneralSettings : Cliver.UserSettings //it will be serialized to the user data directory
@@ -199,7 +199,7 @@ public class GeneralSettings : Cliver.UserSettings //it will be serialized to th
 </pre>
 			
 			
-			<p>In some class, declare a field of the defined settings type:			
+			<p>In some class, declare a field of the defined <a href='#settings_class'>settings type</a>:			
 			<pre>
 <code class="language-csharp">
 public class Settings
@@ -238,6 +238,8 @@ Cliver.Config.Reset();
 connect(Settings.General.SmtpHost, Settings.General.SmtpPort);
 </code>
 </pre>
+         <p><code>Cliver.Config</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
+		 
             <h2><a name=''>Tips</a></h2>
 
             <h3><a name='restoring_predefined_collections'>(!)Predefining collections</a></h3>
@@ -374,8 +376,8 @@ Settings.General.Save();
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            Log is <a href="#logSession">session</a> oriented meaning that the application can write multiple log sessions successively or simultaneously.
-            It is helpful when the application launches many logincal subprocesses which are not depend on each other.
+            Log is <a href="#logSession">session</a> oriented meaning that an application can write number of log sessions successively or simultaneously.
+            It is helpful when an application launches many independent threads implementing the same logic.
 
             Also, Log module was developed with <a href="#logThread">multi-threaded</a> environment in mind meaning that:
             <ul>
@@ -391,9 +393,9 @@ Settings.General.Save();
 
             <h2><a name='logSession'>Session</a></h2>
 
-            Log always creates a session. During its lifespan a process can open only one log session or open/close multiple sessions. 
-            Session means that logs belonging to it are wrote to a separate session folder or contain session name in their names.
-            Session folder can be used to store additional data like caches etc.
+            Each log always belong to a session. During its lifespan a process can open only one log session or open/close multiple sessions. 
+            Session means that logs belonging to it either are wrote to a separate session folder or, if all logs are written to the same folder, contain session name in their names.
+            Session folders can be used to store additional data like caches etc.
 
 <pre>
 <code class="language-csharp">{}</code>
