@@ -66,6 +66,6 @@ Anything handy that is needed in general development.
 See the code and annotations. 
 
 
-### [More details...](https://sergeystoyan.github.io/CliverRoutines/#1)
+## [More details...](https://sergeystoyan.github.io/CliverRoutines/#1)
 
 Review my C# projects in github to see live examples.
