@@ -122,7 +122,7 @@ namespace Cliver
         /// </summary>
         public bool Reset(/*bool ignoreInitFile = false*/)
         {
-            if (!IsAttached())//while technically it is possible, it seems to contradict the idea of Settings if this method would be performed outside the Settings field.
+            if (!IsAttached())//while technically it is possible, it seems to contradict the idea of Settings if this method be performed outside the Settings field.
                 return false;
             __Info.SetObject(Create(__Info, true, true));
             return true;
@@ -138,7 +138,7 @@ namespace Cliver
         /// <param name="throwExceptionIfCouldNotLoadFromStorageFile"></param>
         public bool Reload(bool throwExceptionIfCouldNotLoadFromStorageFile = false)
         {
-            if (!IsAttached())//while technically it is possible, it seems to contradict the idea of Settings if this method would be performed outside the Settings field.
+            if (!IsAttached())//while technically it is possible, it seems to contradict the idea of Settings if this method be performed outside the Settings field.
                 return false;
             __Info.SetObject(Create(__Info, false, throwExceptionIfCouldNotLoadFromStorageFile));
             return true;
