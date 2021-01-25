@@ -123,19 +123,29 @@ namespace App
 }
 </code>
 </pre>
-			<BR><BR>There can be any number of settings fields in your code.
+			<p>There can be any number of settings fields in your code.
                    Usually you will need only one settings field per <a href='#settings_class'>settings type</a> but there is no problem to declare any number fo fields of the same settings type.
+									
+			<p>(!)Looking for settings fields in an application, <code>Cliver.Config</code> searches within the following assemblies by default:
+<br> - assembly that calls one of <code>Cliver.Config</code>'s initializing methods;
+<br> - assemblies that are referenced by the calling assembly;
+<br>The search scope is limited this way in order not to load more assemblies which is unavoidable while enumerating them.  
+<br>Otherwise, the assembly scope can by preset from code explicitly. See the API and annotations.
 			
 			
             <h2><a name='storage_file'>Storage file</a></h2>
-			Each <a href='#settings_field'>settings field</a> is serialized to its own file. A storage file path is defined as follows: file directory is defined by the <a href='#settings_class'>settings type</a> and file name is defined by the <a href='#settings_field'>settings field</a>'s full type path in the code.
+			Each <a href='#settings_field'>settings field</a> is serialized to its own file. 
+		
+		<p>A storage file path is defined as follows: file directory depends on the <a href='#settings_class'>settings type</a> and file name depends on the <a href='#settings_field'>settings field</a>'s full type path in the code.
+			
+			<br>This means that each <a href='#settings_field'>settings field</a> has its own storage file.
 			
 			
 <p>			<b>Example</b>
             <br> 
 			<table style="table-layout:fixed;">
 			<tr>
-			<td style="border:0;">Storage file:</td>
+			<td style="border:0;">storage file path:</td>
 			<td bgcolor="#ddf" style="margin:0;padding:0;border:0;border-collapse:collapse;">C:\Users\serge\AppData\Local\</td>
 			<td bgcolor="#def" style="margin:0;padding:0;border:0;border-collapse:collapse;">Company\App\config\</td>
 			<td bgcolor="#dff" style="margin:0;padding:0;border:0;border-collapse:collapse;">App.Settings.General.json</td>
@@ -148,18 +158,23 @@ namespace App
 			</tr>
 			</table>
 			
-			<p>Each <a href='#settings_class'>settings type</a> can have 2 storage files:
+			<p>Each <a href='#settings_class'>settings type</a> can have 2 files of the same format:
 			<br> - initial file which is optional and can be used for easily altering initial values defined in code or when settings data are too big to be kept in code. It is supplied in the same directory with the application itself;
-			<br> - saved file which is re-created by every call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>;
+			<br> - storage file which is re-created by every call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>;
 			
 			<p><code>Cliver.Config</code> tries to restore a <a href='#settings_field'>settings field</a> in the following order:
-			<br> - from one's saved file if exists;
+			<br> - from one's storage file if exists;
 			<br> - from one's initial file if exists;
 			<br> - from the values predefined in one's <a href='#settings_class'>settings type</a>;
+
+
+
 
             <h2><a name=''>Usage</a></h2>
 			Reference <code>CliverRoutines</code> in your project.
 			
+			
+					
 			<p>Define a settings type according to your needs like this one:		
 <pre>
 <code class="language-csharp">
@@ -172,7 +187,7 @@ public class GeneralSettings : Cliver.UserSettings //it will be serialized to th
 </pre>
 			
 			
-			<br>In some class, declare a field of the defined settings type:			
+			<p>In some class, declare a field of the defined settings type:			
 			<pre>
 <code class="language-csharp">
 public class Settings
@@ -181,14 +196,21 @@ public class Settings
 }
 </code>
 </pre>
-        <br> In the beginning of the application, add initializing:
+
+
+        <p> At the beginning of the application, add initializing:
 <pre>
 <code class="language-csharp">
-//call this in the very beginning of the application to initialize settings fields
-Cliver.Config.Reload();
+//optional configuration can be done at the very beginning. See the API and annotations for details.
+Cliver.Config.ExplicitlyTrackedAssemblies = new List<System.Reflection.Assembly> { Assembly.GetExecutingAssembly() };//optional example
+
+//detect and initialize settings fields. 
+Cliver.Config.Reload();//!!!mandatory call before using settings 
 </code>
 </pre>
-         <br>      Now settings are ready to be used:
+
+
+         <p>      Now settings are ready to be used:
 <pre>
 <code class="language-csharp">
 //modify
