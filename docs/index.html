@@ -646,6 +646,7 @@ game1Session["Test"].Inform("test message");
 
     <h2><a name='thread_log'>Thread logs</a></h2>
     A thread log is a log that belongs to only one .NET thread.
+	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or incremented for each new thread log.
 	
 	<p>In this example, each download thread writes its own log:
 <pre>
@@ -653,29 +654,27 @@ game1Session["Test"].Inform("test message");
 using Cliver;
 ...
 
-static void download(Log.Session logSesson, string uri)
+static void download(string uri)
 {
 	try
 	{
 		//each thread writes its own log
-		logSesson.Thread.Inform("test message");
+		Log.Thread.Inform("test message");
 	}
 	catch (Exception e)
 	{
-		logSesson.Thread.Error2(e);
+		Log.Thread.Error2(e);
 	}
 }
 
 static void Main(string[] args)
 {
-	//write to a thread log in the default (Head) session
+	//writting to a thread log in the default (Head) session
 	Log.Thread.Inform("test message"); //It is a shortcut for Log.Head.Thread.Inform()
 
-	//create session "Game1"
-	Log.Session game1LogSesson = Log.Session.Get("Game1");
 	//launch a number of parallel theads
-	ThreadRoutines.Start(() => { download(game1LogSesson, "http://file.com/1"); });
-	ThreadRoutines.Start(() => { download(game1LogSesson, "http://file.com/2"); });
+	ThreadRoutines.Start(() => { download("http://file.com/1"); });
+	ThreadRoutines.Start(() => { download("http://file.com/2"); });
 }
 </code>
 </pre>
