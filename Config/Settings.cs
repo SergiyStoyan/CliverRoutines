@@ -102,11 +102,11 @@ namespace Cliver
             }
         }
 
-        virtual public void Loaded() { }
+        virtual protected void Loaded() { }
 
-        virtual public void Saving() { }
+        virtual protected void Saving() { }
 
-        virtual public void Saved() { }
+        virtual protected void Saved() { }
 
         //void importValues(Settings s)!!!Declined because such copying may bring to a mess in the object's state (if any)
         //{
