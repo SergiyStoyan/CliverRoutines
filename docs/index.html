@@ -63,22 +63,22 @@ setLicense();
             <h2><a name='licensing'>Source code</a></h2>
             Open <a href='https://github.com/sergeystoyan/CliverRoutines' target='_blank'>repository</a>
         <p>
-            Do not download the latest code as is from a branch because it may be under development. Instead, go to releases and download the latest (pre-)release source code.
+            Do not download the code as is from a branch because it may be under development. Instead, go to releases and get the latest (pre-)release source code.
 
 
 
 
             <h1><a name='config'>Config</a></h1>
-<code>Cliver.Config</code> is a replacement for Visual Studio standard applications settings module. It is very simple in use while much more versatile and powerful than the latter.
+<code>Cliver.Config</code> is a cross-platform replacement for Visual Studio standard applications settings module. It is very simple in use while versatile and powerful.
 
-<p><b>Idea explained:</b> 
-<br> - <code>Cliver.Config</code> automatically detects <a href='#settings_field'>settings fields</a> that you declared in your code;
-<br> - facilitates initializing them with values stored on disk and serilizing them back;
+<p><b>Idea</b> 
+<br> - <code>Cliver.Config</code> automatically detects <a href='#settings_field'>settings fields</a> declared in your code;
+<br> - and facilitates their serialization/deserialization on disk;
 
 
 <p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
         <p>
-            <code>Cliver.Config</code> methods are thread-safe.
+            <code>Cliver.Config</code> is thread-safe.
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
@@ -105,7 +105,7 @@ So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter se
             <p><b>UserSettings and AppSettings</b>
 			<br>Usually you will not inherit <code>Cliver.Settings</code> directly but use one of its derivatives provided by <code>CliverRoutines</code>:
 <br> - <code>Cliver.UserSettings</code> which is serialized to the user-relevant app data directory; 
-<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writting to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
+<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writing to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
 
         <br>When you create a settings class inheriting <code>Cliver.Settings</code> directly, you need to define the serialization directory in it.
 			
@@ -114,20 +114,19 @@ So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter se
 <pre>
 <code class="language-csharp">
 //define a settings class which is serialized to the user data directory.
-//All the names are arbitrary.
 public class GeneralSettings : Cliver.UserSettings
 {   	
 	public List&lt;string&gt; Files; 	
 	public string Host = "";
 	public int Port = 123;
 	
-	public override void Loaded()
+	protected override void Loaded()
 	{
 		if(Files == null)
 			Files = new List<string>(); 
 	}
 	
-	public override void Saving()
+	protected override void Saving()
 	{
 		Files = Files.Distinct();
 	}
@@ -149,7 +148,6 @@ public class GeneralSettings : Cliver.UserSettings
 <pre>
 <code class="language-csharp">
 //create a field of GeneralSettings type anywhere in the code. 
-//All the names are arbitrary.
 namespace App
 {
 	public class Settings
@@ -231,25 +229,26 @@ Cliver.Config.Reload();//!!!mandatory
 //settings type
 public class GeneralSettings : Cliver.UserSettings //it is serialized to the user data directory
 {
-	public int ClientPort;
-	public List&lt;Server&gt; Servers = new List&lt;Server&gt;();
+	public int SmtpHost;
+	public int SmtpPort = 25;
+	public List&lt;Client&gt; Clients = new List&lt;Client&gt;();
 }
 
-public class Server
+public class Client
 {
-	public string Host = "";
-	public int Port = 255;
+	public string Name;
+	public string Email;
 }
 </code>
 </pre>
 			
 			
-			<p>Somewhere, declare a field or a property of the defined <a href='#settings_class'>settings type</a>:			
+			<p>Somewhere, declare a <a href='#settings_field'>settings field</a> of the defined <a href='#settings_class'>settings type</a>:			
 			<pre>
 <code class="language-csharp">
 public class Settings
 {
-	public static readonly GeneralSettings General;//readonly is optional
+	public static readonly GeneralSettings General;//readonly is optional. It can be a property.
 }
 </code>
 </pre>
@@ -271,8 +270,8 @@ Cliver.Config.Reload();//!!!mandatory call before using settings
 <pre>
 <code class="language-csharp">
 //modify
-Settings.General.ClientPort = 457;
-Settings.General.Servers.Add(new Server {Host = "server.com", Port = 345});
+Settings.General.SmtpHost = "smtp.server.com";
+Settings.General.Clients.Add(new Client {Name = "Tom", Email = "tom@company.com"});
 ...
 //save on disk
 Settings.General.Save();
@@ -282,7 +281,7 @@ Cliver.Config.Reload();
 Cliver.Config.Reset();
 ...
 //pass to a function
-notify(Settings.General.ClientPort, Settings.General.Servers);
+notify(Settings.General.SmtpHost, Settings.General.SmtpPort, Settings.General.Clients);
 </code>
 </pre>
          <p><code>Cliver.Config</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
@@ -473,7 +472,7 @@ connect(General.Password);
 
 
             <h3><a name=''>Passing to another process</a></h3>
-You can pass a settings field to another process. It should be done through serilization.
+You can pass a settings field to another process. It should be done through serialization.
 
 <p>In process 1:
 <pre>
@@ -516,45 +515,70 @@ Settings.General.Save();
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            Log is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
-            It is helpful when an application launches many independent threads implementing the same logic.
-
-            Also, Log module was developed with <a href="#logThread">multi-threaded</a> environment in mind meaning that:
-            <ul>
-                <li>it is thread-safe;</li>
-                <li>each thread can write its own log file;</li>
-                <li>auto-cleanup of old logs;</li>
-            </ul>
+            <code>Cliver.Log</code> is a cross-platform logger. 
+			<p>
+            It is thread-safe.
+			
+			<p><code>Cliver.Log</code> is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
+            It is helpful when an application performs multiple independent tasks.
+			
+			<p>
+            <code>Cliver.Log</code> supports <a href="#named_log">named</a> and <a href="#thread_log">thread</a> logs.
+			
+			<p>
+            It performs auto-cleanup of old logs.
+			
 
 
 
             <h2><a name='logSession'>Session</a></h2>
 
-            Each log belongs to a session. During its lifespan a process can open multiple sessions simultaneously. 
-            <br>Session implies that logs belonging to it either are wrote to a separate folder or, if all logs are written to the same folder, contain session name in their names.
-            Session folders can be used to store additional data like caches etc.
+            Each log belongs to a session. 
+			<p>Depending on configuration, each session can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
 			
-			<p>All sessions are created in the same work directory.
+            <p> Session folders can be used to store additional data like caches etc.
 			
-			<p>By default the work directory is defined in the order by which Log tries to write to:
+			<p> Multiple sessions can be open simultaneously.
+			
+	<p>There is the default session which has empty name and is referenced as <code>Head</code>.
+			
+
+
+
+			<p><b>Usage example</b>
+<br>
+<pre>
+<code class="language-csharp">
+using Cliver;
+...
+//create or get an existing session
+Log.Session game1Log = Log.Session.Get("Game1");
+...
+//write to the default log of the session
+game1Log.Write("message");
+...
+//close all the file handlers beloning to the session.
+game1Log.Close(true);//optional call to free memory
+</code>
+</pre>
+
+			<p><b>Work directory</b>
+<br>
+			All sessions are created in the same work directory.
+			
+			
+			<p>By default the work directory is defined in the order by which <code>Cliver.Log</code> tries to write to:
 			<br> - the folder where the application is located;
 			<br> - the user data folder;
 			<br> - the common data folder;
 			<br> - the desktop folder;
 			<br> - the temp folder;
 			
-			<p>The work directory definition can be customized while initializing. See the example:
-
+			<p>The work directory definition can be customized while initializing:
 <pre>
 <code class="language-csharp">
-//logs will be recorded to the user data folder
-Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);
-
-//create or get an existing session
-Log.Session game1Log = Log.Session.Get("Game1");
-game1Log.Write("message");
-//close all the file handlers.
-game1Log.Close(true);//optional call to free memory
+//optional initialization before using logs
+Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);//logs will be recorded to the user data folder
 </code>
 </pre>
 
@@ -562,14 +586,18 @@ game1Log.Close(true);//optional call to free memory
 
 
 
-    <h2><a name='logNamed'>Named logs</a></h2>
-    A session can have named logs. 
-	<br>The default named log is considered the main log of a session.
+    <h2><a name='named_log'>Named logs</a></h2>
+    A named log has name by which it can be called.
+	
+	<p>Each session has its default log which has empty name and is referenced as <code>Main</code>.
 	
     <p>Trivial logging when everything is written to the same file:
 <pre>
     <code class="language-csharp"> 
-//writting to the default (Main) named log in the default (Head) session
+using Cliver;
+...
+
+//writing to the default (Main) named log in the default (Head) session
 Log.Inform("test message"); //It is a shortcut for Log.Head.Main.Inform()
 
 try
@@ -586,14 +614,13 @@ catch (Exception e)
  <p>   Logging to a named log in the default session:
 <pre>
     <code class="language-csharp">
-//writting to the log "Test" in the default session
-Log.Head["Test"].Inform("test message");
-
-//writting to the log "Error" in the default session
+//writig to the log "Inform" in the default session
+Log.Session.NamedWriter informLog = Log.Head["Inform"];
+//writing to the log "Error" in the default session
 Log.Session.NamedWriter errorLog = Log.Head["Error"];
 try
 {
-	Log.Head["Test"].Inform("test message");
+	informLog.Inform("test message");
 }
 catch (Exception e)
 {
@@ -602,10 +629,10 @@ catch (Exception e)
     </code>
 </pre>
 
- <p>   Logging to a named log of an explicitly named session:
+ <p>   Logging to a named log of an explicitly created session:
 <pre>
     <code class="language-csharp">
-//writting to the session "Game1"
+//writing to the session "Game1"
 Log.Session game1Session = Log.Session.Get("Game1");
 //to the main log
 game1Session.Inform("test message");
@@ -619,36 +646,35 @@ game1Session["Test"].Inform("test message");
 
 
 
-    <h2><a name='logThread'>Thread logs</a></h2>
-    A session can have thread logs where each .NET thread automatically writes its own log file. 
-    Writting hen using thread logs, each .NET thread automatically writes to its own log file.
+    <h2><a name='thread_log'>Thread logs</a></h2>
+    A thread log is a log that belongs to only one .NET thread.
+	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or endlessly incremented for each new thread log.
 	
-	
+	<p>In this example, each download thread writes its own log:
 <pre>
 <code class="language-csharp">
-static void download(Log.Session log, string uri)
+using Cliver;
+...
+
+static void download(string uri)
 {
 	try
 	{
-		//write to a thread log in the session
-		log.Thread.Inform("test message");
+		//each download thread writes its own log in the default (Head) session
+		Log.Thread.Inform("test message"); //It is a shortcut for Log.Head.Thread.Inform()
 	}
 	catch (Exception e)
 	{
-		log.Thread.Error2(e);
+		Log.Thread.Error2(e);
 	}
 }
 
 static void Main(string[] args)
 {
-	//write to a thread log in the default session
-	Log.Thread.Inform("test message"); //It is a shortcut for Log.Head.Thread.Inform()
-
-	//create session "Game1"
-	Log.Session game1Log = Log.Session.Get("Game1");
-	//launch number of parallel theads
-	Cliver.ThreadRoutines.StartTry(() => { download(game1Log, "http://file.com/1"); });
-	Cliver.ThreadRoutines.StartTry(() => { download(game1Log, "http://file.com/2"); });
+	//launch a number of parallel theads
+	ThreadRoutines.Start(() => { download("http://file.com/1"); });
+	...
+	ThreadRoutines.Start(() => { download("http://file.com/N"); });
 }
 </code>
 </pre>
@@ -663,10 +689,13 @@ static void Main(string[] args)
         <p> At the beginning of the application, add initializing:
 <pre>
 <code class="language-csharp">
+using Cliver;
+...
+
 //optional configuration can be done at the very beginning. See the API and annotations for options.
 ...
 
-//initialize the log engine. It can be called many times where every call re-initializes the engine.
+//optional initialization. It can be called many times where every call close all the logs and re-initializes the engine.
 Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER); //this call is not mandatory if you are ok with default settings. 
 </code>
 </pre>
