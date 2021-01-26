@@ -69,16 +69,16 @@ setLicense();
 
 
             <h1><a name='config'>Config</a></h1>
-<code>Cliver.Config</code> is a replacement for Visual Studio standard applications settings module. It is very simple in use while much more versatile and powerful than the latter.
+<code>Cliver.Config</code> is a cross-platform replacement for Visual Studio standard applications settings module. It is very simple in use while versatile and powerful.
 
-<p><b>Idea explained:</b> 
-<br> - <code>Cliver.Config</code> automatically detects <a href='#settings_field'>settings fields</a> that you declared in your code;
-<br> - facilitates initializing them with values stored on disk and serilizing them back;
+<p><b>Idea</b> 
+<br> - <code>Cliver.Config</code> automatically detects <a href='#settings_field'>settings fields</a> declared in your code;
+<br> - and facilitates their serialization/deserialization on disk;
 
 
 <p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
         <p>
-            <code>Cliver.Config</code> methods are thread-safe.
+            <code>Cliver.Config</code> is thread-safe.
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
@@ -516,32 +516,44 @@ Settings.General.Save();
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            Log is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
-            It is helpful when an application launches many independent threads implementing the same logic.
-
-            Also, Log module was developed with <a href="#logThread">multi-threaded</a> environment in mind meaning that:
-            <ul>
-                <li>it is thread-safe;</li>
-                <li>each thread can write its own log file;</li>
-                <li>auto-cleanup of old logs;</li>
-            </ul>
+            <code>Cliver.Log</code> is a cross-platform logger. 
+			<p>
+            It is thread-safe.
+			
+			<p><code>Cliver.Log</code> is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
+            It is helpful when an application performs multiple independent tasks.
+			
+			<p>
+            <code>Cliver.Log</code> supports <a href="#named_log">named</a> and <a href="#thread_log">thread</a> logs.
+			
+			<p>
+            It performs auto-cleanup of old logs.
+			
 
 
 
             <h2><a name='logSession'>Session</a></h2>
 
-            Each log belongs to a session. During its lifespan a process can open multiple sessions simultaneously. 
-            <br>Session implies that logs belonging to it either are wrote to a separate folder or, if all logs are written to the same folder, contain session name in their names.
-            Session folders can be used to store additional data like caches etc.
+            Each log belongs to a session. Depending on <code>Cliver.Log</code> configuration, each session can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
+            <br> Session folders can be used to store additional data like caches etc.
 			
+			<p> An application can open multiple sessions simultaneously.
+			
+	<p>The default session is empty-name and is referenced as <code>Head</code>.
+			
+
+
+
 			<p><b>Usage example</b>
 <br>
 <pre>
 <code class="language-csharp">
+using Cliver;
+...
 //create or get an existing session
 Log.Session game1Log = Log.Session.Get("Game1");
 ...
-//write to the session
+//write to the default log of the session
 game1Log.Write("message");
 ...
 //close all the file handlers beloning to the session.
@@ -554,7 +566,7 @@ game1Log.Close(true);//optional call to free memory
 			All sessions are created in the same work directory.
 			
 			
-			<p>By default the work directory is defined in the order by which Log tries to write to:
+			<p>By default the work directory is defined in the order by which <code>Cliver.Log</code> tries to write to:
 			<br> - the folder where the application is located;
 			<br> - the user data folder;
 			<br> - the common data folder;
@@ -564,7 +576,7 @@ game1Log.Close(true);//optional call to free memory
 			<p>The work directory definition can be customized while initializing:
 <pre>
 <code class="language-csharp">
-//optional initialization of Log before using it
+//optional initialization before using logs
 Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);//logs will be recorded to the user data folder
 </code>
 </pre>
@@ -573,13 +585,16 @@ Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.C
 
 
 
-    <h2><a name='logNamed'>Named logs</a></h2>
-    A session can have named logs. 
-	<br>The default named log is considered the main log of a session.
+    <h2><a name='named_log'>Named logs</a></h2>
+    A named log has name by which it can be called. 
+	<p>The default log of a session is an empty-name log which is referenced as <code>Main</code>.
 	
     <p>Trivial logging when everything is written to the same file:
 <pre>
     <code class="language-csharp"> 
+using Cliver;
+...
+
 //writing to the default (Main) named log in the default (Head) session
 Log.Inform("test message"); //It is a shortcut for Log.Head.Main.Inform()
 
@@ -629,36 +644,38 @@ game1Session["Test"].Inform("test message");
 
 
 
-    <h2><a name='logThread'>Thread logs</a></h2>
-    A session can have thread logs where each .NET thread automatically writes its own log file. 
-    Writing hen using thread logs, each .NET thread automatically writes to its own log file.
+    <h2><a name='thread_log'>Thread logs</a></h2>
+    A thread log is a log that belongs to only one .NET thread.
 	
-	
+	<p>In this example, each download thread writes its own log:
 <pre>
 <code class="language-csharp">
-static void download(Log.Session log, string uri)
+using Cliver;
+...
+
+static void download(Log.Session logSesson, string uri)
 {
 	try
 	{
 		//each thread writes its own log
-		log.Thread.Inform("test message");
+		logSesson.Thread.Inform("test message");
 	}
 	catch (Exception e)
 	{
-		log.Thread.Error2(e);
+		logSesson.Thread.Error2(e);
 	}
 }
 
 static void Main(string[] args)
 {
-	//write to a thread log in the default session
+	//write to a thread log in the default (Head) session
 	Log.Thread.Inform("test message"); //It is a shortcut for Log.Head.Thread.Inform()
 
 	//create session "Game1"
-	Log.Session game1Log = Log.Session.Get("Game1");
+	Log.Session game1LogSesson = Log.Session.Get("Game1");
 	//launch a number of parallel theads
-	Cliver.ThreadRoutines.Start(() => { download(game1Log, "http://file.com/1"); });
-	Cliver.ThreadRoutines.Start(() => { download(game1Log, "http://file.com/2"); });
+	ThreadRoutines.Start(() => { download(game1LogSesson, "http://file.com/1"); });
+	ThreadRoutines.Start(() => { download(game1LogSesson, "http://file.com/2"); });
 }
 </code>
 </pre>
@@ -673,10 +690,13 @@ static void Main(string[] args)
         <p> At the beginning of the application, add initializing:
 <pre>
 <code class="language-csharp">
+using Cliver;
+...
+
 //optional configuration can be done at the very beginning. See the API and annotations for options.
 ...
 
-//initialize the log engine. It can be called many times where every call re-initializes the engine.
+//optional initialization. It can be called many times where every call close all the logs and re-initializes the engine.
 Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER); //this call is not mandatory if you are ok with default settings. 
 </code>
 </pre>
