@@ -84,19 +84,26 @@ setLicense();
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
 			<br>Generally, you can consider your settings class not simply a collection of serializable properties but rather a fully functional class with added serializing/deserializing functionality. 
 			
-<p>Fields of a settings class must be <code>public</code> and <code>non-static</code> to be processed as serializable. 
-			<p>Serialization/deserialization is done by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.
+<p>(!)Fields of a settings class must be <code>public</code> and <code>non-static</code> to be considered serializable by <code>Cliver.Config</code>. 
+
+			<p>There can be any number of settings types defined in your code.
+			
+
+<p><b>Newtonsoft.Json</b>
+			<br>Serialization/deserialization is done by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.
 So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter serialization behaviour of certain fields. To do so, you have to reference <code>Newtonsoft.Json</code> in your project. (To avoid compilation problems, make sure that it is the same version that is referenced by <code>CliverRoutines</code>.) For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
 			
-<p>While a settings class can implement any fields and methods without restrictions, remember nevertheless that there are restrictions for what and how can be serialized. For instance, data which depend on the current application state like events, FieldInfo types will be lost after serializing/deserializing.
+<p>(!)While a settings class can implement any logic and members, remember that nevertheless there are restrictions for what and how can be serialized. For instance, data which depend on the current application state like <code>events, FieldInfo</code> types will be lost through serialization.
 			
 			
-<p><code>Cliver.Settings</code> exposes some members which allow enhancing functionality:
+            <p><b>API</b>
+<br><code>Cliver.Settings</code> exposes some members that allow enhancing functionality:
 <br> - property <code>__Info</code> which links together <a href='#settings_field'>settings field</a> and <a href='#settings_class'>settings type</a>;
 <br> - auxiliary methods some of which can be redefined in your settings class if needed;
 <br>See API and annotations for more info.
 
-			<p>Usually you will not inherit <code>Cliver.Settings</code> directly but use one of its derivatives provided by <code>CliverRoutines</code>:
+            <p><b>UserSettings and AppSettings</b>
+			<br>Usually you will not inherit <code>Cliver.Settings</code> directly but use one of its derivatives provided by <code>CliverRoutines</code>:
 <br> - <code>Cliver.UserSettings</code> which is serialized to the user-relevant app data directory; 
 <br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writting to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
 
@@ -110,9 +117,9 @@ So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter se
 //All the names are arbitrary.
 public class GeneralSettings : Cliver.UserSettings
 {   	
-	public List<string> Files; 	
-	public string SmtpHost = "";
-	public int SmtpPort = 25;
+	public List&lt;string&gt; Files; 	
+	public string Host = "";
+	public int Port = 123;
 	
 	public override void Loaded()
 	{
@@ -128,13 +135,17 @@ public class GeneralSettings : Cliver.UserSettings
 </code>
 </pre>
 
-			<p>There can be any number of settings types defined in your code.
 			
 			
             <h2><a name='settings_field'>Settings field</a></h2>
-			Settings field is a <code>static public</code> field or property of <a href='#settings_class'>settings type</a> in any class of your app. Such fields are automatically detected and serialized/deserialized by <code>Cliver.Config</code>.
+			Settings field is a field or property of <a href='#settings_class'>settings type</a> in any class of your app. 
+			<p>(!)A settings field must be <code>static public</code> to be processed by <code>Cliver.Config</code>.
+			<br>Such fields are automatically detected and serialized/deserialized by <code>Cliver.Config</code>.
 			
-<br><br>			<b>Example</b>
+			<p>There can be any number of settings fields in your code.
+                   Usually you will need only one settings field per <a href='#settings_class'>settings type</a> but there is no problem to declare any number fo fields of the same settings type.
+				   
+<p>			<b>Example</b>
 <pre>
 <code class="language-csharp">
 //create a field of GeneralSettings type anywhere in the code. 
@@ -149,37 +160,36 @@ namespace App
 }
 </code>
 </pre>
-			<p>There can be any number of settings fields in your code.
-                   Usually you will need only one settings field per <a href='#settings_class'>settings type</a> but there is no problem to declare any number fo fields of the same settings type.
-				   
 		
-        <p> Detection and initialization of settings fields and also optional configuration of <code>Cliver.Config</code> is done from your code:
+<p>			<b>Initialization</b>
+        <br> Detection and initialization of settings fields is triggered from your code. It can be preceded by optional configuration of <code>Cliver.Config</code> (see the API and annotations).
 <pre>
 <code class="language-csharp">
-//optional configuration can be done at the very beginning. See the API and annotations for options.
+//configure. It must be done before initializing the settings.
 Cliver.Config.ExplicitlyTrackedAssemblies = new List<System.Reflection.Assembly> { Assembly.GetExecutingAssembly() };//optional
 
 //detect and initialize settings fields. 
 Cliver.Config.Reload();//!!!mandatory
 </code>
 </pre>			   
-									
-			<p>(!)Looking for settings fields in an application, <code>Cliver.Config</code> searches within the following assemblies by default:
+				
+<p>			<b>Assembly scope</b>
+        <br>(!)Looking for settings fields in an application, <code>Cliver.Config</code> searches within the following assemblies by default:
 <br> - assembly that calls one of <code>Cliver.Config</code>'s initializing methods;
 <br> - assemblies that are referenced by the calling assembly;
 <br>The search scope is limited this way in order not to load more assemblies which is unavoidable while enumerating them.  
-<br>Otherwise, the assembly scope can by preset from code explicitly. See the API and annotations.
+<br>Otherwise, the assembly scope can by assigned from code explicitly (see the API and annotations).
 			
 			
             <h2><a name='storage_file'>Storage file</a></h2>
 			Each <a href='#settings_field'>settings field</a> is serialized to its own file. 
 		
-		<p>A storage file path is defined as follows: file directory depends on the <a href='#settings_class'>settings type</a> and file name depends on the <a href='#settings_field'>settings field</a>'s full type path in the code.
+<p>			<b>Storage file path</b>
+            <br>A storage file path is defined as follows: file directory depends on the <a href='#settings_class'>settings type</a> and file name depends on the <a href='#settings_field'>settings field</a>'s full type path in the code.
 			
 			<br>This means that each <a href='#settings_field'>settings field</a> has its own storage file.
-			
-			
-<p>			<b>Example</b>
+						
+<p>			See the example:
             <br> 
 			<table style="table-layout:fixed;">
 			<tr>
@@ -196,11 +206,13 @@ Cliver.Config.Reload();//!!!mandatory
 			</tr>
 			</table>
 			
-			<p>Each <a href='#settings_class'>settings type</a> can have 2 files of the same format:
+<p>			<b>Initial and storage files</b>
+            <br>Each <a href='#settings_class'>settings type</a> can have 2 files of the same format:
 			<br> - initial file which is optional and can be used for easily altering initial values defined in code or when settings data are too big to be kept in code. It is supplied in the same directory with the application itself;
 			<br> - storage file which is re-created by every call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>;
 			
-			<p><code>Cliver.Config</code> tries to restore a <a href='#settings_field'>settings field</a> in the following order:
+<p>			<b>Restoring settings order</b>
+            <br><code>Cliver.Config</code> tries to restore a <a href='#settings_field'>settings field</a> in the following order:
 			<br> - from one's storage file if exists;
 			<br> - from one's initial file if exists;
 			<br> - from the values predefined in one's <a href='#settings_class'>settings type</a>;
@@ -216,10 +228,11 @@ Cliver.Config.Reload();//!!!mandatory
 			<p>Define a <a href='#settings_class'>settings type</a> according to your needs like this one:		
 <pre>
 <code class="language-csharp">
-public class GeneralSettings : Cliver.UserSettings //it will be serialized to the user data directory
+//settings type
+public class GeneralSettings : Cliver.UserSettings //it is serialized to the user data directory
 {
 	public int ClientPort;
-	public List<Server> Servers = new List<Server>();
+	public List&lt;Server&gt; Servers = new List&lt;Server&gt;();
 }
 
 public class Server
@@ -231,7 +244,7 @@ public class Server
 </pre>
 			
 			
-			<p>In some class, declare a field of the defined <a href='#settings_class'>settings type</a>:			
+			<p>Somewhere, declare a field or a property of the defined <a href='#settings_class'>settings type</a>:			
 			<pre>
 <code class="language-csharp">
 public class Settings
@@ -245,10 +258,10 @@ public class Settings
         <p> At the beginning of the application, add initializing:
 <pre>
 <code class="language-csharp">
-//optional configuration can be done at the very beginning. See the API and annotations for options.
+//optional configuration must be done before initializing settings. See the API and annotations for options.
 ...
 
-//detect and initialize settings fields. It can be called many times where every call re-initializes the engine.
+//detect and initialize settings fields. It can be called many times where every call re-initializes settings.
 Cliver.Config.Reload();//!!!mandatory call before using settings 
 </code>
 </pre>
@@ -260,14 +273,14 @@ Cliver.Config.Reload();//!!!mandatory call before using settings
 //modify
 Settings.General.ClientPort = 457;
 Settings.General.Servers.Add(new Server {Host = "server.com", Port = 345});
-
+...
 //save on disk
 Settings.General.Save();
 //or, restore the previous values instead of saving the new ones
 Cliver.Config.Reload();
 //or, reset to the initial values
 Cliver.Config.Reset();
-
+...
 //pass to a function
 notify(Settings.General.ClientPort, Settings.General.Servers);
 </code>
@@ -287,7 +300,7 @@ public class GeneralSettings : Cliver.UserSettings
 {   	
 	//avoid doubling the collection's elements
 	[JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
-	public List<string> Files = new List<string>("apple", "pear", "banana"); 
+	public List&lt;string&gt; Files = new List&lt;string&gt;("apple", "pear", "banana"); 
 }
 </code>
 </pre>
@@ -325,7 +338,7 @@ GeneralSettings general2 = Settings.General.CreateClone();
 //modify
 general2.ClientPort = 123;
 
-if(userClickedOk)
+if(userOk())
 {
 	Settings.General = general2;
 	Settings.General.Save();
