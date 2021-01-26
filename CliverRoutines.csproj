@@ -39,7 +39,7 @@
     <None Remove="CliverRoutinesExample\**" />
     <None Remove="CliverRoutinesTests\**" />
     <None Remove="Example\**" />
-    <None Include="..\..\CliverRoutines\LICENSE">
+    <None Include="LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
