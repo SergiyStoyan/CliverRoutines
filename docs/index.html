@@ -340,12 +340,14 @@ if(userClickedOk)
 
             <h3><a name=''>Polymorphism</a></h3>
 As <a href='#settings_class'>settings type</a> is a usual C# class it supports polymorphism. That's, you can build many <a href='#settings_class'>settings types</a> inheriting the same parent <a href='#settings_class'>settings type</a> and easily switch between them depending on application logic. See the example.
+
+<p>Define a base <a href='#settings_class'>settings type</a> and its derivatives:
 <pre>
 <code class="language-csharp">
 //base settings class which you will reference in your code
 abstract public class ScopeSettings : Cliver.UserSettings
 {
-	virtual public string HelpUri { get; set; }
+	virtual public string NotificationUri { get; set; }
 
 	public static ScopeSettings Scope { get; internal set; }//(!)it is ignored by Cliver.Config because ScopeSettings is abstract class
 }
@@ -353,7 +355,7 @@ abstract public class ScopeSettings : Cliver.UserSettings
 //derivative1 implementing certain logic
 public class Scope1Settings : ScopeSettings
 {
-	override public string HelpUri { get; set; } = "http://www.help.com/help1.html";
+	override public string NotificationUri { get; set; } = "https://nt.abc.com/api1";
 
 	public static Scope1Settings This;//a settings field can be nested in its own settings type
 }
@@ -361,7 +363,7 @@ public class Scope1Settings : ScopeSettings
 //derivative2 implementing certain logic
 public class Scope2Settings : ScopeSettings
 {
-	override public string HelpUri { get; set; } = "http://www.help.com/help2.html";
+	override public string NotificationUri { get; set; } = "https://nt.abc.com/api2";
 
 	public static Scope2Settings This;
 }
@@ -376,8 +378,8 @@ Config.Reload();
 ScopeSettings.Scope = Scope1Settings.This;
 
 ...
-//independing on the chosen scope, in all the rest code you use only ScopeSettings.Scope
-Process.Start(ScopeSettings.Scope.HelpUri);
+//independing on actual scope, you use only ScopeSettings.Scope in all the code
+send(ScopeSettings.Scope.NotificationUri, "message");
 </code>
 </pre>
 
