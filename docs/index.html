@@ -231,14 +231,15 @@ Cliver.Config.Reload();//!!!mandatory
 //settings type
 public class GeneralSettings : Cliver.UserSettings //it is serialized to the user data directory
 {
-	public int ClientPort;
-	public List&lt;Server&gt; Servers = new List&lt;Server&gt;();
+	public int SmtpHost;
+	public int SmtpPort = 25;
+	public List&lt;Client&gt; Clients = new List&lt;Client&gt;();
 }
 
-public class Server
+public class Client
 {
-	public string Host = "";
-	public int Port = 255;
+	public string Name;
+	public string Email;
 }
 </code>
 </pre>
@@ -271,8 +272,8 @@ Cliver.Config.Reload();//!!!mandatory call before using settings
 <pre>
 <code class="language-csharp">
 //modify
-Settings.General.ClientPort = 457;
-Settings.General.Servers.Add(new Server {Host = "server.com", Port = 345});
+Settings.General.SmtpHost = "smtp.server.com";
+Settings.General.Clients.Add(new Client {Name = "Tom", Email = "tom@company.com"});
 ...
 //save on disk
 Settings.General.Save();
@@ -282,7 +283,7 @@ Cliver.Config.Reload();
 Cliver.Config.Reset();
 ...
 //pass to a function
-notify(Settings.General.ClientPort, Settings.General.Servers);
+notify(Settings.General.SmtpHost, Settings.General.SmtpPort, Settings.General.Clients);
 </code>
 </pre>
          <p><code>Cliver.Config</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
@@ -649,7 +650,7 @@ game1Session["Test"].Inform("test message");
 
     <h2><a name='thread_log'>Thread logs</a></h2>
     A thread log is a log that belongs to only one .NET thread.
-	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or incremented for each new thread log.
+	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or endlessly incremented for each new thread log.
 	
 	<p>In this example, each download thread writes its own log:
 <pre>
@@ -662,7 +663,7 @@ static void download(string uri)
 	try
 	{
 		//each download thread writes its own log in the default (Head) session
-		Log.Thread.Inform("test message");
+		Log.Thread.Inform("test message"); //It is a shortcut for Log.Head.Thread.Inform()
 	}
 	catch (Exception e)
 	{
@@ -672,9 +673,6 @@ static void download(string uri)
 
 static void Main(string[] args)
 {
-	//writting to a thread log in the default (Head) session
-	Log.Thread.Inform("test message"); //It is a shortcut for Log.Head.Thread.Inform()
-
 	//launch a number of parallel theads
 	ThreadRoutines.Start(() => { download("http://file.com/1"); });
 	...
