@@ -347,7 +347,7 @@ As <a href='#settings_class'>settings type</a> is a usual C# class it supports p
 //base settings class which you will reference in your code
 abstract public class ScopeSettings : Cliver.UserSettings
 {
-	virtual public string NotificationUri { get; set; }
+	virtual public string HelpUri { get; set; }
 
 	public static ScopeSettings Scope { get; internal set; }//(!)it is ignored by Cliver.Config because ScopeSettings is abstract class
 }
@@ -355,7 +355,7 @@ abstract public class ScopeSettings : Cliver.UserSettings
 //derivative1 implementing certain logic
 public class Scope1Settings : ScopeSettings
 {
-	override public string NotificationUri { get; set; } = "https://nt.abc.com/api1";
+	override public string HelpUri { get; set; } = "http://www.help.com/help1.html";
 
 	public static Scope1Settings This;//a settings field can be nested in its own settings type
 }
@@ -363,7 +363,7 @@ public class Scope1Settings : ScopeSettings
 //derivative2 implementing certain logic
 public class Scope2Settings : ScopeSettings
 {
-	override public string NotificationUri { get; set; } = "https://nt.abc.com/api2";
+	override public string HelpUri { get; set; } = "http://www.help.com/help2.html";
 
 	public static Scope2Settings This;
 }
@@ -378,8 +378,11 @@ Config.Reload();
 ScopeSettings.Scope = Scope1Settings.This;
 
 ...
-//independing on actual scope, you use only ScopeSettings.Scope in all the code
-send(ScopeSettings.Scope.NotificationUri, "message");
+//independing on the chosen scope, you use only ScopeSettings.Scope in all the code
+Process.Start(ScopeSettings.Scope.HelpUri);
+...
+ScopeSettings.Scope.HelpUri = "http://www.help.com/help3.html"; 
+ScopeSettings.Scope.Save();
 </code>
 </pre>
 
@@ -394,31 +397,32 @@ send(ScopeSettings.Scope.NotificationUri, "message");
 <code class="language-csharp">
 public class GeneralSettings : Cliver.Win.UserSettings
 {   	            
-	public string _EncryptedSmtpPassword = null;
+	//password will be stored on disk as an ecrypted string
+	public string _EncryptedPassword = null;
 	
 	//it is internal so not to be serialized; otheriwse if public, use attribute [Newtonsoft.Json.JsonIgnore]
-	internal string SmtpPassword
+	internal string Password
 	{
 		get
 		{
-			if (string.IsNullOrEmpty(_EncryptedSmtpPassword))
+			if (string.IsNullOrEmpty(_EncryptedPassword))
 				return null;
 			try
 			{
-				return crypto.Decrypt(_EncryptedSmtpPassword);
+				return crypto.Decrypt(_EncryptedPassword);
 			}
-			catch
+			catch(Exception e)
 			{
-				Cliver.Log.Error("Could not decrypt the password.");
+				Cliver.Log.Error("Could not decrypt password.", e);
 				return null;
 			}
 		}
 		set
 		{
 			if (string.IsNullOrEmpty(value))
-				_EncryptedSmtpPassword = null;
+				_EncryptedPassword = null;
 			else
-				_EncryptedSmtpPassword = crypto.Encrypt(value);
+				_EncryptedPassword = crypto.Encrypt(value);
 		}
 	}
 	//on Widnows
@@ -431,9 +435,17 @@ public class Settings
 {
 	public static readonly GeneralSettings General;
 }
+</code>
+</pre>
 
-//...now, use it anywhere in the code:
-connect(General.SmtpPassword);
+<p>Now, use it anywhere in the code:
+<pre>
+<code class="language-csharp">
+Settings.General.Password = password;
+Settings.General.Save();
+
+...
+connect(General.Password);
 </code>
 </pre>
 
@@ -443,24 +455,35 @@ connect(General.SmtpPassword);
 
 
 
-
             <h3><a name=''>Passing to another process</a></h3>
-You can pass a settings field to another process. It should be done through serilization:
+You can pass a settings field to another process. It should be done through serilization.
+
+<p>In process 1:
 <pre>
 <code class="language-csharp">
 string generalStr = Cliver.Serialization.Json.Serialize(Settings.General);
 
-//pass the string to another process:
-//****** IN PROCESS 2 *********************************************************
+//pass generalStr to process 2...
+</code>
+</pre>
+
+<p>In process 2:
+<pre>
+<code class="language-csharp">
 //restore
 GeneralSettings general = Cliver.Serialization.Json.Deserialize(generalStr);
 //modify
 general.Files.Add("c:\\other.txt");
 //serialize
 generalStr = Cliver.Serialization.Json.Serialize(general);
-//return to the first process...
-//****** OUT PROCESS 2 ********************************************************
 
+//pass generalStr back to process 1...
+</code>
+</pre>
+
+<p>In process 1:
+<pre>
+<code class="language-csharp">
 //accept modifications
 GeneralSettings general2 = Cliver.Serialization.Json.Deserialize(generalStr);
 //!!!do not forget to restore __Info as it is distorted by serialization
@@ -490,16 +513,23 @@ Settings.General.Save();
 
             <h2><a name='logSession'>Session</a></h2>
 
-            Each log always belong to a session. During its lifespan a process can open multiple sessions simultaneously. 
-            Session means that logs belonging to it either are wrote to a separate session folder or, if all logs are written to the same folder, contain session name in their names.
+            Each log belongs to a session. During its lifespan a process can open multiple sessions simultaneously. 
+            <br>Session implies that logs belonging to it either are wrote to a separate folder or, if all logs are written to the same folder, contain session name in their names.
             Session folders can be used to store additional data like caches etc.
 			
-			<p>Session directory 
+			<p>All sessions are created in the same work directory. 
+			<br>By default it is defined in the order by which Log tries to write to:
+			<br> - the folder where the application is located;
+			<br> - the user data folder;
+			<br> - the common data folder;
+			<br> - the desktop folder;
+			<br> - the temp folder;
+			The work directory can be customized when initializing Log like in the expample:
 
 <pre>
 <code class="language-csharp">
-//creating session "Game1"
-Log.Session game1Session = Log.Session.Get("Game1");
+//logs will be recorded to the user data folder
+Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);
 </code>
 </pre>
 
