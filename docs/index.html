@@ -657,8 +657,8 @@ static void Main(string[] args)
 	//create session "Game1"
 	Log.Session game1Log = Log.Session.Get("Game1");
 	//launch a number of parallel theads
-	Cliver.ThreadRoutines.StartTry(() => { download(game1Log, "http://file.com/1"); });
-	Cliver.ThreadRoutines.StartTry(() => { download(game1Log, "http://file.com/2"); });
+	Cliver.ThreadRoutines.Start(() => { download(game1Log, "http://file.com/1"); });
+	Cliver.ThreadRoutines.Start(() => { download(game1Log, "http://file.com/2"); });
 }
 </code>
 </pre>
