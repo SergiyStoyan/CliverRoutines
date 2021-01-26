@@ -114,20 +114,19 @@ So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter se
 <pre>
 <code class="language-csharp">
 //define a settings class which is serialized to the user data directory.
-//All the names are arbitrary.
 public class GeneralSettings : Cliver.UserSettings
 {   	
 	public List&lt;string&gt; Files; 	
 	public string Host = "";
 	public int Port = 123;
 	
-	public override void Loaded()
+	protected override void Loaded()
 	{
 		if(Files == null)
 			Files = new List<string>(); 
 	}
 	
-	public override void Saving()
+	protected override void Saving()
 	{
 		Files = Files.Distinct();
 	}
@@ -149,7 +148,6 @@ public class GeneralSettings : Cliver.UserSettings
 <pre>
 <code class="language-csharp">
 //create a field of GeneralSettings type anywhere in the code. 
-//All the names are arbitrary.
 namespace App
 {
 	public class Settings
@@ -245,12 +243,12 @@ public class Client
 </pre>
 			
 			
-			<p>Somewhere, declare a field or a property of the defined <a href='#settings_class'>settings type</a>:			
+			<p>Somewhere, declare a <a href='#settings_field'>settings field</a> of the defined <a href='#settings_class'>settings type</a>:			
 			<pre>
 <code class="language-csharp">
 public class Settings
 {
-	public static readonly GeneralSettings General;//readonly is optional
+	public static readonly GeneralSettings General;//readonly is optional. It can be a property.
 }
 </code>
 </pre>
