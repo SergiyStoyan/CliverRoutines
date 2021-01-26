@@ -105,7 +105,7 @@ So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter se
             <p><b>UserSettings and AppSettings</b>
 			<br>Usually you will not inherit <code>Cliver.Settings</code> directly but use one of its derivatives provided by <code>CliverRoutines</code>:
 <br> - <code>Cliver.UserSettings</code> which is serialized to the user-relevant app data directory; 
-<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writting to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
+<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writing to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
 
         <br>When you create a settings class inheriting <code>Cliver.Settings</code> directly, you need to define the serialization directory in it.
 			
@@ -534,7 +534,25 @@ Settings.General.Save();
             <br>Session implies that logs belonging to it either are wrote to a separate folder or, if all logs are written to the same folder, contain session name in their names.
             Session folders can be used to store additional data like caches etc.
 			
-			<p>All sessions are created in the same work directory.
+			<p><b>Usage example</b>
+<br>
+<pre>
+<code class="language-csharp">
+//create or get an existing session
+Log.Session game1Log = Log.Session.Get("Game1");
+...
+//write to the session
+game1Log.Write("message");
+...
+//close all the file handlers beloning to the session.
+game1Log.Close(true);//optional call to free memory
+</code>
+</pre>
+
+			<p><b>Work directory</b>
+<br>
+			All sessions are created in the same work directory.
+			
 			
 			<p>By default the work directory is defined in the order by which Log tries to write to:
 			<br> - the folder where the application is located;
@@ -543,18 +561,11 @@ Settings.General.Save();
 			<br> - the desktop folder;
 			<br> - the temp folder;
 			
-			<p>The work directory definition can be customized while initializing. See the example:
-
+			<p>The work directory definition can be customized while initializing:
 <pre>
 <code class="language-csharp">
-//logs will be recorded to the user data folder
-Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);
-
-//create or get an existing session
-Log.Session game1Log = Log.Session.Get("Game1");
-game1Log.Write("message");
-//close all the file handlers.
-game1Log.Close(true);//optional call to free memory
+//optional initialization of Log before using it
+Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);//logs will be recorded to the user data folder
 </code>
 </pre>
 
@@ -569,7 +580,7 @@ game1Log.Close(true);//optional call to free memory
     <p>Trivial logging when everything is written to the same file:
 <pre>
     <code class="language-csharp"> 
-//writting to the default (Main) named log in the default (Head) session
+//writing to the default (Main) named log in the default (Head) session
 Log.Inform("test message"); //It is a shortcut for Log.Head.Main.Inform()
 
 try
@@ -586,14 +597,13 @@ catch (Exception e)
  <p>   Logging to a named log in the default session:
 <pre>
     <code class="language-csharp">
-//writting to the log "Test" in the default session
-Log.Head["Test"].Inform("test message");
-
-//writting to the log "Error" in the default session
+//writig to the log "Inform" in the default session
+Log.Session.NamedWriter informLog = Log.Head["Inform"];
+//writing to the log "Error" in the default session
 Log.Session.NamedWriter errorLog = Log.Head["Error"];
 try
 {
-	Log.Head["Test"].Inform("test message");
+	informLog.Inform("test message");
 }
 catch (Exception e)
 {
@@ -605,7 +615,7 @@ catch (Exception e)
  <p>   Logging to a named log of an explicitly named session:
 <pre>
     <code class="language-csharp">
-//writting to the session "Game1"
+//writing to the session "Game1"
 Log.Session game1Session = Log.Session.Get("Game1");
 //to the main log
 game1Session.Inform("test message");
@@ -621,7 +631,7 @@ game1Session["Test"].Inform("test message");
 
     <h2><a name='logThread'>Thread logs</a></h2>
     A session can have thread logs where each .NET thread automatically writes its own log file. 
-    Writting hen using thread logs, each .NET thread automatically writes to its own log file.
+    Writing hen using thread logs, each .NET thread automatically writes to its own log file.
 	
 	
 <pre>
@@ -630,7 +640,7 @@ static void download(Log.Session log, string uri)
 {
 	try
 	{
-		//write to a thread log in the session
+		//each thread writes its own log
 		log.Thread.Inform("test message");
 	}
 	catch (Exception e)
@@ -646,7 +656,7 @@ static void Main(string[] args)
 
 	//create session "Game1"
 	Log.Session game1Log = Log.Session.Get("Game1");
-	//launch number of parallel theads
+	//launch a number of parallel theads
 	Cliver.ThreadRoutines.StartTry(() => { download(game1Log, "http://file.com/1"); });
 	Cliver.ThreadRoutines.StartTry(() => { download(game1Log, "http://file.com/2"); });
 }
