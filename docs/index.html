@@ -473,7 +473,7 @@ connect(General.Password);
 
 
             <h3><a name=''>Passing to another process</a></h3>
-You can pass a settings field to another process. It should be done through serilization.
+You can pass a settings field to another process. It should be done through serialization.
 
 <p>In process 1:
 <pre>
@@ -534,12 +534,14 @@ Settings.General.Save();
 
             <h2><a name='logSession'>Session</a></h2>
 
-            Each log belongs to a session. Depending on <code>Cliver.Log</code> configuration, each session can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
-            <br> Session folders can be used to store additional data like caches etc.
+            Each log belongs to a session. 
+			<p>Depending on configuration, each session can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
 			
-			<p> An application can open multiple sessions simultaneously.
+            <p> Session folders can be used to store additional data like caches etc.
 			
-	<p>The default session is empty-name and is referenced as <code>Head</code>.
+			<p> Multiple sessions can be open simultaneously.
+			
+	<p>There is the default session which has empty name and is referenced as <code>Head</code>.
 			
 
 
@@ -586,8 +588,9 @@ Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.C
 
 
     <h2><a name='named_log'>Named logs</a></h2>
-    A named log has name by which it can be called. 
-	<p>The default log of a session is an empty-name log which is referenced as <code>Main</code>.
+    A named log has name by which it can be called.
+	
+	<p>Each session has its default log which has empty name and is referenced as <code>Main</code>.
 	
     <p>Trivial logging when everything is written to the same file:
 <pre>
@@ -627,7 +630,7 @@ catch (Exception e)
     </code>
 </pre>
 
- <p>   Logging to a named log of an explicitly named session:
+ <p>   Logging to a named log of an explicitly created session:
 <pre>
     <code class="language-csharp">
 //writing to the session "Game1"
@@ -658,7 +661,7 @@ static void download(string uri)
 {
 	try
 	{
-		//each thread writes its own log
+		//each download thread writes its own log in the default (Head) session
 		Log.Thread.Inform("test message");
 	}
 	catch (Exception e)
@@ -674,7 +677,8 @@ static void Main(string[] args)
 
 	//launch a number of parallel theads
 	ThreadRoutines.Start(() => { download("http://file.com/1"); });
-	ThreadRoutines.Start(() => { download("http://file.com/2"); });
+	...
+	ThreadRoutines.Start(() => { download("http://file.com/N"); });
 }
 </code>
 </pre>
