@@ -132,7 +132,7 @@ public class GeneralSettings : Cliver.UserSettings
 			
 			
             <h2><a name='settings_field'>Settings field</a></h2>
-			Settings field is a <code>static public</code> field of <a href='#settings_class'>settings type</a> in any class of your app. Such fields are automatically detected and serialized/deserialized by <code>Cliver.Config</code>.
+			Settings field is a <code>static public</code> field or property of <a href='#settings_class'>settings type</a> in any class of your app. Such fields are automatically detected and serialized/deserialized by <code>Cliver.Config</code>.
 			
 <br><br>			<b>Example</b>
 <pre>
@@ -218,8 +218,14 @@ Cliver.Config.Reload();//!!!mandatory
 <code class="language-csharp">
 public class GeneralSettings : Cliver.UserSettings //it will be serialized to the user data directory
 {
-	public string SmtpHost = "";
-	public int SmtpPort = 25;
+	public int ClientPort;
+	public List<Server> Servers = new List<Server>();
+}
+
+public class Server
+{
+	public string Host = "";
+	public int Port = 255;
 }
 </code>
 </pre>
@@ -252,7 +258,8 @@ Cliver.Config.Reload();//!!!mandatory call before using settings
 <pre>
 <code class="language-csharp">
 //modify
-Settings.General.SmtpHost = "smtp.test.com";
+Settings.General.ClientPort = 457;
+Settings.General.Servers.Add(new Server {Host = "server.com", Port = 345});
 
 //save on disk
 Settings.General.Save();
@@ -262,7 +269,7 @@ Cliver.Config.Reload();
 Cliver.Config.Reset();
 
 //pass to a function
-connect(Settings.General.SmtpHost, Settings.General.SmtpPort);
+notify(Settings.General.ClientPort, Settings.General.Servers);
 </code>
 </pre>
          <p><code>Cliver.Config</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
@@ -302,6 +309,11 @@ public class GeneralSettings : Cliver.UserSettings
 }
 </code>
 </pre>	
+
+
+
+
+
             <h3><a name='swapping'>Cloning and replacing</a></h3>
 
             Sometimes it is handy to modify not a settings field itself but its clone and then replace it:
@@ -310,14 +322,69 @@ public class GeneralSettings : Cliver.UserSettings
 //create a clone. Pay attention, that __Info field is not cloned here but remains the same.
 GeneralSettings general2 = Settings.General.CreateClone();
 
-//modifying general2
-general2.SmtpHost = "smtp.server.com";
+//modify
+general2.ClientPort = 123;
 
-//if ok, accept modifications
-Settings.General = general2;
-Settings.General.Save();
+if(userClickedOk)
+{
+	Settings.General = general2;
+	Settings.General.Save();
+}
 </code>
 </pre>
+
+
+
+
+
+
+            <h3><a name=''>Polymorphism</a></h3>
+As <a href='#settings_class'>settings type</a> is a usual C# class it supports polymorphism. That's, you can build many <a href='#settings_class'>settings types</a> inheriting the same parent <a href='#settings_class'>settings type</a> and easily switch between them depending on application logic. See the example.
+<pre>
+<code class="language-csharp">
+//base settings class which you will reference in your code
+abstract public class ScopeSettings : Cliver.UserSettings
+{
+	virtual public string HelpUri { get; set; }
+
+	public static ScopeSettings Scope { get; internal set; }//(!)it is ignored by Cliver.Config because ScopeSettings is abstract class
+}
+
+//derivative1 implementing certain logic
+public class Scope1Settings : ScopeSettings
+{
+	override public string HelpUri { get; set; } = "http://www.help.com/help1.html";
+
+	public static Scope1Settings This;//a settings field can be nested in its own settings type
+}
+
+//derivative2 implementing certain logic
+public class Scope2Settings : ScopeSettings
+{
+	override public string HelpUri { get; set; } = "http://www.help.com/help2.html";
+
+	public static Scope2Settings This;
+}
+</code>
+</pre>
+
+<p>Now, initialize settings fields and set the required scope:
+<pre>
+<code class="language-csharp">
+Config.Reload();
+//choose which scope to use?
+ScopeSettings.Scope = Scope1Settings.This;
+
+...
+//independing on the chosen scope, in all the rest code you use only ScopeSettings.Scope
+Process.Start(ScopeSettings.Scope.HelpUri);
+</code>
+</pre>
+
+
+
+
+
 
             <h3><a name='storing_password'>Storing password</a></h3>
             How to store and use passwords:
@@ -372,6 +439,9 @@ connect(General.SmtpPassword);
 
 
 
+
+
+
             <h3><a name=''>Passing to another process</a></h3>
 You can pass a settings field to another process. It should be done through serilization:
 <pre>
@@ -401,15 +471,6 @@ Settings.General.Save();
 
 
 
-            <h3><a name=''>Inheriting settings type</a></h3>
-:
-<pre>
-<code class="language-csharp">
-</code>
-</pre>
-
-
-
 
             <h1><a name='log'>Log</a></h1>
         <p>
@@ -434,10 +495,11 @@ Settings.General.Save();
 			<p>Session directory 
 
 <pre>
-<code class="language-csharp">{}</code>
+<code class="language-csharp">
+//creating session "Game1"
+Log.Session game1Session = Log.Session.Get("Game1");
+</code>
 </pre>
-
-<p>
 
 
 
