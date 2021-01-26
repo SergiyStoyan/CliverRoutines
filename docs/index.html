@@ -339,7 +339,7 @@ if(userClickedOk)
 
 
             <h3><a name=''>Polymorphism</a></h3>
-As <a href='#settings_class'>settings type</a> is a usual C# class it supports polymorphism. That's, you can build many <a href='#settings_class'>settings types</a> inheriting the same parent <a href='#settings_class'>settings type</a> and easily switch between them depending on application logic. See the example.
+Being usual C# classes, <a href='#settings_class'>settings types</a> support polymorphism. That is, you can build many <a href='#settings_class'>settings types</a> inheriting the same parent and easily switch between them depending on the application logic. See the example.
 
 <p>Define a base <a href='#settings_class'>settings type</a> and its derivatives:
 <pre>
@@ -370,15 +370,19 @@ public class Scope2Settings : ScopeSettings
 </code>
 </pre>
 
-<p>Now, initialize settings fields and set the required scope:
+<p>Initialize settings fields and set the required scope:
 <pre>
 <code class="language-csharp">
 Config.Reload();
 //choose which scope to use?
 ScopeSettings.Scope = Scope1Settings.This;
+</code>
+</pre>
 
+<p>Now, independing on the actual scope, you can use ScopeSettings.Scope uniformly:
+<pre>
+<code class="language-csharp">
 ...
-//independing on the chosen scope, you use only ScopeSettings.Scope in all the code
 Process.Start(ScopeSettings.Scope.HelpUri);
 ...
 ScopeSettings.Scope.HelpUri = "http://www.help.com/help3.html"; 
@@ -427,7 +431,7 @@ public class GeneralSettings : Cliver.Win.UserSettings
 	}
 	//on Widnows
     Cliver.Win.Crypto.ProtectedData crypto = new Cliver.Win.Crypto.ProtectedData();
-	//on non-Windows
+	//cross-platform
     Cliver.Crypto.Rijndael crypto = new Cliver.Crypto.Rijndael("random key");
 }
 
