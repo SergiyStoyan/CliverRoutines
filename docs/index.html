@@ -332,8 +332,8 @@ public class GeneralSettings : Cliver.UserSettings
             Sometimes it is handy to modify not a settings field itself but its clone and then replace it:
 <pre>
 <code class="language-csharp">
-//create a clone. Pay attention, that __Info field is not cloned here but remains the same.
-GeneralSettings general2 = Settings.General.CreateClone();
+//create a clone
+GeneralSettings general2 = Settings.General.CreateClone();//!!!property __Info is not cloned but references the same object.
 
 //modify
 general2.ClientPort = 123;
