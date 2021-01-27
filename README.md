@@ -32,4 +32,4 @@ Anything handy that is needed in general development.
 
 ## [More details...](https://sergeystoyan.github.io/CliverRoutines/#1)
 
-To see live examples, refer to CliverRoutinesExample project. Also review my C# projects in github.
+To see live usage examples, refer to CliverRoutinesExample project. Also review my C# projects in github.
