@@ -1,27 +1,28 @@
 # CliverRoutines
 
-A cross-platform C# lib which provides frequently used routines: 
-- application settings module which replaces the one of Visual Studio;
-- logging with multi-threading and session support;
+A cross-platform C# lib which provides the frequently needed routines:
+
+- application settings module superseding the one of Visual Studio;
+- logger with multi-threading and session support;
 - auxiliary routines;
 
-It is developed on .NET Standard 2.0 and supposed to run anywhere. 
+It has been developed on .NET Standard 2.0 and supposed to run on any platform. 
 
 Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
 - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
-## Application settings engine
-It is easy to use aplication settings engine which is much more powerful and flexible than the Visual Studio's one.
+## Application settings
+It is easy to use aplication settings engine which is more versatile and flexible than the Visual Studio's one.
 
 Features:
-- automatically serialazing/deserialazing values of class members which need it;
-- serializable types are tailored in the application according to needs;
+- class fields/properties in your code can be automatically serialazed/deserialazed on disk;
+- serializable types are tailored in your code according to your needs;
 
 ## Logger 
 Features:
 - thread-safe;
-- writting log per thread;
+- writting thead logs;
 - simultaneous multiple log sessions;
 - automatic old log cleanup; 
 
