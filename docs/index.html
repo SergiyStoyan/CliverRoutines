@@ -80,8 +80,15 @@ setLicense();
 
 
 <p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
+        <p>While <code>Cliver.Config</code> was designed primarily as a settings engine, in conjunction with <code>System.Linq</code> it can be used as a simple nosql database.
         <p>
             <code>Cliver.Config</code> is thread-safe.
+			
+			<p>To see live usage examples, refer to CliverRoutinesExample project.
+			
+			
+			
+			
 
             <h2><a name='settings_class'>Settings type</a></h2>
 			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
@@ -302,7 +309,7 @@ public class GeneralSettings : Cliver.UserSettings
 {   	
 	//avoid doubling the collection's elements
 	[JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
-	public List&lt;string&gt; Files = new List&lt;string&gt;("apple", "pear", "banana"); 
+	public List&lt;string&gt; Options = new List&lt;string&gt;("apple", "pear", "banana"); 
 }
 </code>
 </pre>
@@ -530,6 +537,9 @@ Settings.General.Save();
 			
 			<p>
             It performs auto-cleanup of old logs.
+			
+			
+			<p>To see live usage examples, refer to CliverRoutinesExample project.
 			
 
 
