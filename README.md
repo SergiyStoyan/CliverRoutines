@@ -6,7 +6,7 @@ A cross-platform C# lib which provides the frequently needed routines:
 - logger with multi-threading and session support;
 - auxiliary routines;
 
-It is developed on .NET Standard 2.0 and supposed to run anywhere. 
+It has been developed on .NET Standard 2.0 and supposed to run on any platform. 
 
 Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
