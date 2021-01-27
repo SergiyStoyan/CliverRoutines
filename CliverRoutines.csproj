@@ -18,7 +18,7 @@
 - logger with multi-threading and session support;
 - auxiliary routines;</Description>
     <PackageTags>serialize, log, settings</PackageTags>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
