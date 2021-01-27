@@ -529,7 +529,7 @@ Settings.General.Save();
 			<p>
             It is thread-safe.
 			
-			<p><code>Cliver.Log</code> is <a href="#logSession">session</a> oriented meaning that an application can write multiple log sessions successively or simultaneously.
+			<p><code>Cliver.Log</code> is <a href="#logSession">session</a> oriented. It means that an application can write multiple log sessions successively or simultaneously.
             It is helpful when an application performs multiple independent tasks.
 			
 			<p>
@@ -599,7 +599,7 @@ Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.C
 
 
 
-    <h2><a name='named_log'>Named logs</a></h2>
+    <h2><a name='named_log'>Named log</a></h2>
     A named log has name by which it can be called.
 	
 	<p>Each session has its default log which has empty name and is referenced as <code>Main</code>.
@@ -659,9 +659,9 @@ game1Session["Test"].Inform("test message");
 
 
 
-    <h2><a name='thread_log'>Thread logs</a></h2>
-    A thread log is a log that belongs to only one .NET thread.
-	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or endlessly incremented for each new thread log.
+    <h2><a name='thread_log'>Thread log</a></h2>
+    A thread log is a log that belongs to only one and same .NET thread.
+	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or be endlessly incremented for each new thread log.
 	
 	<p>In this example, each download thread writes its own log:
 <pre>
