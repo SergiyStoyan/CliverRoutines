@@ -31,4 +31,4 @@ Anything handy that is needed in general development.
 
 ## [More details...](https://sergeystoyan.github.io/CliverRoutines/#1)
 
-Also review my C# projects in github to see live examples.
+To see live examples, review my C# projects in github.
