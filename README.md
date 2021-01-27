@@ -1,8 +1,9 @@
 # CliverRoutines
 
-A cross-platform C# lib which provides frequently used routines: 
-- application settings module which replaces the one of Visual Studio;
-- logging with multi-threading and session support;
+A cross-platform C# lib which provides the frequently needed routines:
+
+- application settings module superseding the one of Visual Studio;
+- logger with multi-threading and session support;
 - auxiliary routines;
 
 It is developed on .NET Standard 2.0 and supposed to run anywhere. 
