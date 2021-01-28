@@ -8,59 +8,74 @@ namespace Example
     {
         public static void Run()
         {
-            try
-            {
-                Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER);//if permissions allow it, log will be in the bin directory
+            //optional; initialize log            
+            Log.Initialize(Log.Mode.FOLDER_PER_SESSION);//if permissions allow it, log will be created in the executable directory
 
-                Log.Inform("test");
+            //trivial usage: everything is written to the same file
+            Log.Inform("write to the default log of the default session");
 
-                Log.Session s1 = Log.Session.Get("Name1");//create if no session "Name1"
-                Log.Writer nl = s1["Name"];//create if no log "Name"
-                nl.Error("to log 'Name'");
-                s1.Trace("to the main log of session 'Name1'");
-                s1.Thread.Inform("to the thread log of session 'Name1'");
-                s1.Rename("Name2");
+            //more sophisticated usage is below
+            Log.Head["Action1"].Inform0("write to log 'Action1' of the default session");
 
-                //writting thread logs to the default session
-                ThreadRoutines.Start(task);
-                ThreadRoutines.Start(task);
+            //writing thread logs to the default session
+            ThreadRoutines.Start(task);
+            ThreadRoutines.Start(task);
 
-                //writting thread logs to session Game1
-                Log.Session g1 = Log.Session.Get("Game1");
-                ThreadRoutines.Start(() => { task2(g1); });
-                ThreadRoutines.Start(() => { task2(g1); });
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
+            //writing to an explicitly created session
+            Log.Session logSession_Task = Log.Session.Get("Task");//create if not exists
+            logSession_Task.Inform("write to the default log of the session 'Task'");
+            Log.Writer log_Task_Subtask = logSession_Task["Subtask"];//create if not exists
+            log_Task_Subtask.Error("write to log '" + log_Task_Subtask.Name + "' of session 'Task'");
+            logSession_Task.Trace("write to the default log of the session '" + logSession_Task.Name + "'");
+            logSession_Task.Thread.Inform("write to the thread log " + Log.Thread.Id + " of the session '" + logSession_Task.Name + "'");
+            //sometimes you may need to rename a log session:
+            logSession_Task.Rename("renamed_Task");
+            //optional; close the handlers and free memory
+            logSession_Task.Close(false);
+
+            //writing thread logs to explicitly created sessions
+            Task.Start("Task1");
+            Task.Start("Task2");
         }
 
         static void task()
         {
             try
             {
-                Log.Inform0("to default log");
-                Log.Thread.Inform0("to thread log");
-                throw new Exception2("test exception2");
+                Log.Inform0("write to default log of the default session");
+                Log.Thread.Inform0("write to thread log " + Log.Thread.Id + " of the default session");
+                throw new Exception("test exception2");
             }
             catch (Exception e)
             {
-                Log.Thread.Error("to thread log", e);
+                Log.Thread.Error("write to thread log " + Log.Thread.Id + " of the default session", e);
             }
         }
 
-        static void task2(Log.Session logSession)
+
+        class Task
         {
-            try
+            public static void Start(string name)
             {
-                logSession.Inform0("to default log");
-                logSession.Thread.Inform0("to thread log");
-                throw new Exception2("test exception2");
+                Task task = new Task();
+                task.logSession = Log.Session.Get(name);
+                ThreadRoutines.Start(task.download);
+                ThreadRoutines.Start(task.download);
             }
-            catch (Exception e)
+            Log.Session logSession;
+
+            void download()
             {
-                logSession.Thread.Error("to thread log", e);
+                try
+                {
+                    logSession.Inform0("write to the default log of session '" + logSession.Name + "'");
+                    logSession.Thread.Inform0("write to thread log " + logSession.Thread.Id + " of session '" + logSession.Name + "'");
+                    throw new Exception2("test exception");
+                }
+                catch (Exception e)
+                {
+                    logSession.Thread.Error("write to thread log " + logSession.Thread.Id + " of session '" + logSession.Name + "'", e);
+                }
             }
         }
     }

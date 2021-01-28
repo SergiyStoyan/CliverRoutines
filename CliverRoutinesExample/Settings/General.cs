@@ -5,10 +5,20 @@ using Cliver;
 
 namespace Example
 {
- 
+
     class GeneralSettings : Cliver.UserSettings//UserSettings based class is serialized in the user directory
     {
         public Dictionary<string, User> Users = new Dictionary<string, User>();
+
+        protected override void Loaded()
+        {
+            ConfigExample.Log.Inform("Settings loaded: " + __Info.FullName);
+        }
+
+        protected override void Saving()
+        {
+            ConfigExample.Log.Inform("Settings saving...: " + __Info.FullName);
+        }
     }
 
     public class User
@@ -19,7 +29,7 @@ namespace Example
 
         public void Notify(string message)
         {
-            Program.Email(Settings.Smtp.Host, Settings.Smtp.Port, Settings.Smtp.Password, message);
+            ConfigExample.Email(Settings.Smtp.Host, Settings.Smtp.Port, Settings.Smtp.Password, message);
         }
     }
 }

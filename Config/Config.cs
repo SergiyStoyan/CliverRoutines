@@ -17,11 +17,11 @@ using System.Diagnostics;
 namespace Cliver
 {
     /// <summary>
-    /// Config manages serializable Settings objects set to static fields of Settings derived types declared in the application.
-    /// It performs:
-    /// - detecting static fields of Settings types declared in the application and initiating them with Settings objects;
-    /// - serializing/deserializing the Settings objects;
-    /// Every Settings field in the application has it own storage file which is defined by the Settings type and the field's full name in code. 
+    /// Config manages values of the static public fields/properties of Settings-derived types that are declared anywhere in the application.
+    /// It provides:
+    /// - detecting static public fields of Settings types declared in the application and initiating them with values;
+    /// - serializing/deserializing those Settings fields/properties;
+    /// Every Settings field/property has it own storage file which is defined by its type and its full name in code. 
     /// Usually it's that only one field is declared per Settings type, but generally there can be any number of fields of the same Settings type.
     /// </summary>
     public static partial class Config
@@ -38,7 +38,7 @@ namespace Cliver
         /// Types listed here will be initialized first in the provided order.
         /// It must be set before calling Reload() or Reset().
         /// </summary>
-        public static List<Type> InitialzingOrderedSettingsTypes = null;
+        public static List<Type> InitializationOrderedSettingsTypes = null;
 
         /// <summary>
         /// Tells Config in which assemblies to look for Settings fields.
@@ -123,9 +123,9 @@ namespace Cliver
             {
                 Type[] types = assembly.GetTypes();
                 IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))).Distinct();
-                if (InitialzingOrderedSettingsTypes != null)
+                if (InitializationOrderedSettingsTypes != null)
                 {
-                    SettingsTypeComparer settingsTypeComparer = new SettingsTypeComparer(InitialzingOrderedSettingsTypes);
+                    SettingsTypeComparer settingsTypeComparer = new SettingsTypeComparer(InitializationOrderedSettingsTypes);
                     settingsTypes = settingsTypes.OrderBy(t => t, settingsTypeComparer);
                 }
                 foreach (Type type in types)

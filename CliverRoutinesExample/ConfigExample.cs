@@ -6,9 +6,11 @@ namespace Example
 {
     class ConfigExample
     {
+        static public Log.Session Log = Cliver.Log.Session.Get("ConfigExample");
+
         public static void Run()
         {
-            //initialize settings
+            //mandatory; initialize settings
             Config.Reload();
 
             //modify
@@ -58,6 +60,11 @@ namespace Example
             Settings.General.Users[user.Name] = user;
             Settings.General.Save();
             return user;
+        }
+
+        public static void Email(string host, int port, string password, string message)
+        {
+            Log.Inform("sent message:\r\n" + message);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Cliver
                         string alert;
                         switch (Log.mode)
                         {
-                            case Mode.EACH_SESSION_IS_IN_OWN_FORLDER:
+                            case Mode.FOLDER_PER_SESSION:
                                 alert = "Session data including caches and logs older than " + FirstLogDate.ToString() + " are to be deleted.\r\nDelete?";
                                 foreach (DirectoryInfo d in di.GetDirectories())
                                 {
@@ -68,7 +68,7 @@ namespace Cliver
                                     }
                                 }
                                 break;
-                            case Mode.ALL_LOGS_ARE_IN_SAME_FOLDER:
+                            case Mode.SAME_FOLDER:
                                 alert = "Logs older than " + FirstLogDate.ToString() + " are to be deleted.\r\nDelete?";
                                 foreach (FileInfo f in di.GetFiles())
                                 {

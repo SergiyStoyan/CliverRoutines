@@ -5,7 +5,7 @@ using Cliver;
 
 namespace Example
 {
- 
+
     class SmtpSettings : Cliver.UserSettings//UserSettings based class is serialized in the user directory
     {
         public string Host = "";
@@ -40,12 +40,12 @@ namespace Example
 
         protected override void Loaded()
         {
-            Log.Inform("Settings loaded.");
+            ConfigExample.Log.Inform("Settings loaded: " + __Info.FullName);
         }
 
         protected override void Saved()
         {
-            Log.Inform("Settings saved.");
+            ConfigExample.Log.Inform("Settings saved: " + __Info.FullName);
         }
     }
 }

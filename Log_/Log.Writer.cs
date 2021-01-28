@@ -41,7 +41,7 @@ namespace Cliver
                     }
                 }
             }
-            Level level = Log.defaultLevel;
+            Level level = Log.DefaultLevel;
 
             public readonly string Name;
 
@@ -55,12 +55,12 @@ namespace Cliver
                     string file2 = Session.Dir + System.IO.Path.DirectorySeparatorChar;
                     switch (Log.mode)
                     {
-                        case Log.Mode.ALL_LOGS_ARE_IN_SAME_FOLDER:
+                        case Log.Mode.SAME_FOLDER:
                             file2 += (string.IsNullOrWhiteSpace(Session.Name) ? "" : Session.Name + "_") + Session.TimeMark;
                             //if (!string.IsNullOrWhiteSpace(Name))//not Main log
                             //    file2 += "_" + DateTime.Now.ToString("yyMMddHHmmss");
                             break;
-                        case Cliver.Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER:
+                        case Cliver.Log.Mode.FOLDER_PER_SESSION:
                             file2 += DateTime.Now.ToString("yyMMddHHmmss");
                             break;
                         default:
@@ -79,7 +79,7 @@ namespace Cliver
 
             public readonly Session Session;
 
-            public int MaxFileSize = Log.defaultMaxFileSize;
+            public int MaxFileSize = Log.DefaultMaxFileSize;
 
             public const string MAIN_THREAD_LOG_NAME = "";
 
@@ -184,7 +184,7 @@ namespace Cliver
                     }
 
                     message = (messageType == MessageType.LOG ? "" : messageType.ToString() + ": ") + message + (string.IsNullOrWhiteSpace(details) ? "" : "\r\n\r\n" + details);
-                    logWriter.WriteLine(DateTime.Now.ToString(Log.timePattern) + message);
+                    logWriter.WriteLine(DateTime.Now.ToString(Log.TimePattern) + message);
                     logWriter.Flush();
                 }
             }

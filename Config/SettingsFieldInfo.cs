@@ -23,7 +23,7 @@ namespace Cliver
     {
         /// <summary>
         /// Settings' full name is the string that is used in code to refer to this field/property. 
-        /// It defines exactly Settings field/property in the code but has nothing to do with the type of it. 
+        /// It defines exactly the Settings field/property in code but has nothing to do with the one's type. 
         /// </summary>
         public readonly string FullName;
 

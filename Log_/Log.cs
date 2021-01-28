@@ -19,27 +19,50 @@ namespace Cliver
     {
         static readonly object lockObject = new object();
 
-        public static void Initialize(Mode mode, List<string> primaryBaseDirs = null, Level defaultLevel = Level.ALL, int deleteLogsOlderDays = 10, int defaultMaxFileSize = -1, string timePattern = "[dd-MM-yy HH:mm:ss] ")
+        /// <summary>
+        /// Shuts down the log engine and re-initializes it. Optional.
+        /// </summary>
+        /// <param name="mode">log configuration</param>
+        /// <param name="primaryBaseDirs">log directories ordered by preference</param>
+        /// <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted</param>
+        public static void Initialize(Mode mode, List<string> primaryBaseDirs = null, int deleteLogsOlderThanDays = 10)
         {
             lock (lockObject)
             {
                 Log.CloseAll();
                 Log.mode = mode;
                 Log.primaryBaseDirs = primaryBaseDirs;
-                Log.deleteLogsOlderDays = deleteLogsOlderDays;
-                Log.defaultLevel = defaultLevel;
-                Log.defaultMaxFileSize = defaultMaxFileSize;
-                Log.timePattern = timePattern;
+                Log.deleteLogsOlderThanDays = deleteLogsOlderThanDays;
             }
         }
         static List<string> primaryBaseDirs = null;
-        static int deleteLogsOlderDays = 10;
-        static Mode mode = Mode.ALL_LOGS_ARE_IN_SAME_FOLDER;
-        static Level defaultLevel = Level.ALL;
-        static int defaultMaxFileSize = -1;
-        static string timePattern = "[dd-MM-yy HH:mm:ss] ";
+        static int deleteLogsOlderThanDays = 10;
+        static Mode mode = Mode.SAME_FOLDER;
 
+        /// <summary>
+        /// Log level which is passed to each log as default.
+        /// </summary>
+        public static Level DefaultLevel = Level.ALL;
+
+        /// <summary>
+        /// Maximum log file length in bytes which is passed to each log as default.
+        /// If negative than no effect.
+        /// </summary>
+        public static int DefaultMaxFileSize = -1;
+
+        /// <summary>
+        /// Pattern of time recorded before a log message. See DateTime.ToString() format.
+        /// </summary>
+        public static string TimePattern = "[dd-MM-yy HH:mm:ss] ";
+
+        /// <summary>
+        /// Whether thread log indexes of closed logs should be reused.
+        /// </summary>
         public static bool ReuseThreadLogIndexes = false;
+
+        /// <summary>
+        /// Extension of log files.
+        /// </summary>
         public static string FileExtension = "log";
 
         public enum Mode
@@ -47,12 +70,12 @@ namespace Cliver
             /// <summary>
             /// Each session creates its own folder.
             /// </summary>
-            EACH_SESSION_IS_IN_OWN_FORLDER,
+            FOLDER_PER_SESSION,
             /// <summary>
             /// <summary>
-            /// Writes only log files without creating session folder.
+            /// No session folder is created. Log files are in the same folder.
             /// </summary>
-            ALL_LOGS_ARE_IN_SAME_FOLDER
+            SAME_FOLDER
         }
 
         /// <summary>
@@ -154,7 +177,7 @@ namespace Cliver
             get
             {
                 if (workDir == null)
-                    setWorkDir(defaultLevel > Level.NONE);
+                    setWorkDir(DefaultLevel > Level.NONE);
                 return workDir;
             }
         }
@@ -205,11 +228,11 @@ namespace Cliver
                 if (workDir == null)
                     throw new Exception("Could not access any log directory.");
                 workDir = PathRoutines.GetNormalizedPath(workDir, false);
-                if (Directory.Exists(workDir) && deleteLogsOlderDays >= 0)
+                if (Directory.Exists(workDir) && deleteLogsOlderThanDays >= 0)
                 {
                     if (deletingOldLogsThread?.TryAbort(1000) == false)
                         throw new Exception("Could not abort deletingOldLogsThread");
-                    deletingOldLogsThread = ThreadRoutines.Start(() => { Log.DeleteOldLogs(deleteLogsOlderDays, DeleteOldLogsDialog); });//to avoid a concurrent loop while accessing the log file from the same thread 
+                    deletingOldLogsThread = ThreadRoutines.Start(() => { Log.DeleteOldLogs(deleteLogsOlderThanDays, DeleteOldLogsDialog); });//to avoid a concurrent loop while accessing the log file from the same thread 
                 }
                 else
                     throw new Exception("Could not create log folder!");

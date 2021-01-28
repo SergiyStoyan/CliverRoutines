@@ -31,10 +31,10 @@ namespace Cliver
                     string dir;
                     switch (Log.mode)
                     {
-                        case Cliver.Log.Mode.ALL_LOGS_ARE_IN_SAME_FOLDER:
+                        case Cliver.Log.Mode.SAME_FOLDER:
                             dir = WorkDir;
                             break;
-                        case Cliver.Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER:
+                        case Cliver.Log.Mode.FOLDER_PER_SESSION:
                             string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
                             dir = dir0;
                             for (int count = 1; Directory.Exists(dir); count++)
@@ -130,9 +130,9 @@ namespace Cliver
                             string newDir = getDir(newName);
                             switch (Log.mode)
                             {
-                                case Cliver.Log.Mode.ALL_LOGS_ARE_IN_SAME_FOLDER:
+                                case Cliver.Log.Mode.SAME_FOLDER:
                                     dir = newDir;
-                                    foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threads2treadWriter.Values))
+                                    foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
                                     {
                                         string file0 = w.File;
                                         w.SetFile();
@@ -140,11 +140,11 @@ namespace Cliver
                                             File.Move(file0, w.File);
                                     }
                                     break;
-                                case Cliver.Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER:
+                                case Cliver.Log.Mode.FOLDER_PER_SESSION:
                                     if (Directory.Exists(dir))
                                         Directory.Move(dir, newDir);
                                     dir = newDir;
-                                    foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threads2treadWriter.Values))
+                                    foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
                                         w.SetFile();
                                     break;
                                 default:
@@ -176,7 +176,7 @@ namespace Cliver
             {
                 lock (names2NamedWriter)
                 {
-                    if (names2NamedWriter.Values.FirstOrDefault(a => !a.IsClosed) == null && threads2treadWriter.Values.FirstOrDefault(a => !a.IsClosed) == null)
+                    if (names2NamedWriter.Values.FirstOrDefault(a => !a.IsClosed) == null && threadIds2TreadWriter.Values.FirstOrDefault(a => !a.IsClosed) == null)
                         return;
 
                     Write("Closing the log session...");
@@ -185,11 +185,11 @@ namespace Cliver
                         nw.Close();
                     //names2NamedWriter.Clear(); !!! clearing writers will bring to duplicating them if they are referenced in the custom code.
 
-                    lock (threads2treadWriter)
+                    lock (threadIds2TreadWriter)
                     {
-                        foreach (ThreadWriter tw in threads2treadWriter.Values)
+                        foreach (ThreadWriter tw in threadIds2TreadWriter.Values)
                             tw.Close();
-                        //threads2treadWriter.Clear(); !!!clearing writers will bring to duplicating them if they are referenced in the custom code.
+                        //threadIds2TreadWriter.Clear(); !!!clearing writers will bring to duplicating them if they are referenced in the custom code.
                     }
 
                     if (!reuse)

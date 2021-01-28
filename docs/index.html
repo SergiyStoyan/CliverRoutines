@@ -19,7 +19,7 @@
         <p> <code>CliverRoutines</code> is a cross-platform C# lib which provides the frequently needed routines:
 
  <ul>
-                <li> <a href="#config">application settings module</a> superseding the one of Visual Studio;</li>
+                <li> <a href="#config">application settings module</a> superseding that of Visual Studio;</li>
                 <li> <a href="#log">logger</a> with multi-threading and session support;</li>
                 <li> <a href="#miscellaneous">auxiliary routines</a>;</li>
             </ul>
@@ -170,7 +170,7 @@ namespace App
 </pre>
 		
 <p>			<b>Initialization</b>
-        <br> Detection and initialization of settings fields is triggered from your code. It can be preceded by optional configuration of <code>Cliver.Config</code> (see the API and annotations).
+        <br> Detection and initialization of settings fields is triggered from your code. It can be preceded by optional configuration of <code>Cliver.Config</code> (see the API).
 <pre>
 <code class="language-csharp">
 //configure. It must be done before initializing the settings.
@@ -185,8 +185,9 @@ Cliver.Config.Reload();//!!!mandatory
         <br>(!)Looking for settings fields in an application, <code>Cliver.Config</code> searches within the following assemblies by default:
 <br> - assembly that calls one of <code>Cliver.Config</code>'s initializing methods;
 <br> - assemblies that are referenced by the calling assembly;
-<br>The search scope is limited this way in order not to load more assemblies which is unavoidable while enumerating them.  
-<br>Otherwise, the assembly scope can by assigned from code explicitly (see the API and annotations).
+<br>The search scope is limited this way in order not to load more assemblies which is unavoidable while enumerating them. 
+ 
+<p>If needed, the assembly scope can by assigned from code explicitly (see the API).
 			
 			
             <h2><a name='storage_file'>Storage file</a></h2>
@@ -210,7 +211,7 @@ Cliver.Config.Reload();//!!!mandatory
 			<td>predetermined by:</td>
 			<td style="width:10px;">inheriting from <code>Cliver.UserSettings</code></td>
 			<td style="width:10px;">application's name 'App' and company name 'Company'</td>
-			<td style="width:10px;">the full type path of the settings field <code>General</code> in the application</td>
+			<td style="width:10px;">the full path of field <code>General</code> in the application</td>
 			</tr>
 			</table>
 			
@@ -660,7 +661,7 @@ game1Session["Test"].Inform("test message");
 
 
     <h2><a name='thread_log'>Thread log</a></h2>
-    A thread log is a log that belongs to only one and same .NET thread.
+    A thread log is a log that belongs to only one and the same .NET thread.
 	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or be endlessly incremented for each new thread log.
 	
 	<p>In this example, each download thread writes its own log:
