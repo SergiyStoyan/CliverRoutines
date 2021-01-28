@@ -2,7 +2,7 @@
 
 A cross-platform C# lib which provides the frequently needed routines:
 
-- application settings module superseding the one of Visual Studio;
+- application settings module that supersedes the one provided by Visual Studio;
 - logger with multi-threading and session support;
 - auxiliary routines;
 
