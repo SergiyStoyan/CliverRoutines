@@ -592,7 +592,7 @@ game1Log.Close(true);//optional call to free memory
 <pre>
 <code class="language-csharp">
 //optional initialization before using logs
-Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);//logs will be recorded to the user data folder
+Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.CompanyUserDataDir }, Log.Level.ALL);//logs will be recorded to the user data folder
 </code>
 </pre>
 
@@ -710,7 +710,7 @@ using Cliver;
 ...
 
 //optional initialization. It can be called many times where every call close all the logs and re-initializes the engine.
-Log.Initialize(Log.Mode.EACH_SESSION_IS_IN_OWN_FORLDER); //this call is not mandatory if you are ok with default settings. 
+Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you are ok with default settings. 
 </code>
 </pre>
 
