@@ -727,41 +727,18 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.CompanyUserDa
 <a href='#default_log'>The default log</a> of a <a href='#log_session'>session</a> is a <a href='#default_log'>named log</a> which is used when no <a href='#named_log'>named log</a> is called explicitly. It is referenced as <code>Main</code> and has empty name.
 
 		
-    <p><a href='#default_log'>The default log</a> is handy for trivial logging when everything is written to the same file.
-	
-    <p>Writing to <a href='#default_log'>the default log</a> of <a href='#log_default_session'>the default session</a>:
+    <p><a href='#default_log'>The default log</a> is handy for trivial logging when everything is written to the same file:
 <pre>
     <code class="language-csharp"> 
 using Cliver;
 ...
 
 //writing to the default (Main) log in the default (Head) session
-try
-{
-	Log.Inform("test message");//It is a shortcut for Log.Head.Main.Inform()
-}
-catch (Exception e)
-{
-	Log.Error(e);
-}
-    </code>
-</pre>
-	
-    <p>Writing to <a href='#default_log'>the default log</a> of an explicitly created <a href='#log_session'>session</a>:
-<pre>
-    <code class="language-csharp"> 
-using Cliver;
-...
+Log.Inform("test message");//It is a shortcut for Log.Head.Main.Inform()
+
 //writing to the default (Main) log of the session "Game1"
 Log.Session game1Session = Log.Session.Get("Game1");
-try
-{
-	game1Session.Inform("test message");//It is a shortcut for game1Session.Head.Main.Inform()
-}
-catch (Exception e)
-{
-	game1Session.Error(e);
-}
+game1Session.Inform("test message");//It is a shortcut for game1Session.Main.Inform()
     </code>
 </pre>
 
