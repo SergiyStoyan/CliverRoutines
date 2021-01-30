@@ -82,7 +82,6 @@ setLicense();
         <p>
             <a href='#config'><code>Cliver.Config</code></a> is thread-safe.
 			
-			<p>To see live usage examples, refer to CliverRoutinesExample project.
 			
 			
 			
@@ -394,7 +393,8 @@ Cliver.Config.Reset();
 notify(Settings.General.SmtpHost, Settings.General.SmtpPort, Settings.General.Clients);
 </code>
 </pre>
-         <p>See <a href='#config'><code>Cliver.Config</code></a> API and CliverRoutinesExample project for more options.
+			<p>To see live usage examples, refer to CliverRoutinesExample project in CliverRoutines solution.
+			<br>For the complete usage options, review <a href='#config'><code>Cliver.Config</code></a> API and annotations. 
 		 
             <h2><a name=''>Tips</a></h2>
 
@@ -637,7 +637,6 @@ Settings.General.Save();
 			<p> It performs auto-cleanup of old logs.
 			
 			
-			<p>To see live usage examples, refer to CliverRoutinesExample project.
 			
 
 
@@ -784,6 +783,7 @@ game1Session["Test"].Inform("test message");
     A <a href='#thread_log'>thread log</a> is a log that belongs to only one and the same .NET thread.
 	<p>Each <a href='#thread_log'>thread log</a> has a unique ID which is a part of its file name. Depending on configuration, those ID's can be reused or be endlessly incremented for each new <a href='#thread_log'>thread log</a>.
 	
+			<h3>Example</h3>
 	<p>In this example, each download thread writes its own log:
 <pre>
 <code class="language-csharp">
@@ -841,7 +841,8 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you
 Log.Inform("test message"); //trivial log usage
 </code>
 </pre> 
-         <p>See <a href='#log'><code>Cliver.Log</code></a> API and CliverRoutinesExample project for more options.
+			<p>To see live usage examples, refer to CliverRoutinesExample project in CliverRoutines solution. 
+			<br>For the complete usage options, review <a href='#log'><code>Cliver.Log</code></a> API and annotations.
 		 
   
 
