@@ -165,14 +165,7 @@ namespace Cliver
             lock (settingsFieldFullNames2SettingsFieldInfo)
             {
                 foreach (SettingsFieldInfo settingsFieldInfo in settingsFieldFullNames2SettingsFieldInfo.Values)
-                {
-                    Settings s = settingsFieldInfo.GetObject();
-                    if (s == null)
-                        return;
-                    if (s.__Info != settingsFieldInfo)//which can only happen if there are several settings fields of the same type
-                        throw new Exception("Value of settings field '" + settingsFieldInfo.FullName + "' is not attached to it.");
-                    s.Save();
-                }
+                    settingsFieldInfo.GetObject()?.Save(settingsFieldInfo);
             }
         }
 

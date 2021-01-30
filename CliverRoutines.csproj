@@ -3,15 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>5.15.1.0</AssemblyVersion>
+    <AssemblyVersion>5.16.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/sergeystoyan/CliverRoutines.git</RepositoryUrl>
-    <FileVersion>5.15.1.0</FileVersion>
+    <FileVersion>5.16.0.0</FileVersion>
     <!--PackageLicenseFile>LICENSE</PackageLicenseFile-->
 	<PackageLicenseExpression></PackageLicenseExpression>
     <Copyright>Sergey Stoyan</Copyright>
     <Authors>Sergey Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>5.15.1</Version>
+    <Version>5.16.0</Version>
     <PackageProjectUrl>https://github.com/sergeystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines:
 - application settings module that supersedes the one provided by Visual Studio;
