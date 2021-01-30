@@ -727,22 +727,40 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.CompanyUserDa
 <a href='#default_log'>The default log</a> of a <a href='#log_session'>session</a> is a <a href='#default_log'>named log</a> which is used when no <a href='#named_log'>named log</a> is called explicitly. It is referenced as <code>Main</code> and has empty name.
 
 		
-    <p><a href='#default_log'>The default log</a> is handy for trivial logging when everything is written to the same file:
+    <p><a href='#default_log'>The default log</a> is handy for trivial logging when everything is written to the same file.
+	
+    <p>Writing to <a href='#default_log'>the default log</a> of <a href='#log_default_session'>the default session</a>:
 <pre>
     <code class="language-csharp"> 
 using Cliver;
 ...
 
 //writing to the default (Main) log in the default (Head) session
-Log.Inform("test message"); //It is a shortcut for Log.Head.Main.Inform()
-
 try
 {
-	Log.Inform("test message");
+	Log.Inform("test message");//It is a shortcut for Log.Head.Main.Inform()
 }
 catch (Exception e)
 {
 	Log.Error(e);
+}
+    </code>
+</pre>
+	
+    <p>Writing to <a href='#default_log'>the default log</a> of an explicitly created <a href='#log_session'>session</a>:
+<pre>
+    <code class="language-csharp"> 
+using Cliver;
+...
+//writing to the default (Main) log of the session "Game1"
+Log.Session game1Session = Log.Session.Get("Game1");
+try
+{
+	game1Session.Inform("test message");//It is a shortcut for game1Session.Head.Main.Inform()
+}
+catch (Exception e)
+{
+	game1Session.Error(e);
 }
     </code>
 </pre>
@@ -754,7 +772,7 @@ catch (Exception e)
  <p>   Logging to a named log of <a href='#log_default_session'>the default session</a>:
 <pre>
     <code class="language-csharp">
-//writig to the log "Inform" in the default session
+//writig to the log "Inform" of the default session
 Log.Session.NamedWriter informLog = Log.Head["Inform"];
 //writing to the log "Error" in the default session
 Log.Session.NamedWriter errorLog = Log.Head["Error"];
@@ -774,6 +792,7 @@ catch (Exception e)
     <code class="language-csharp">
 //writing to the session "Game1"
 Log.Session game1Session = Log.Session.Get("Game1");
+
 //to the main log
 game1Session.Inform("test message");
 
