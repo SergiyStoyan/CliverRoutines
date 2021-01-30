@@ -16,19 +16,19 @@
 
     <div class='content'>
         <h1><a name='overview'>Overview</a></h1>
-        <p> <code>CliverRoutines</code> is a cross-platform C# lib which provides the frequently needed routines:
+        <p> CliverRoutines is a cross-platform C# lib which provides the frequently needed routines:
 
  <ul>
-                <li> <a href="#config">application settings module</a> that supersedes the one provided by Visual Studio;</li>
-                <li> <a href="#log">logger</a> with multi-threading and session support;</li>
+                <li> <a href="#config">application settings module</a> which supersedes the one provided by Visual Studio;</li>
+                <li> <a href="#log">logger</a> with multi-threading and <a href='#log_session'>session</a> support;</li>
                 <li> <a href="#miscellaneous">auxiliary routines</a>;</li>
             </ul>
 			
 <p><b>Platforms</b>
-<br><code>CliverRoutines</code> has been developed on .NET Standard 2.0 and supposed to run on any platform. 			
+<br>CliverRoutines has been developed on .NET Standard 2.0 and supposed to run on any platform. 			
 <br>A concern about certain platform might be regarded to peculiarities of the platform's file system.
 
-			<p><code>CliverRoutines</code> has been used on:
+			<p>CliverRoutines has been used on:
 <br> - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
 <br> - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
@@ -66,23 +66,21 @@ setLicense();
             <h2><a name='licensing'>Source code</a></h2>
             Open <a href='https://github.com/sergeystoyan/CliverRoutines' target='_blank'>repository</a>
         <p>
-            Do not download the code as is from a branch because it may be under development. Instead, go to releases and get the latest (pre-)release source code.
+            Do not download the latest code from a branch because it may be under development. Instead, use the latest (pre-)release code.
 
 
 
 
             <h1><a name='config'>Config</a></h1>
-<code>Cliver.Config</code> is a cross-platform replacement for Visual Studio standard applications settings module. It is very simple in use while versatile and powerful.
+<a href='#config'><code>Cliver.Config</code></a> is a cross-platform replacement for Visual Studio standard applications settings module. It is very simple in use while versatile and powerful.
 
-<p><b>Idea</b> 
-<br> - <code>Cliver.Config</code> automatically detects <a href='#settings_field'>settings fields</a> declared in your code;
-<br> - and facilitates their serialization/deserialization on disk;
+<p><b>Idea:</b> <a href='#config'><code>Cliver.Config</code></a> automatically detects <a href='#settings_field'>settings fields/properties</a> in your code and facilitates their serialization/deserialization on disk.
 
 
 <p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
-        <p>While <code>Cliver.Config</code> was designed primarily as a settings engine, in conjunction with <code>System.Linq</code> it can be used as a simple nosql database.
+        <p>While <a href='#config'><code>Cliver.Config</code></a> was designed primarily as a settings engine, in conjunction with <code>System.Linq</code> it can be used as a simple nosql database.
         <p>
-            <code>Cliver.Config</code> is thread-safe.
+            <a href='#config'><code>Cliver.Config</code></a> is thread-safe.
 			
 			<p>To see live usage examples, refer to CliverRoutinesExample project.
 			
@@ -91,35 +89,49 @@ setLicense();
 			
 
             <h2><a name='settings_class'>Settings type</a></h2>
-			Settings type is a custom class to be serialized/deserialized according to the needs of application. To be recognized as settings type, it must inherit <code>Cliver.Settings</code> class.
-			<br>Generally, you can consider your settings class not simply a collection of serializable properties but rather a fully functional class with added serializing/deserializing functionality. 
+			<a href='#settings_class'>Settings type</a> is a custom class that is to be serialized/deserialized according to the needs of the application. To be recognized as such, it must inherit <a href='#cliver_settings'><code>Cliver.Settings</code></a> class.
 			
-<p>(!)Fields of a settings class must be <code>public</code> and <code>non-static</code> to be considered serializable by <code>Cliver.Config</code>. 
+			<p>While a settings class is primarily a collection of settings, yet in general it should be considered a fully functional class which is enhanced with serializing/deserializing of its fields/properties. 
+			
+<p>(!)Fields/properies of a settings class must be <code>public</code> and <code>non-static</code> to be considered serializable by <a href='#config'><code>Cliver.Config</code></a>. 
 
 			<p>There can be any number of settings types defined in your code.
 			
 
-<p><b>Newtonsoft.Json</b>
-			<br>Serialization/deserialization is done by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.
-So you can apply attributes provided by <code>Newtonsoft.Json</code> to alter serialization behaviour of certain fields. To do so, you have to reference <code>Newtonsoft.Json</code> in your project. (To avoid compilation problems, make sure that it is the same version that is referenced by <code>CliverRoutines</code>.) For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
+<h3>Newtonsoft.Json</h3>
+			<br>Serialization/deserialization is performed by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.
+Hence you can apply attributes provided by <code>Newtonsoft.Json</code> to certain fields/properties of a <a href='#settings_class'>settings class</a> to alter their serialization behaviour. To do so, you have to reference <code>Newtonsoft.Json</code> in your project. (To avoid compilation problems, make sure that it is the same version that is referenced by CliverRoutines.) For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
 			
-<p>(!)While a settings class can implement any logic and members, remember that nevertheless there are restrictions for what and how can be serialized. For instance, data which depend on the current application state like <code>events, FieldInfo</code> types will be lost through serialization.
-			
-			
-            <p><b>API</b>
-<br><code>Cliver.Settings</code> exposes some members that allow enhancing functionality:
-<br> - property <code>__Info</code> which links together <a href='#settings_field'>settings field</a> and <a href='#settings_class'>settings type</a>;
+<p>(!)While a <a href='#settings_class'>settings class</a> can implement any logic and members, remember that nevertheless there are restrictions for what and how can be serialized. For instance, data which depend on the current application state like <code>events, FieldInfo</code> types will be lost through serialization.
+
+						
+            <h3><a name='cliver_settings'>Cliver.Settings</a></h3>
+			<a href='#cliver_settings'><code>Cliver.Settings</code></a> is a base <a href='#settings_class'>settings type</a> defined in <a href='#config'><code>Cliver.Config</code></a>.
+<p>It exposes some members that allow managing serialization routine in its derivatives:
+<br> - property <code>__Info</code> which links <a href='#settings_class'>a settings type</a> to a certain <a href='#settings_field'>settings field</a>;
 <br> - auxiliary methods some of which can be redefined in your settings class if needed;
 <br>See API and annotations for more info.
 
-            <p><b>UserSettings and AppSettings</b>
-			<br>Usually you will not inherit <code>Cliver.Settings</code> directly but use one of its derivatives provided by <code>CliverRoutines</code>:
-<br> - <code>Cliver.UserSettings</code> which is serialized to the user-relevant app data directory; 
-<br> - <code>Cliver.AppSettings</code> which is serialized to the user-irrelevant app data directory (NB: writing to it on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in <code>CliverWinRoutines</code> package);
+        <p>			Usually you will not inherit <a href='#cliver_settings'><code>Cliver.Settings</code></a> directly and use one of its derivatives provided by CliverRoutines: <a href="#cliver_usersettings"><code>Cliver.UserSettings</code></a> and <a href="#cliver_appsettings"><code>Cliver.AppSettings</code></a>.
+			<br>If your <a href='#settings_class'>settings class</a> inherits <a href='#cliver_settings'><code>Cliver.Settings</code></a> directly then you have to define the serialization directory in it.
 
-        <br>When you create a settings class inheriting <code>Cliver.Settings</code> directly, you need to define the serialization directory in it.
+
+
+            <h4><a name="cliver_usersettings">Cliver.UserSettings</a></h4>
+<a href="#cliver_usersettings"><code>Cliver.UserSettings</code></a> is a <a href='#cliver_settings'><code>Cliver.Settings</code></a> derivative which provides serialization to the current user's application data directory. 
+
+
+
+
+            <h4><a name="cliver_appsettings">Cliver.AppSettings</a></h4>
+<a href="#cliver_appsettings"><code>Cliver.AppSettings</code></a> is a <a href='#cliver_settings'><code>Cliver.Settings</code></a> derivative which provides serialization to the common (user-irrelevant) application data directory. 
+<p>(!)Writing to this directory on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in CliverWinRoutines package.
+
+				    
+				   
+
 			
-<p>			<b>Example</b>
+<h3>Example</h3>
 			
 <pre>
 <code class="language-csharp">
@@ -145,16 +157,30 @@ public class GeneralSettings : Cliver.UserSettings
 </pre>
 
 			
+
 			
-            <h2><a name='settings_field'>Settings field</a></h2>
-			Settings field is a field or property of <a href='#settings_class'>settings type</a> in any class of your app. 
-			<p>(!)A settings field must be <code>static public</code> to be processed by <code>Cliver.Config</code>.
-			<br>Such fields are automatically detected and serialized/deserialized by <code>Cliver.Config</code>.
+
+
 			
-			<p>There can be any number of settings fields in your code.
-                   Usually you will need only one settings field per <a href='#settings_class'>settings type</a> but there is no problem to declare any number fo fields of the same settings type.
+<h2><a name='settings_field'>Settings field</a></h2>
+			<a href='#settings_field'>Settings field</a> is a field or property of <a href='#settings_class'>settings type</a> declared in any class of your app. 
+			<p>(!)A <a href='#settings_field'>settings field</a> must be <code>static public</code> to be processed by <a href='#config'><code>Cliver.Config</code></a>. Such fields are automatically detected by <a href='#config'><code>Cliver.Config</code></a> and can be serialized/deserialized.
+			
+			<p>There can be any number of <a href='#settings_field'>settings field</a>s in your code.
+                   Usually you will need only one <a href='#settings_field'>settings field</a> per <a href='#settings_class'>settings type</a> but there is no problem to declare any number of <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>settings type</a>.
+				   				
+
+
+			
+			  
+		   <p>  At the outset <a href='#settings_field'>settings fields</a> are initialized by <a href='#config'><code>Cliver.Config</code></a> which creates instances of their <a href='#settings_class'>settings types</a>. <br>But you too can create or clone instances of <a href='#settings_class'>settings types</a>. And if a <a href='#settings_field'>settings field</a> is non-readonly, you can replace its value with another instance. 
+<br>An instance of <a href='#settings_class'>settings type</a> which is the value of some <a href='#settings_field'>settings field</a> is called <i>attached</i>, otherwise, <i>detached</i>. See <a href='#swapping_settings'>example</a>.
+
+
+
+								
 				   
-<p>			<b>Example</b>
+<h3>Example</h3>
 <pre>
 <code class="language-csharp">
 //create a field of GeneralSettings type anywhere in the code. 
@@ -162,75 +188,148 @@ namespace App
 {
 	public class Settings
 	{
-		//Usually, to avoid mess, you'd like to make it readonly. But it is optional because sometimes the logic of the app may require to replace the value.
+		//Usually, to avoid mess, you'd like to make it readonly. But it is optional because sometimes the logic of the app may require replacing the value.
 		public static readonly GeneralSettings General;
 	}
 }
 </code>
 </pre>
 		
-<p>			<b>Initialization</b>
-        <br> Detection and initialization of settings fields is triggered from your code. It can be preceded by optional configuration of <code>Cliver.Config</code> (see the API).
+<h3>Initialization</h3>
+        <br> Detection and initialization of <a href='#settings_field'>settings field</a>s must be triggered from your code. It can be preceded by optional configuration of <a href='#config'><code>Cliver.Config</code></a> (see its API).
 <pre>
 <code class="language-csharp">
 //configure. It must be done before initializing the settings.
 Cliver.Config.ExplicitlyTrackedAssemblies = new List<System.Reflection.Assembly> { Assembly.GetExecutingAssembly() };//optional
 
 //detect and initialize settings fields. 
-Cliver.Config.Reload();//!!!mandatory
+Cliver.Config.Reload();//mandatory
 </code>
 </pre>			   
 				
-<p>			<b>Assembly scope</b>
-        <br>(!)Looking for settings fields in an application, <code>Cliver.Config</code> searches within the following assemblies by default:
-<br> - assembly that calls one of <code>Cliver.Config</code>'s initializing methods;
+				
+				
+				
+<h3>Assembly scope</h3>
+        <br>(!)When looking for <a href='#settings_field'>settings fields</a> in an application, <a href='#config'><code>Cliver.Config</code></a> searches within the following assemblies by default:
+<br> - assembly that calls one of <a href='#config'><code>Cliver.Config</code></a>'s initializing methods;
 <br> - assemblies that are referenced by the calling assembly;
-<br>The search scope is limited this way in order not to load more assemblies which is unavoidable while enumerating them. 
+<br>The search scope is limited this way in order not to load more assemblies which is necessary while enumerating through them. 
  
 <p>If needed, the assembly scope can by assigned from code explicitly (see the API).
 			
 			
-            <h2><a name='storage_file'>Storage file</a></h2>
-			Each <a href='#settings_field'>settings field</a> is serialized to its own file. 
-		
-<p>			<b>Storage file path</b>
-            <br>A storage file path is defined as follows: file directory depends on the <a href='#settings_class'>settings type</a> and file name depends on the <a href='#settings_field'>settings field</a>'s full type path in the code.
+				   
+				   
 			
-			<br>This means that each <a href='#settings_field'>settings field</a> has its own storage file.
-						
-<p>			See the example:
-            <br> 
+			
+			
+<h3><a name='storage_file'>Storage file</a></h3>
+		<a href='#storage_file'>Storage file</a> stores serialized data for one <a href='#settings_field'>settings field</a>. Thus, each <a href='#settings_field'>settings field</a> has its own <a href='#storage_file'>storage file</a>. 
+		
+		<p>It is re-created by call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>.
+			
+			
+			
+			<h4>Path</h4>
+			<p><a href='#storage_file'>Storage file</a> path is defined as follows: file directory is predetermined by the <a href='#settings_class'>settings type</a> and file name is predetermined by the <a href='#settings_field'>settings field</a>'s full path in the code.
+									
+<p>See the example:
+<pre>
+<code class="language-csharp">
+namespace App
+{
+	public class GeneralSettings : Cliver.UserSettings
+	{   	
+		public string User;
+	}
+	
+	public class Settings
+	{
+		public static readonly GeneralSettings General;
+	}
+}
+</code>
+</pre>
+The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>settings field</a> <code>Settings.General</code> will be:
 			<table style="table-layout:fixed;">
 			<tr>
 			<td style="border:0;">storage file path:</td>
 			<td bgcolor="#ddf" style="margin:0;padding:0;border:0;border-collapse:collapse;">C:\Users\serge\AppData\Local\</td>
-			<td bgcolor="#def" style="margin:0;padding:0;border:0;border-collapse:collapse;">Company\App\config\</td>
+			<td bgcolor="#def" style="margin:0;padding:0;border:0;border-collapse:collapse;">SuperDuperSoft\App\config\</td>
 			<td bgcolor="#dff" style="margin:0;padding:0;border:0;border-collapse:collapse;">App.Settings.General.json</td>
 				</tr>
 				<tr>
 			<td>predetermined by:</td>
-			<td style="width:10px;">inheriting from <code>Cliver.UserSettings</code></td>
-			<td style="width:10px;">application's name 'App' and company name 'Company'</td>
+			<td style="width:10px;"><code>Cliver.UserSettings</code></td>
+			<td style="width:10px;">application's name 'App' and company name 'SuperDuperSoft'</td>
 			<td style="width:10px;">the full path of field <code>General</code> in the application</td>
 			</tr>
 			</table>
 			
-<p>			<b>Initial and storage files</b>
-            <br>Each <a href='#settings_class'>settings type</a> can have 2 files of the same format:
-			<br> - initial file which is optional and can be used for easily altering initial values defined in code or when settings data are too big to be kept in code. It is supplied in the same directory with the application itself;
-			<br> - storage file which is re-created by every call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>;
+
+
+
+
+
 			
-<p>			<b>Restoring settings order</b>
-            <br><code>Cliver.Config</code> tries to restore a <a href='#settings_field'>settings field</a> in the following order:
-			<br> - from one's storage file if exists;
-			<br> - from one's initial file if exists;
+			
+<h3><a name='initial_file'>Initial file</a></h3>
+			<p><a href='#initial_file'>Initial file</a> keeps data which supersede the initial values hardcoded in the <a href='#settings_class'>settings type</a> definition. Each <a href='#settings_field'>settings field</a> can have its own <a href='#initial_file'>initial file</a> and thus, can have its own initial value set. 
+			
+			<p>It is optional and has the same format as <a href='#storage_file'>storage file</a>.
+			
+		<p><a href='#initial_file'>Initial file</a> is re-read by call of <code>Reload()</code> or <code>Reset()</code>.
+			
+			<p>It is supplied in the same directory as the application itself.
+		 
+			
+			<p>It is helpful when:
+			<br> - initial settings data are too big to be kept in code;
+			<br> - initial settings data can be more easily managed in file, not in code;
+			<br> - the application has several <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>settings type</a> and each of them must be initiated by its own value set;
+						
+			
+			
+			<h4>Name</h4>
+			<p><a href='#initial_file'>Initial file</a> name is predetermined by the <a href='#settings_field'>settings field</a>'s full path in the code.
+									
+<p>See the example:
+<pre>
+<code class="language-csharp">
+namespace App
+{	
+	public class Settings
+	{
+		public static readonly GeneralSettings General;
+	}
+}
+</code>
+</pre>
+The <a href='#initial_file'>initial file</a> name of <a href='#settings_field'>settings field</a> <code>Settings.General</code> will be 'App.Settings.General.json'.
+
+
+
+			
+			
+<h3>Restoring order</h3>
+            <br><a href='#config'><code>Cliver.Config</code></a> performs restoring of a <a href='#settings_field'>settings field</a> in the following order:
+			
+			<p><code><b>Reload()</code></b>
+			<br> - from one's <a href='#storage_file'>storage file</a> if exists;
+			<br> - from one's <a href='#initial_file'>initial file</a> if exists;
 			<br> - from the values predefined in one's <a href='#settings_class'>settings type</a>;
+		
+			<p><code><b>Reset()</code></b>
+			<br> - from one's <a href='#initial_file'>initial file</a> if exists;
+			<br> - from the values predefined in one's <a href='#settings_class'>settings type</a>;
+		
 
 
 
 
-            <h2><a name=''>Usage</a></h2>
-			Reference <code>CliverRoutines</code> in your project.
+<h2><a name=''>Usage</a></h2>
+			Reference CliverRoutines in your project.
 			
 			
 					
@@ -271,7 +370,7 @@ public class Settings
 //optional configuration must be done before initializing settings. See the API and annotations for options.
 ...
 
-//detect and initialize settings fields. It can be called many times where every call re-initializes settings.
+//detect and initialize <a href='#settings_field'>settings fields</a>. It can be called many times where every call re-initializes settings.
 Cliver.Config.Reload();//!!!mandatory call before using settings 
 </code>
 </pre>
@@ -295,7 +394,7 @@ Cliver.Config.Reset();
 notify(Settings.General.SmtpHost, Settings.General.SmtpPort, Settings.General.Clients);
 </code>
 </pre>
-         <p><code>Cliver.Config</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
+         <p><a href='#config'><code>Cliver.Config</code></a> has more properties and methods which allow flexibly meeting your needs. See its API and annotations. 
 		 
             <h2><a name=''>Tips</a></h2>
 
@@ -316,9 +415,9 @@ public class GeneralSettings : Cliver.UserSettings
 </pre>
 			
 			
-            <h3><a name=''>Ignoring fields</a></h3>
+            <h3><a name=''>Ignoring fields/properties</a></h3>
 
-            To make a certain field not serializable, make it <code>non-public</code>. Otherwise, reference <code>Newtonsoft.Json</code> and add the attribute as in the example:
+            To make a certain field or property not serializable, make it <code>non-public</code>. Otherwise, reference <code>Newtonsoft.Json</code> and add the attribute as in the example:
 <pre>
 <code class="language-csharp">
 public class GeneralSettings : Cliver.UserSettings
@@ -337,9 +436,9 @@ public class GeneralSettings : Cliver.UserSettings
 
 
 
-            <h3><a name='swapping'>Cloning and replacing</a></h3>
+            <h3><a name='swapping_settings'>Cloning and replacing</a></h3>
 
-            Sometimes it is handy to modify not a settings field itself but its clone and then replace it:
+            Sometimes it is handy to modify not a <a href='#settings_field'>settings field</a> itself but its clone and then replace it:
 <pre>
 <code class="language-csharp">
 //create a clone
@@ -362,7 +461,7 @@ if(userOk())
 
 
             <h3><a name=''>Polymorphism</a></h3>
-Being usual C# classes, <a href='#settings_class'>settings types</a> support polymorphism. That is, you can build many <a href='#settings_class'>settings types</a> inheriting the same parent and easily switch between them depending on the application logic. See the example.
+Being ordinary C# classes, <a href='#settings_class'>settings types</a> support polymorphism. That is, you can build many <a href='#settings_class'>settings types</a> inheriting the same parent and easily switch between them depending on the application logic. See the example.
 
 <p>Define a base <a href='#settings_class'>settings type</a> and its derivatives:
 <pre>
@@ -393,7 +492,7 @@ public class Scope2Settings : ScopeSettings
 </code>
 </pre>
 
-<p>Initialize settings fields and set the required scope:
+<p>Initialize <a href='#settings_field'>settings fields</a> and set the required scope:
 <pre>
 <code class="language-csharp">
 Config.Reload();
@@ -402,7 +501,7 @@ ScopeSettings.Scope = Scope1Settings.This;
 </code>
 </pre>
 
-<p>Now, independing on the actual scope, you can use ScopeSettings.Scope uniformly:
+<p>Now, independing on the actual scope, you can use <code>ScopeSettings.Scope</code> uniformly:
 <pre>
 <code class="language-csharp">
 ...
@@ -483,7 +582,7 @@ connect(General.Password);
 
 
             <h3><a name=''>Passing to another process</a></h3>
-You can pass a settings field to another process. It should be done through serialization.
+You can pass a <a href='#settings_field'>settings field</a> to another process. It should be done through serialization.
 
 <p>In process 1:
 <pre>
@@ -530,7 +629,7 @@ Settings.General.Save();
 			<p>
             It is thread-safe.
 			
-			<p><code>Cliver.Log</code> is <a href="#logSession">session</a> oriented. It means that an application can write multiple log sessions successively or simultaneously.
+			<p><code>Cliver.Log</code> is <a href="#log_session">session</a> oriented. It means that an application can write multiple log <a href='#log_session'>sessions</a> successively or simultaneously.
             It is helpful when an application performs multiple independent tasks.
 			
 			<p>
@@ -545,22 +644,35 @@ Settings.General.Save();
 
 
 
-            <h2><a name='logSession'>Session</a></h2>
+            <h2><a name='log_session'>Session</a></h2>
 
-            Each log belongs to a session. 
-			<p>Depending on configuration, each session can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
+            Each log belongs to a <a href='#log_session'>session</a>. 
+			<p>Depending on configuration, each <a href='#log_session'>session</a> can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
 			
             <p> Session folders can be used to store additional data like caches etc.
 			
-			<p> Multiple sessions can be open simultaneously.
+			<p> Multiple <a href='#log_session'>sessions</a> can be open simultaneously.
 			
-	<p>There is the default session which has empty name and is referenced as <code>Head</code>.
+	<p>There is the default <a href='#log_session'>session</a> which has empty name and is referenced as <code>Head</code>.
 			
 
 
+			<h3><a name='log_default_session'>Head session</a></h3>
+<a href='#log_default_session'>The default session</a> is a <a href='#log_session'>session</a> which is used when no <a href='#log_session'>session</a> is called explicitly. It is referenced as <code>Head</code> and has empty name.
 
-			<p><b>Usage example</b>
-<br>
+
+<pre>
+<code class="language-csharp">
+using Cliver;
+...
+//write to the default session
+Log.Write("message");// it is shortcut for Log.Head.Write("message");
+</code>
+</pre>
+
+
+
+			<h3>Example</h3>
 <pre>
 <code class="language-csharp">
 using Cliver;
@@ -576,19 +688,23 @@ game1Log.Close(true);//optional call to free memory
 </code>
 </pre>
 
-			<p><b>Work directory</b>
+
+
+
+
+			<h3><a name="#work_directory">Work directory</a></h3>
 <br>
-			All sessions are created in the same work directory.
+			All <a href='#log_session'>sessions</a> are created within the same <a href="work_directory">work directory</a> which is defined at the first log writing or call of <code>Log.Initialize()</code>
 			
 			
-			<p>By default the work directory is defined in the order by which <code>Cliver.Log</code> tries to write to:
+			<p>By default the <a href="work_directory">work directory</a> is defined in the order by which <code>Cliver.Log</code> tries to write to:
 			<br> - the folder where the application is located;
 			<br> - the user data folder;
 			<br> - the common data folder;
 			<br> - the desktop folder;
 			<br> - the temp folder;
 			
-			<p>The work directory definition can be customized while initializing:
+			<p>The <a href="work_directory">work directory</a> definition can be customized while initializing:
 <pre>
 <code class="language-csharp">
 //optional initialization before using logs
@@ -601,17 +717,23 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.CompanyUserDa
 
 
     <h2><a name='named_log'>Named log</a></h2>
-    A named log has name by which it can be called.
-	
-	<p>Each session has its default log which has empty name and is referenced as <code>Main</code>.
-	
-    <p>Trivial logging when everything is written to the same file:
+    <a href='#default_log'>Named log</a> is a log which can be referenced by custom name.
+	<p>The name of a <a href='#default_log'>named log</a> is a part of its file name.
+
+
+
+
+			<h3><a name='default_log'>Main log</a></h3>
+<a href='#default_log'>The default log</a> of a <a href='#log_session'>session</a> is a <a href='#default_log'>named log</a> which is used when no <a href='#named_log'>named log</a> is called explicitly. It is referenced as <code>Main</code> and has empty name.
+
+		
+    <p><a href='#default_log'>The default log</a> is handy for trivial logging when everything is written to the same file:
 <pre>
     <code class="language-csharp"> 
 using Cliver;
 ...
 
-//writing to the default (Main) named log in the default (Head) session
+//writing to the default (Main) log in the default (Head) session
 Log.Inform("test message"); //It is a shortcut for Log.Head.Main.Inform()
 
 try
@@ -625,7 +747,11 @@ catch (Exception e)
     </code>
 </pre>
 
- <p>   Logging to a named log in the default session:
+
+
+			<h3>Example</h3>
+
+ <p>   Logging to a named log of <a href='#log_default_session'>the default session</a>:
 <pre>
     <code class="language-csharp">
 //writig to the log "Inform" in the default session
@@ -643,7 +769,7 @@ catch (Exception e)
     </code>
 </pre>
 
- <p>   Logging to a named log of an explicitly created session:
+ <p>   Logging to a named log of an explicitly created <a href='#log_session'>session</a>:
 <pre>
     <code class="language-csharp">
 //writing to the session "Game1"
@@ -661,8 +787,8 @@ game1Session["Test"].Inform("test message");
 
 
     <h2><a name='thread_log'>Thread log</a></h2>
-    A thread log is a log that belongs to only one and the same .NET thread.
-	<p>Each thread log has a unique ID in its file name. Depending on configuration, those ID's can be reused or be endlessly incremented for each new thread log.
+    A <a href='#thread_log'>thread log</a> is a log that belongs to only one and the same .NET thread.
+	<p>Each <a href='#thread_log'>thread log</a> has a unique ID which is a part of its file name. Depending on configuration, those ID's can be reused or be endlessly incremented for each new <a href='#thread_log'>thread log</a>.
 	
 	<p>In this example, each download thread writes its own log:
 <pre>
@@ -697,7 +823,7 @@ static void Main(string[] args)
 
 
             <h2><a name='example'>Usage</a></h2>
-			Reference <code>CliverRoutines</code> in your project.
+			Reference CliverRoutines in your project.
 			
 		
         <p> At the beginning of the application, add initializing:
@@ -721,7 +847,7 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you
 Log.Inform("test message"); //trivial log usage
 </code>
 </pre>
-         <p><code>Cliver.Log</code> has more properties and methods that allows flexibly meeting your needs. See the API and annotations for details. 
+         <p><code>Cliver.Log</code> has more properties and methods that allows flexibly meeting your needs. See its API and annotations. 
 		 
   
 
@@ -731,7 +857,7 @@ Log.Inform("test message"); //trivial log usage
 
 
     <h1><a name='miscellaneous'>Miscellaneous</a></h1>
-<p><code>CliverRoutines</code> exposes a number of auxiliary routines. See the API and annotations for details.
+<p>CliverRoutines exposes a number of auxiliary routines. See the API and annotations.
 
 
 
