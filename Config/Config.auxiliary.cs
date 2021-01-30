@@ -81,7 +81,7 @@ namespace Cliver
                     else
                     {
                         Settings s = Settings.Create(sfi, true, true);
-                        s.Save();
+                        s.Save(sfi);
                         File.Move(sfi.File, file2);
                     }
                 }
