@@ -394,7 +394,7 @@ Cliver.Config.Reset();
 notify(Settings.General.SmtpHost, Settings.General.SmtpPort, Settings.General.Clients);
 </code>
 </pre>
-         <p><a href='#config'><code>Cliver.Config</code></a> has more properties and methods which allow flexibly meeting your needs. See its API and annotations. 
+         <p>See <a href='#config'><code>Cliver.Config</code></a> API and CliverRoutinesExample project for more options.
 		 
             <h2><a name=''>Tips</a></h2>
 
@@ -625,18 +625,16 @@ Settings.General.Save();
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            <code>Cliver.Log</code> is a cross-platform logger. 
-			<p>
-            It is thread-safe.
+            <a href='#log'><code>Cliver.Log</code></a> is a cross-platform logger. 
 			
-			<p><code>Cliver.Log</code> is <a href="#log_session">session</a> oriented. It means that an application can write multiple log <a href='#log_session'>sessions</a> successively or simultaneously.
+			<p>It is thread-safe.
+			
+			<p><a href='#log'><code>Cliver.Log</code></a> is <a href="#log_session">session</a> oriented. It means that an application can write multiple log <a href='#log_session'>sessions</a> successively or simultaneously.
             It is helpful when an application performs multiple independent tasks.
 			
-			<p>
-            <code>Cliver.Log</code> supports <a href="#named_log">named</a> and <a href="#thread_log">thread</a> logs.
+			<p>            <a href='#log'><code>Cliver.Log</code></a> supports <a href="#named_log">named</a> and <a href="#thread_log">thread</a> logs.
 			
-			<p>
-            It performs auto-cleanup of old logs.
+			<p> It performs auto-cleanup of old logs.
 			
 			
 			<p>To see live usage examples, refer to CliverRoutinesExample project.
@@ -697,7 +695,7 @@ game1Log.Close(true);//optional call to free memory
 			All <a href='#log_session'>sessions</a> are created within the same <a href="work_directory">work directory</a> which is defined at the first log writing or call of <code>Log.Initialize()</code>
 			
 			
-			<p>By default the <a href="work_directory">work directory</a> is defined in the order by which <code>Cliver.Log</code> tries to write to:
+			<p>By default the <a href="work_directory">work directory</a> is defined in the order by which <a href='#log'><code>Cliver.Log</code></a> tries to write to:
 			<br> - the folder where the application is located;
 			<br> - the user data folder;
 			<br> - the common data folder;
@@ -822,7 +820,7 @@ static void Main(string[] args)
 			Reference CliverRoutines in your project.
 			
 		
-        <p> At the beginning of the application, add initializing:
+        <p> At the beginning of the application, add optional initializing:
 <pre>
 <code class="language-csharp">
 using Cliver;
@@ -831,19 +829,19 @@ using Cliver;
 //optional configuration can be done at the very beginning. See the API and annotations for options.
 ...
 
-//optional initialization. It can be called many times where every call close all the logs and re-initializes the engine.
+//optional initialization. It can be called many times where every call closes all the logs and re-initializes the engine.
 Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you are ok with default settings. 
 </code>
 </pre>
 
 
-         <p>      Now the logger is ready to be used:
+         <p>      Now the logger can be used:
 <pre>
 <code class="language-csharp">
 Log.Inform("test message"); //trivial log usage
 </code>
-</pre>
-         <p><code>Cliver.Log</code> has more properties and methods that allows flexibly meeting your needs. See its API and annotations. 
+</pre> 
+         <p>See <a href='#log'><code>Cliver.Log</code></a> API and CliverRoutinesExample project for more options.
 		 
   
 
