@@ -208,19 +208,19 @@ namespace Cliver
                                 CompanyUserDataDir,
                                 CompanyCommonDataDir,
                                 Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-                                System.IO.Path.GetTempPath() + System.IO.Path.DirectorySeparatorChar + CompanyName + System.IO.Path.DirectorySeparatorChar,
+                                Path.GetTempPath() + Path.DirectorySeparatorChar + CompanyName + Path.DirectorySeparatorChar,
                                 };
                 if (Log.primaryBaseDirs != null)
                     baseDirs.InsertRange(0, Log.primaryBaseDirs);
                 foreach (string baseDir in baseDirs)
                 {
-                    workDir = baseDir + System.IO.Path.DirectorySeparatorChar + Log.ProcessName + WorkDirNameSuffix;
+                    workDir = baseDir + Path.DirectorySeparatorChar + Log.ProcessName + WorkDirNameSuffix;
                     if (create)
                         try
                         {
                             if (!Directory.Exists(workDir))
                                 FileSystemRoutines.CreateDirectory(workDir);
-                            string testFile = workDir + System.IO.Path.DirectorySeparatorChar + "test";
+                            string testFile = workDir + Path.DirectorySeparatorChar + "test";
                             File.WriteAllText(testFile, "test");
                             File.Delete(testFile);
                             Log.BaseDir = baseDir;
@@ -236,26 +236,15 @@ namespace Cliver
                 workDir = PathRoutines.GetNormalizedPath(workDir, false);
                 if (Directory.Exists(workDir) && deleteLogsOlderThanDays >= 0)
                     deletingOldLogsThread = ThreadRoutines.Start(() => { Log.DeleteOldLogs(deleteLogsOlderThanDays, DeleteOldLogsDialog); });//to avoid a concurrent loop while accessing the log file from the same thread 
-                else
-                    throw new Exception("Could not create log folder!");
             }
-            // deletingOldLogsThread?.Join();      
         }
 
         static public string BaseDir { get; private set; }
     }
 
-    //public class TerminatingException : Exception
-    //{
-    //    public TerminatingException(string message)
-    //        : base(message)
-    //    {
-    //        LogMessage.Exit(message);
-    //    }
-    //}
-
     /// <summary>
-    /// Trace info for such Exception is not logged. Used for foreseen errors.
+    /// Trace info for such Exception is not logged. 
+    /// It is intended for foreseen errors.
     /// </summary>
     public class Exception2 : Exception
     {

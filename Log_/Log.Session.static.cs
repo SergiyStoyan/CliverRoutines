@@ -34,8 +34,8 @@ namespace Cliver
             /// Get the session.
             /// It will be created if not exists.
             /// </summary>
-            /// <param name="sessionName"></param>
-            /// <returns></returns>
+            /// <param name="sessionName">session name</param>
+            /// <returns>session</returns>
             public static Session Get(string sessionName)
             {
                 lock (names2Session)
@@ -50,9 +50,9 @@ namespace Cliver
             }
 
             /// <summary>
-            /// Get all the sessions.
+            /// Get all the existing sessions.
             /// </summary>
-            /// <returns></returns>
+            /// <returns>existing sessions</returns>
             public static List<Session> GetAll()
             {
                 lock (names2Session)

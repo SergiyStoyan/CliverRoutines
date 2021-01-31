@@ -129,32 +129,9 @@ namespace Cliver
                 {
                     write(messageType, message, details);
                     if (messageType == Log.MessageType.EXIT)
-                    {
-                        if (exiting)
-                            return;
-                        exiting = true;
-                        //if (exitingThread != null)
-                        //    return;
-                        //exitingThread = ThreadRoutines.Start(() =>
-                        //{
-                        try
-                        {
-                            Exitig?.Invoke(message);
-                        }
-                        catch (Exception e)
-                        {
-                            write(Log.MessageType.ERROR, GetExceptionMessage(e));
-                        }
-                        finally
-                        {
-                            Environment.Exit(0);
-                        }
-                        //});
-                    }
+                        Environment.Exit(0);
                 }
             }
-            //static protected System.Threading.Thread exitingThread = null;
-            static protected bool exiting = false;
             void write(Log.MessageType messageType, string message, string details = null)
             {
                 lock (this)
@@ -207,7 +184,7 @@ namespace Cliver
             TextWriter logWriter = null;
 
             /// <summary>
-            /// Called for OnWrite. 
+            /// Called for Writing. 
             /// </summary>
             /// <param name="logWriterName"></param>
             /// <param name="messageType"></param>
@@ -215,19 +192,9 @@ namespace Cliver
             /// <param name="details"></param>
             public delegate void OnWrite(string logWriterName, Log.MessageType messageType, string message, string details);
             /// <summary>
-            /// Called right before writing message.
+            /// Triggered before writing message.
             /// </summary>
             static public event OnWrite Writing = null;
-
-            /// <summary>
-            /// Called for OnExitig
-            /// </summary>
-            /// <param name="message"></param>
-            public delegate void OnExitig(string message);
-            /// <summary>
-            /// Called right before writing message and exiting.
-            /// </summary>
-            static public event OnExitig Exitig = null;
         }
     }
 }
