@@ -15,6 +15,11 @@ namespace Cliver
     {
         public partial class Session
         {
+            /// <summary>
+            /// Get log for this thread.
+            /// It will be created if not exists.
+            /// </summary>
+            /// <returns>thread log</returns>
             public ThreadWriter Thread
             {
                 get
@@ -27,6 +32,9 @@ namespace Cliver
 
             int threadWriterCounter = 0;
 
+            /// <summary>
+            /// Thread log.
+            /// </summary>
             public class ThreadWriter : Writer
             {
                 ThreadWriter(Session session, int id, System.Threading.Thread thread)
@@ -37,12 +45,12 @@ namespace Cliver
                 }
 
                 /// <summary>
-                /// Log ID
+                /// Log ID.
                 /// </summary>
                 public readonly int Id = 0;
 
                 /// <summary>
-                /// Log thread
+                /// Log thread.
                 /// </summary>
                 public readonly System.Threading.Thread Thread;
 
@@ -54,14 +62,9 @@ namespace Cliver
                         if (!session.threadIds2TreadWriter.TryGetValue(thread.ManagedThreadId, out tw))
                         {
                             //cleanup for dead thread logs
-                            List<System.Threading.Thread> oldLogThreads = session.threadIds2TreadWriter.Values.Where(a=>!a.Thread.IsAlive).Select(a=>a.Thread).ToList();
+                            List<System.Threading.Thread> oldLogThreads = session.threadIds2TreadWriter.Values.Where(a => !a.Thread.IsAlive).Select(a => a.Thread).ToList();
                             foreach (System.Threading.Thread t in oldLogThreads)
                             {
-                                if (t.ThreadState != System.Threading.ThreadState.Stopped)
-                                {
-                                    session.threadIds2TreadWriter[t.ManagedThreadId].Error("This thread is detected as not alive. Aborting it...");
-                                    t.Abort();
-                                }
                                 session.threadIds2TreadWriter[t.ManagedThreadId].Close();
                                 session.threadIds2TreadWriter.Remove(t.ManagedThreadId);
                             }

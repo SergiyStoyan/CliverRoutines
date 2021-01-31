@@ -29,51 +29,86 @@ namespace Cliver
             if (ProgramRoutines.IsWebContext)
                 ProcessName = System.Web.Compilation.BuildManager.GetGlobalAsaxType().BaseType.Assembly.GetName(false).Name;
             else*/
-            System.Reflection.Assembly a = System.Reflection.Assembly.GetEntryAssembly();
-            //!!!when using WCF hapenned that GetEntryAssembly() is NULL 
-            if (a == null)
-                a = System.Reflection.Assembly.GetCallingAssembly();
-            ProcessName = System.Reflection.Assembly.GetEntryAssembly().GetName(false).Name;
+            /*!!!it was tested on XamarinMAC, NT service
+            entryAssembly = Assembly.GetEntryAssembly();
+            //!!!when using WCF it happened that GetEntryAssembly() is NULL 
+            if (entryAssembly == null)
+                entryAssembly = Assembly.GetCallingAssembly();
+            ProcessName = entryAssembly.GetName(false).Name;
 
-            AppDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(System.IO.Path.DirectorySeparatorChar);
-
-            AssemblyRoutines.AssemblyInfo ai = new AssemblyRoutines.AssemblyInfo(Assembly.GetEntryAssembly());
+            AssemblyRoutines.AssemblyInfo ai = new AssemblyRoutines.AssemblyInfo(entryAssembly);
             CompanyName = string.IsNullOrWhiteSpace(ai.Company) ? "CliverSoft" : ai.Company;
 
-            //!!!no write permission on macOS!!!
-            CompanyCommonDataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + System.IO.Path.DirectorySeparatorChar + CompanyName;
-            AppCommonDataDir = CompanyCommonDataDir + System.IO.Path.DirectorySeparatorChar + Log.ProcessName;
+            AppDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            */
 
-            CompanyUserDataDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + CompanyName;
-            AppUserDataDir = CompanyUserDataDir + System.IO.Path.DirectorySeparatorChar + Log.ProcessName;
+            Process p = Process.GetCurrentProcess();
+            ProcessName = p.ProcessName;
+            AppDir = PathRoutines.GetFileDir(p.MainModule.FileName);
+            CompanyName = FileVersionInfo.GetVersionInfo(p.MainModule.FileName)?.CompanyName;
+
+            //!!!No write permission on macOS
+            CompanyCommonDataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + Path.DirectorySeparatorChar + CompanyName;
+            //!!!No write permission on macOS
+            AppCompanyCommonDataDir = CompanyCommonDataDir + Path.DirectorySeparatorChar + ProcessName;
+            CompanyUserDataDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + CompanyName;
+            AppCompanyUserDataDir = CompanyUserDataDir + Path.DirectorySeparatorChar + ProcessName;
         }
 
         /// <summary>
-        /// Normalized name of this process
+        /// Normalized name of this process.
         /// </summary>
         public static readonly string ProcessName;
 
+        /// <summary>
+        /// Company name of the executing file.
+        /// </summary>
         public static readonly string CompanyName;
+        ///// <summary>
+        ///// If altering it, do it at the very beginning.
+        ///// </summary>
+        //public static string CompanyName
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrWhiteSpace(companyName))
+        //        {
+        //            Assembly entryAssembly = Assembly.GetEntryAssembly();
+        //            if (entryAssembly == null)//!!!when using WCF it happened that GetEntryAssembly() is NULL 
+        //                entryAssembly = Assembly.GetCallingAssembly();
+        //            AssemblyRoutines.AssemblyInfo ai = new AssemblyRoutines.AssemblyInfo(entryAssembly);
+        //            companyName = string.IsNullOrWhiteSpace(ai.Company) ? "CliverSoft" : ai.Company;
+        //        }
+        //        return companyName;
+        //    }
+        //    set
+        //    {
+        //        companyName = value;
+        //    }
+        //}
+        //static string companyName;
 
         /// <summary>
-        /// Directory where the company's application data independent on user are located.
+        /// User-independent company data directory.
+        /// (!)No write permission on macOS
         /// </summary>
         public static readonly string CompanyCommonDataDir;
 
         /// <summary>
-        /// Directory where the application's data files independent on user are located.
+        /// User-independent company-application data directory.
+        /// (!)No write permission on macOS
         /// </summary>
-        public static readonly string AppCommonDataDir;
+        public static readonly string AppCompanyCommonDataDir;
 
         /// <summary>
-        /// Directory where the CliverSoft's application data dependent on user are located.
+        /// User-dependent company data directory.
         /// </summary>
         public static readonly string CompanyUserDataDir;
 
         /// <summary>
-        /// Directory where the application's data files dependent on user are located.
+        /// User-dependent company-application data directory.
         /// </summary>
-        public static readonly string AppUserDataDir;
+        public static readonly string AppCompanyUserDataDir;
 
         /// <summary>
         /// Directory where the application binary is located.

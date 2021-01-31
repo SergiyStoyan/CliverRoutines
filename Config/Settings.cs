@@ -83,7 +83,7 @@ namespace Cliver
         {
             return __Info != null
                 && Config.GetSettingsFieldInfo(__Info.FullName).GetObject() == this;//is referenced by the field
-                //&& __Info.GetObject() == this;//is referenced by the field//!!!if Config was reloaded and __Info was recreated, it still would work
+                                                                                    //&& __Info.GetObject() == this;//is referenced by the field//!!!if Config was reloaded and __Info was recreated, it still would work
         }
 
         /// <summary>
@@ -101,9 +101,9 @@ namespace Cliver
         }
         void save()
         {
-                Saving();
-                Cliver.Serialization.Json.Save(__Info.File, this, __Info.Indented, true);
-                Saved();
+            Saving();
+            Cliver.Serialization.Json.Save(__Info.File, this, __Info.Indented, true);
+            Saved();
         }
         internal void Save(SettingsFieldInfo settingsFieldInfo)//this avoids a redundant operation and provides an appropriate exception message
         {
@@ -192,7 +192,7 @@ namespace Cliver
     public class AppSettings : Settings
     {
         sealed public override string __StorageDir { get { return StorageDir; } }
-        public static readonly string StorageDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + System.IO.Path.DirectorySeparatorChar + Log.CompanyName + System.IO.Path.DirectorySeparatorChar + Log.ProcessName + System.IO.Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        public static readonly string StorageDir = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 
     /// <summary>
@@ -201,6 +201,6 @@ namespace Cliver
     public class UserSettings : Settings
     {
         sealed public override string __StorageDir { get { return StorageDir; } }
-        public static readonly string StorageDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + Log.CompanyName + System.IO.Path.DirectorySeparatorChar + Log.ProcessName + System.IO.Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        public static readonly string StorageDir = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }

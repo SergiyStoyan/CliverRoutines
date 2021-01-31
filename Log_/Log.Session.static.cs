@@ -5,7 +5,7 @@
 //        stoyan@cliversoft.com
 //        http://www.cliversoft.com
 //********************************************************************************************
-using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 
@@ -17,6 +17,9 @@ namespace Cliver
         {
             static Dictionary<string, Session> names2Session = new Dictionary<string, Session>();
 
+            /// <summary>
+            /// Close all the sessions.
+            /// </summary>
             internal static void CloseAll()
             {
                 lock (names2Session)
@@ -27,6 +30,12 @@ namespace Cliver
                 }
             }
 
+            /// <summary>
+            /// Get the session.
+            /// It will be created if not exists.
+            /// </summary>
+            /// <param name="sessionName"></param>
+            /// <returns></returns>
             public static Session Get(string sessionName)
             {
                 lock (names2Session)
@@ -37,6 +46,18 @@ namespace Cliver
                         names2Session[sessionName] = s;
                     }
                     return s;
+                }
+            }
+
+            /// <summary>
+            /// Get all the sessions.
+            /// </summary>
+            /// <returns></returns>
+            public static List<Session> GetAll()
+            {
+                lock (names2Session)
+                {
+                    return names2Session.Values.ToList();
                 }
             }
         }

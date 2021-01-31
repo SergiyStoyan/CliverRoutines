@@ -7,6 +7,7 @@
 //********************************************************************************************
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -25,78 +26,80 @@ namespace Cliver
         /// </summary>
         public static void DeleteOldLogs(int deleteLogsOlderDays, Func<string, bool> askYesNo = null)
         {
-            lock (lockObject)//TEST!!!! if avoid interlock when writing to log from here
+            lock (lockObject)//TEST??? to avoid interlock when writing to log from here
             {
                 try
                 {
-                    if (deleteLogsOlderDays > 0)
+                    if (deleteLogsOlderDays < 0)
+                        return;
+                    DateTime firstLogTime = DateTime.Now.AddDays(-deleteLogsOlderDays);
+                    DateTime currentLogTime = Session.GetAll().Min(a => a.CreatedTime);
+                    if (firstLogTime > currentLogTime)
+                        firstLogTime = currentLogTime;
+
+                    DirectoryInfo di = new DirectoryInfo(Log.WorkDir);
+                    if (!di.Exists)
+                        return;
+
+                    string alert;
+                    switch (Log.mode)
                     {
-                        DateTime FirstLogDate = DateTime.Now.AddDays(-deleteLogsOlderDays);
-
-                        DirectoryInfo di = new DirectoryInfo(Log.WorkDir);
-                        if (!di.Exists)
-                            return;
-
-                        string alert;
-                        switch (Log.mode)
-                        {
-                            case Mode.FOLDER_PER_SESSION:
-                                alert = "Session data including caches and logs older than " + FirstLogDate.ToString() + " are to be deleted.\r\nDelete?";
-                                foreach (DirectoryInfo d in di.GetDirectories())
+                        case Mode.FOLDER_PER_SESSION:
+                            alert = "Session data including caches and logs older than " + firstLogTime.ToString() + " are to be deleted.\r\nDelete?";
+                            foreach (DirectoryInfo d in di.GetDirectories())
+                            {
+                                if (headSession != null && d.FullName.StartsWith(headSession.Dir, StringComparison.InvariantCultureIgnoreCase))
+                                    continue;
+                                if (d.LastWriteTime >= firstLogTime)
+                                    continue;
+                                if (alert != null)
                                 {
-                                    if (headSession != null && d.FullName.StartsWith(headSession.Dir, StringComparison.InvariantCultureIgnoreCase))
-                                        continue;
-                                    if (d.LastWriteTime >= FirstLogDate)
-                                        continue;
-                                    if (alert != null)
-                                    {
-                                        if (askYesNo == null)
-                                            Log.Main.Inform("Deleting session data including caches and logs older than " + FirstLogDate.ToString());
-                                        else
-                                        if (!askYesNo(alert))
-                                            return;
-                                        alert = null;
-                                    }
-                                    Log.Main.Inform("Deleting old directory: " + d.FullName);
-                                    try
-                                    {
-                                        d.Delete(true);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Log.Error(e);
-                                    }
+                                    if (askYesNo == null)
+                                        Log.Main.Inform("Deleting session data including caches and logs older than " + firstLogTime.ToString());
+                                    else
+                                    if (!askYesNo(alert))
+                                        return;
+                                    alert = null;
                                 }
-                                break;
-                            case Mode.SAME_FOLDER:
-                                alert = "Logs older than " + FirstLogDate.ToString() + " are to be deleted.\r\nDelete?";
-                                foreach (FileInfo f in di.GetFiles())
+                                Log.Main.Inform("Deleting old directory: " + d.FullName);
+                                try
                                 {
-                                    if (f.LastWriteTime >= FirstLogDate)
-                                        continue;
-                                    if (alert != null)
-                                    {
-                                        if (askYesNo == null)
-                                            Log.Main.Inform("Deleting logs older than " + FirstLogDate.ToString());
-                                        else
-                                        if (!askYesNo(alert))
-                                            return;
-                                        alert = null;
-                                    }
-                                    Log.Main.Inform("Deleting old file: " + f.FullName);
-                                    try
-                                    {
-                                        f.Delete();
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Log.Error(e);
-                                    }
+                                    d.Delete(true);
                                 }
-                                break;
-                            default:
-                                throw new Exception("Unknown LOGGING_MODE:" + Log.mode);
-                        }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e);
+                                }
+                            }
+                            break;
+                        case Mode.SAME_FOLDER:
+                            alert = "Logs older than " + firstLogTime.ToString() + " are to be deleted.\r\nDelete?";
+                            foreach (FileInfo f in di.GetFiles())
+                            {
+                                if (f.LastWriteTime >= firstLogTime)
+                                    continue;
+                                if (alert != null)
+                                {
+                                    if (askYesNo == null)
+                                        Log.Main.Inform("Deleting logs older than " + firstLogTime.ToString());
+                                    else
+                                    if (!askYesNo(alert))
+                                        return;
+                                    alert = null;
+                                }
+                                Log.Main.Inform("Deleting old file: " + f.FullName);
+                                try
+                                {
+                                    f.Delete();
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e);
+                                }
+                            }
+                            break;
+                        default:
+                            throw new Exception("Unknown LOGGING_MODE:" + Log.mode);
                     }
                 }
                 finally
@@ -106,9 +109,12 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Return stack information for the caller.
+        /// Get stack information for the caller.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="startFrame">frame to start with</param>
+        /// <param name="frameCount">number of frames to take</param>
+        /// <param name="endOnEmptyFile">if true, stop when going out of the app</param>
+        /// <returns>stack info</returns>
         public static string GetStackString(int startFrame = 0, int frameCount = 1, bool endOnEmptyFile = true)
         {
             StackTrace st = new StackTrace(true);
@@ -142,20 +148,21 @@ namespace Cliver
         static List<Type> TypesExcludedFromStack = null;
 
         /// <summary>
-        /// Get exception message without details.
+        /// Get exception message without stack info.
         /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
+        /// <param name="e">exception</param>
+        /// <returns>exception message chain</returns>
         public static string GetExceptionMessage2(Exception e)
         {
             return GetExceptionMessage(e, false);
         }
 
         /// <summary>
-        /// Get exception message with details.
+        /// Get the exception message chain.
         /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
+        /// <param name="e">exception</param>
+        /// <param name="withDetails">add stack info</param>
+        /// <returns>exception message chain</returns>
         static public string GetExceptionMessage(Exception e, bool withDetails = true)
         {
             Exception lastInterestingE = null;
@@ -202,6 +209,11 @@ namespace Cliver
         //    details += "\r\n\r\nModule:" + e.TargetSite?.Module + " \r\n\r\nStack:" + e.StackTrace;
         //}
 
+        /// <summary>
+        /// Return name of the method which called this function
+        /// </summary>
+        /// <param name="name">don't change it</param>
+        /// <returns>name of the calling method</returns>
         static public string GetThisMethodName([System.Runtime.CompilerServices.CallerMemberName] string name = "undefined")
         {
             return name;

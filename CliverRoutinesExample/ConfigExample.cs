@@ -24,7 +24,9 @@ namespace Example
 
             editSmtpInDialog();
 
-            User user = setUser(new User { Name = "Tom", Email = "tom@company.com" });
+            User user = new User { Name = "Tom", Email = "tom@company.com" };
+            Settings.General.Users[user.Name] = user;
+            Settings.General.Save();
             user.Notify("test");
         }
 
@@ -53,13 +55,6 @@ namespace Example
         static bool isValid(SmtpSettings smtp)
         {
             return true;
-        }
-
-        static User setUser(User user)
-        {
-            Settings.General.Users[user.Name] = user;
-            Settings.General.Save();
-            return user;
         }
 
         public static void Email(string host, int port, string password, string message)

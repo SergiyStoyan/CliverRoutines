@@ -26,10 +26,10 @@
 			
 <p><b>Compatibility</b>
 <br>CliverRoutines has been developed on .NET Standard 2.0 and supposed to run on any platform supported by .NET Core, Xamarin or Mono. 			
-<br>A possible concern about certain platform might be regarded to peculiarities of the platform's file system.
+<br>A possible concern about certain platform might be regarded to peculiarities of its file system.
 
 			<p>CliverRoutines has been used on:
-<br> - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
+<br> - Windows 7, 10 in C# projects including windows services;
 <br> - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
 
@@ -221,7 +221,7 @@ Cliver.Config.Reload();//mandatory
 <h3><a name='storage_file'>Storage file</a></h3>
 		<a href='#storage_file'>Storage file</a> stores serialized data for one <a href='#settings_field'>settings field</a>. Thus, each <a href='#settings_field'>settings field</a> has its own <a href='#storage_file'>storage file</a>. 
 		
-		<p>It is re-created by call of <code>Save()</code> on a <a href='#settings_field'>settings field</a>.
+		<p>It is re-created by call of <code>Save()</code>.
 			
 			
 			
@@ -328,6 +328,7 @@ The <a href='#initial_file'>initial file</a> name of <a href='#settings_field'>s
 
 <h2><a name=''>Usage</a></h2>
 			Reference CliverRoutines in your project.
+			<br>Set your project's company name as it defines the storage directory.
 			
 			
 					
@@ -859,6 +860,7 @@ static void Main(string[] args)
 
             <h2><a name='example'>Usage</a></h2>
 			Reference CliverRoutines in your project.
+			<br>Set your project's company name as it defines the storage directory.
 			
 		
         <p> At the beginning of the application, add optional initializing:

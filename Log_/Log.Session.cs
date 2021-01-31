@@ -14,6 +14,9 @@ namespace Cliver
 {
     public static partial class Log
     {
+        /// <summary>
+        /// Log session.
+        /// </summary>
         public partial class Session
         {
             Session(string name)
@@ -47,8 +50,14 @@ namespace Cliver
                 }
             }
 
+            /// <summary>
+            /// Session name prefix in the session directory.
+            /// </summary>
             public static string NamePrefix = "Session";
 
+            /// <summary>
+            /// Session name.
+            /// </summary>
             public string Name
             {
                 get
@@ -61,6 +70,9 @@ namespace Cliver
             }
             string name;
 
+            /// <summary>
+            /// Session directory.
+            /// </summary>
             public string Dir
             {
                 get
@@ -75,7 +87,14 @@ namespace Cliver
             }
             string dir;
 
+            /// <summary>
+            /// Time when the session was created.
+            /// </summary>
             public DateTime CreatedTime { get; protected set; }
+
+            /// <summary>
+            /// Time mark in the session directory of log names.
+            /// </summary>
             public string TimeMark
             {
                 get
@@ -113,7 +132,9 @@ namespace Cliver
             /// Close all log files in the session.  
             /// Nevertheless the session can be re-used after.
             /// </summary>
-            /// <param name="newName"></param>
+            /// <param name="newName">new name</param>
+            /// <param name="tryMaxCount">number of attempts if the session foldr is locked</param>
+            /// <param name="tryDelayMss">time span between attempts</param>
             public void Rename(string newName, int tryMaxCount = 10, int tryDelayMss = 50)
             {
                 lock (this.names2NamedWriter)

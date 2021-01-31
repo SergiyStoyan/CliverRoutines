@@ -22,6 +22,9 @@ namespace Cliver
                 SetFile();
             }
 
+            /// <summary>
+            /// Log importance level.
+            /// </summary>
             public Level Level
             {
                 get
@@ -43,8 +46,14 @@ namespace Cliver
             }
             Level level = Log.DefaultLevel;
 
+            /// <summary>
+            /// Log name.
+            /// </summary>
             public readonly string Name;
 
+            /// <summary>
+            /// Log file path.
+            /// </summary>
             public string File { get; private set; } = null;
 
             internal void SetFile()
@@ -77,8 +86,15 @@ namespace Cliver
             }
             int fileCounter = 0;
 
+            /// <summary>
+            /// Session to which this log belongs.
+            /// </summary>
             public readonly Session Session;
 
+            /// <summary>
+            /// Maximum log file length in bytes which is passed to each log as default.
+            /// If negative than no effect.
+            /// </summary>
             public int MaxFileSize = Log.DefaultMaxFileSize;
 
             public const string MAIN_THREAD_LOG_NAME = "";
@@ -105,7 +121,7 @@ namespace Cliver
             }
 
             /// <summary>
-            /// General writting log method.
+            /// Base writting log method.
             /// </summary>
             public void Write(Log.MessageType messageType, string message, string details = null)
             {
@@ -190,8 +206,28 @@ namespace Cliver
             }
             TextWriter logWriter = null;
 
+            /// <summary>
+            /// Called for OnWrite. 
+            /// </summary>
+            /// <param name="logWriterName"></param>
+            /// <param name="messageType"></param>
+            /// <param name="message"></param>
+            /// <param name="details"></param>
             public delegate void OnWrite(string logWriterName, Log.MessageType messageType, string message, string details);
+            /// <summary>
+            /// Called right before writing message.
+            /// </summary>
             static public event OnWrite Writing = null;
+
+            /// <summary>
+            /// Called for OnExitig
+            /// </summary>
+            /// <param name="message"></param>
+            public delegate void OnExitig(string message);
+            /// <summary>
+            /// Called right before writing message and exiting.
+            /// </summary>
+            static public event OnExitig Exitig = null;
         }
     }
 }

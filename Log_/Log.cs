@@ -65,6 +65,9 @@ namespace Cliver
         /// </summary>
         public static string FileExtension = "log";
 
+        /// <summary>
+        /// Log configuration.
+        /// </summary>
         public enum Mode
         {
             /// <summary>
@@ -128,7 +131,7 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Log only messages of the respective types
+        /// Message importance levels.
         /// </summary>
         public enum Level
         {
@@ -139,6 +142,9 @@ namespace Cliver
             ALL
         }
 
+        /// <summary>
+        /// Message types.
+        /// </summary>
         public enum MessageType
         {
             LOG,
@@ -217,7 +223,7 @@ namespace Cliver
                             string testFile = workDir + System.IO.Path.DirectorySeparatorChar + "test";
                             File.WriteAllText(testFile, "test");
                             File.Delete(testFile);
-                            Log.baseDir = baseDir;
+                            Log.BaseDir = baseDir;
                             break;
                         }
                         catch //(Exception e)
@@ -229,25 +235,14 @@ namespace Cliver
                     throw new Exception("Could not access any log directory.");
                 workDir = PathRoutines.GetNormalizedPath(workDir, false);
                 if (Directory.Exists(workDir) && deleteLogsOlderThanDays >= 0)
-                {
-                    if (deletingOldLogsThread?.TryAbort(1000) == false)
-                        throw new Exception("Could not abort deletingOldLogsThread");
                     deletingOldLogsThread = ThreadRoutines.Start(() => { Log.DeleteOldLogs(deleteLogsOlderThanDays, DeleteOldLogsDialog); });//to avoid a concurrent loop while accessing the log file from the same thread 
-                }
                 else
                     throw new Exception("Could not create log folder!");
             }
             // deletingOldLogsThread?.Join();      
         }
 
-        static public string BaseDir
-        {
-            get
-            {
-                return baseDir;
-            }
-        }
-        static string baseDir;
+        static public string BaseDir { get; private set; }
     }
 
     //public class TerminatingException : Exception
