@@ -2,7 +2,7 @@
 
 A cross-platform C# lib which provides the frequently needed routines:
 
-- application settings module that supersedes the one provided by Visual Studio;
+- application settings manager that supersedes .NET ConfigurationManager;
 - logger with multi-threading and session support;
 - auxiliary routines;
 
@@ -12,8 +12,8 @@ Tested on:
 - Windows 7, 10 in C# projects of any configuration built in Visual Studio;
 - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
-## Application settings
-It is easy to use aplication settings engine which is more versatile and flexible than the Visual Studio's one.
+## Application settings manager
+Aplication settings manager is easy to use and yet more versatile and flexible than .NET ConfigurationManager.
 
 Features:
 - class fields/properties in your code can be automatically serialazed/deserialazed on disk;
