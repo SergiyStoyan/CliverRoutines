@@ -23,7 +23,7 @@ namespace Cliver
             }
 
             /// <summary>
-            /// Log importance level.
+            /// Message importance level.
             /// </summary>
             public Level Level
             {
@@ -92,7 +92,7 @@ namespace Cliver
             public readonly Session Session;
 
             /// <summary>
-            /// Maximum log file length in bytes which is passed to each log as default.
+            /// Maximum log file length in bytes.
             /// If negative than no effect.
             /// </summary>
             public int MaxFileSize = Log.DefaultMaxFileSize;

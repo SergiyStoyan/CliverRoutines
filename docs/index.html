@@ -19,7 +19,7 @@
         <p> CliverRoutines is a cross-platform C# lib which provides the frequently needed routines:
 
  <ul>
-                <li> <a href="#config">application settings module</a> which supersedes the one provided by Visual Studio;</li>
+                <li> <a href="#config">application settings manager</a> which supersedes .NET <code>ConfigurationManager</code>;</li>
                 <li> <a href="#log">logger</a> with multi-threading and <a href='#log_session'>session</a> support;</li>
                 <li> <a href="#miscellaneous">auxiliary routines</a>;</li>
             </ul>
@@ -72,12 +72,13 @@ setLicense();
 
 
             <h1><a name='config'>Config</a></h1>
-<a href='#config'><code>Cliver.Config</code></a> is a cross-platform replacement for Visual Studio standard applications settings module. It is very simple in use while versatile and powerful.
+<a href='#config'><code>Cliver.Config</code></a> is a cross-platform replacement for .NET ConfigurationManager. It is highly intuitive and simple in use, and yet versatile and powerful.
 
 <p><b>Idea:</b> <a href='#config'><code>Cliver.Config</code></a> automatically detects <a href='#settings_field'>settings fields/properties</a> in your code and facilitates their serialization/deserialization on disk.
 
 
 <p>You define <a href='#settings_class'>types</a> of <a href='#settings_field'>settings fields</a> according to your needs thus achieving a great flexibility.
+
         <p>While <a href='#config'><code>Cliver.Config</code></a> was designed primarily as a settings engine, in conjunction with <code>System.Linq</code> it can be used as a simple nosql database.
         <p>
             <a href='#config'><code>Cliver.Config</code></a> is thread-safe.
@@ -402,7 +403,7 @@ notify(Settings.General.SmtpHost, Settings.General.SmtpPort, Settings.General.Cl
 
 <h2>Attached/detached instances</h2>
 			  
-		   <p>In the trivial case, <a href='#settings_field'>settings fields</a> are only initialized by <a href='#config'><code>Cliver.Config</code></a> which creates instances of their <a href='#settings_class'>settings types</a>. 
+		   <p>In the trivial use case, <a href='#settings_field'>settings fields</a> are only initialized by <a href='#config'><code>Cliver.Config</code></a> which creates instances of their <a href='#settings_class'>settings types</a>. 
 		   <br>But you too can create or clone instances of <a href='#settings_class'>settings types</a>. And if a <a href='#settings_field'>settings field</a> is non-readonly, you can replace its value with another instance. 
 <br>See <a href='#swapping_settings'>the replace example</a>.
 		   

@@ -9,7 +9,7 @@ namespace Example
         static void Main(string[] args)
         {            
             try
-            {   
+            {
                 LogExample.Run();
 
                 ConfigExample.Run();

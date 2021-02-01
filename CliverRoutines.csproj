@@ -14,7 +14,7 @@
     <Version>5.16.0</Version>
     <PackageProjectUrl>https://github.com/sergeystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines:
-- application settings module that supersedes the one provided by Visual Studio;
+- application settings manager that supersedes .NET ConfigurationManager;
 - logger with multi-threading and session support;
 - auxiliary routines;</Description>
     <PackageTags>serialize, log, settings</PackageTags>
