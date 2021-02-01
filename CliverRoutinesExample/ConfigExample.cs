@@ -52,11 +52,13 @@ namespace Example
             }
         }
 
+        // bogus validator
         static bool isValid(SmtpSettings smtp)
         {
             return true;
         }
-
+        
+        // bogus mailer
         public static void Email(string host, int port, string password, string message)
         {
             Log.Inform("sent message:\r\n" + message);

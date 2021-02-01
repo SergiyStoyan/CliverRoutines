@@ -12,12 +12,12 @@ namespace Example
 
         protected override void Loaded()
         {
-            ConfigExample.Log.Inform("Settings loaded: " + __Info.FullName);
+            ConfigExample.Log.Inform0("Settings loaded: " + __Info.FullName);
         }
 
         protected override void Saving()
         {
-            ConfigExample.Log.Inform("Settings saving...: " + __Info.FullName);
+            ConfigExample.Log.Inform0("Settings saving...: " + __Info.FullName);
         }
     }
 
