@@ -278,18 +278,18 @@ The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>s
 			
 			
 <h3><a name='initial_file'>Initial file</a></h3>
-			<p><a href='#initial_file'>Initial file</a> keeps data which supersede the initial values hardcoded in the <a href='#settings_class'>settings type</a> definition. Each <a href='#settings_field'>settings field</a> can have its own <a href='#initial_file'>initial file</a> and thus, can have its own initial value set. 
+			<p><a href='#initial_file'>Initial file</a> keeps data that is to override the initial values hardcoded in a <a href='#settings_class'>settings type</a> definition. Each <a href='#settings_field'>settings field</a> can have its own <a href='#initial_file'>initial file</a> and thus, can have its own initial value set. 
 			
 			<p>It is optional and has the same format as <a href='#storage_file'>storage file</a>.
 			
-		<p><a href='#initial_file'>Initial file</a> is re-read by call of <code>Reload()</code> or <code>Reset()</code>.
+		<p><a href='#initial_file'>Initial file</a> is re-read by <code>Reload()</code> or <code>Reset()</code>.
 			
 			<p>It is supplied in the same directory as the application itself.
 		 
 			
 			<p>It is helpful when:
 			<br> - initial settings data are too big to be kept in code;
-			<br> - initial settings data can be more easily managed in file, not in code;
+			<br> - initial settings data are managed better in file than in code;
 			<br> - the application has several <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>settings type</a> and each of them must be initiated by its own value set;
 						
 			
@@ -635,6 +635,21 @@ Settings.General.Save();</code>
 </pre>
 
 
+
+
+
+
+
+
+            <!--h3><a name='initialazing_order'>Initialization order</a></h3>
+You can pass a <a href='#settings_field'>settings field</a> to another process. It should be done through serialization.
+
+<p>In process 1:
+<pre>
+<code class="language-csharp">string generalStr = Cliver.Serialization.Json.Serialize(Settings.General);
+
+//pass generalStr to process 2...</code>
+</pre-->
 
 
 
