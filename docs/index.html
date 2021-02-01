@@ -174,9 +174,9 @@ public class GeneralSettings : Cliver.UserSettings
 
 			
 <h2><a name='settings_field'>Settings field</a></h2>
-			A field or property declared in any class of your app, whose type is a <a href='#settings_class'>settings type</a> is called <a href='#settings_field'>settings field</a>. 
-			
-			(!)It must be <code>static public</code>. 
+			A <a href='#settings_field'>settings field</a> is a field or property declared in any class of your app, that satisfies the following:
+<br> - its type is a <a href='#settings_class'>settings type</a>;
+<br> - it is <code>static public</code>; 
 			
 			<p><a href='#settings_field'>Settings fields</a> are automatically detected and initialized by <a href='#config'><code>Cliver.Config</code></a>.
 			
@@ -366,7 +366,7 @@ public class Server
 </pre>
 
 
-        <p>To make <a href='#config'><code>Cliver.Config</code></a> detect all such fields/properties in your code and initialize them, do this call at the beginning of the application:: 
+        <p>Do this call at the beginning of the application, to trigger <a href='#config'><code>Cliver.Config</code></a> to detect all <a href='#settings_field'>settings fields</a> in your code and initialize them: 
 <pre>
 <code class="language-csharp">//It can be called many times where every call re-initializes settings.
 Cliver.Config.Reload();//mandatory call before using settings</code>
