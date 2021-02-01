@@ -2,7 +2,7 @@
 
 A cross-platform C# lib which provides the frequently needed routines:
 
-- application settings manager that supersedes the one provided by Visual Studio;
+- application settings manager that is a replacement for .NET ConfigurationManager;
 - logger with multi-threading and session support;
 - auxiliary routines;
 
