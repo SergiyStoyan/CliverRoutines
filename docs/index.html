@@ -357,9 +357,10 @@ public class Server
 </pre>
 
 
-        <p> At the beginning of the application, add initializing:
+        <p>Cliver.Config will detect all such fields/properties in your code and initialize them. 
+		To trigger it, do this call at the beginning of the application: 
 <pre>
-<code class="language-csharp">//detect and initialize <a href='#settings_field'>settings fields</a>. It can be called many times where every call re-initializes settings.
+<code class="language-csharp">//It can be called many times where every call re-initializes settings.
 Cliver.Config.Reload();//mandatory call before using settings</code>
 </pre>
 
@@ -373,15 +374,15 @@ Settings.General.Servers.Add(new Server {Name = "host1", Host = "123.123.123.123
 //save on disk
 Settings.General.Save();
 //or, restore the previous values instead of saving the new ones
-Cliver.Config.Reload();
+Settings.General.Reload();
 //or, reset to the initial values
-Cliver.Config.Reset();
+Settings.General.Reset();
 ...
 //pass to a function
 Server server = Settings.General.Servers.Find(a => a.Name == "host1");
 connect(Settings.General.ClientPort, server.Host, server.Port);</code>
 </pre>
-			<p>To see live usage examples, refer to CliverRoutinesExample project in CliverRoutines solution.
+			<p>To see live examples, refer to CliverRoutinesExample project in CliverRoutines solution.
 			<br>For the complete usage options, review <a href='#config'><code>Cliver.Config</code></a> API and annotations. 
 
 
@@ -837,7 +838,7 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you
 <pre>
 <code class="language-csharp">Log.Inform("test message"); //trivial log usage</code>
 </pre> 
-			<p>To see live usage examples, refer to CliverRoutinesExample project in CliverRoutines solution. 
+			<p>To see live examples, refer to CliverRoutinesExample project in CliverRoutines solution. 
 			<br>For the complete usage options, review <a href='#log'><code>Cliver.Log</code></a> API and annotations.
 		 
   

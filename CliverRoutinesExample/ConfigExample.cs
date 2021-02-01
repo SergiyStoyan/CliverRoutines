@@ -30,6 +30,7 @@ namespace Example
             user.Notify("test");
         }
 
+        // bogus editor
         static void editSmtpInDialog()
         {
             try
