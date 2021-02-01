@@ -14,9 +14,9 @@
 
 <h2>Background</h2>
 
-<p>Every time I was using .NET ConfigurationManager&nbsp;it was a pain whether I needed to store custom types, or initialize&nbsp;settings with long&nbsp;data,&nbsp;or use overrided settings. In general, to make ConfigurationManager do&nbsp;something custom,&nbsp;means run into&nbsp;awkward coding full of&nbsp;restrictions. Not to mention that editing settings&nbsp;though the Visual Studio settings editor is&nbsp;terribly unhandy.</p>
+<p>Every time I was using .NET ConfigurationManager&nbsp;it was a pain whether it was&nbsp;needed to store custom types, or initialize&nbsp;settings with long&nbsp;data,&nbsp;or use overrided settings. In general, to make ConfigurationManager do&nbsp;something custom,&nbsp;means run into&nbsp;awkward coding full of&nbsp;restrictions. Not to mention that editing settings&nbsp;though the Visual Studio settings table is&nbsp;terribly unhandy.</p>
 
-<p>That&#39;s why years ago I developed the settings manager <code>Cliver.Config</code>. The idea&nbsp;behind it appeared so suitable that since then I&nbsp;have&nbsp;never looked back. It has been&nbsp;used in many apps of any complexity on Windows and Xamarin.Mac and always proved to be simple in use,&nbsp;flexible and&nbsp;robust.</p>
+<p>That&#39;s why years ago I developed the settings manager <code>Cliver.Config</code>. The idea&nbsp;behind it appeared so suitable that since then I&nbsp;have&nbsp;never looked back. It has been&nbsp;used in many apps of any complexity on Windows and Xamarin.Mac and always proved to be simple in use,&nbsp;capable and&nbsp;robust.</p>
 
 <p>Also, CliverRoutines&nbsp;exposes the logger <code>Cliver.Log</code>&nbsp;and some auxiliary routines.</p>
 
@@ -112,6 +112,7 @@ For the complete usage options, review&nbsp;<code>Cliver.Config</code>&nbsp;API.
 	<li>session oriented:&nbsp;an application can write multiple log sessions successively or simultaneously. It is helpful when an application performs multiple independent tasks;</li>
 	<li>thread oriented:&nbsp;it can automatically write a log per thread;</li>
 	<li>auto-cleanup of old logs;</li>
+	<li>printing call&nbsp;stack info;</li>
 </ul>
 
 <h3>Usage&nbsp;</h3>
@@ -182,7 +183,3 @@ static void Main(string[] args)
 For the complete usage options, review&nbsp;<code>Cliver.Log</code>&nbsp;API.</p>
 
 <h2>Enjoy!</h2>
-
-<div id="gtx-trans" style="position: absolute; left: -28px; top: 1503.2px;">
-<div class="gtx-trans-icon">&nbsp;</div>
-</div>

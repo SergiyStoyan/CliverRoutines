@@ -64,6 +64,7 @@ namespace Example
             }
             Log.Session logSession;
 
+            // bogus task
             void download()
             {
                 try
