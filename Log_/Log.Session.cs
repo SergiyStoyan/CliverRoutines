@@ -34,14 +34,14 @@ namespace Cliver
                     string dir;
                     if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
-                        string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
+                        string dir0 = BaseDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
                         dir = dir0;
                         for (int count = 1; Directory.Exists(dir); count++)
                             dir = dir0 + "_" + count.ToString();
                     }
                     else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
                     {
-                        dir = WorkDir;
+                        dir = BaseDir;
                     }
                     return dir;
                 }

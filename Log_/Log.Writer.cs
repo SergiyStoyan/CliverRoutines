@@ -37,7 +37,7 @@ namespace Cliver
                     {
                         if (level == Level.NONE && value > Level.NONE)
                         {
-                            setWorkDir(true);
+                            setBaseDir(true);
                             Directory.CreateDirectory(Session.Dir);
                         }
                         level = value;
