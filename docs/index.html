@@ -176,9 +176,10 @@ public class GeneralSettings : Cliver.UserSettings
 <h2><a name='settings_field'>Settings field</a></h2>
 			A <a href='#settings_field'>settings field</a> is a field or property declared in any class of your app, that satisfies the following:
 <br> - its type is a <a href='#settings_class'>settings type</a>;
-<br> - it is <code>static public</code>; 
+<br> - it is <code>static</code> (<code>public</code> is optional); 
 			
 			<p><a href='#settings_field'>Settings fields</a> are automatically detected and initialized by <a href='#config'><code>Cliver.Config</code></a>.
+			<p>Behaviour of a certain <a href='#settings_field'>settings field</a> can be infuenced by <code>Cliver.SettingsAttribute</code> applied to it. 
 			
 			<p>There can be any number of <a href='#settings_field'>settings fields</a> in your code.
                   <br> Usually you will need only one <a href='#settings_field'>settings field</a> per <a href='#settings_class'>settings type</a> but there is no problem to declare any number of <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>settings type</a>.
@@ -325,6 +326,7 @@ The <a href='#initial_file'>initial file</a> name of <a href='#settings_field'>s
 			<br> - from one's <a href='#initial_file'>initial file</a> if exists;
 			<br> - from the values predefined in one's <a href='#settings_class'>settings type</a>;
 		
+	
 
 
 
@@ -708,7 +710,7 @@ Log.Write("message");//shortcut for Log.Head.Write("message");</code>
 Log.Inform("test message");//shortcut for Log.Head.Main.Inform()</code>
 </pre>
 
-			<p>Switch <a href='#default_log'>the default log</a> to <a href='#thread_log'>thread log</a>:
+			<p>Toggle <a href='#default_log'>the default log</a> to <a href='#thread_log'>thread log</a>:
 <pre>
 <code class="language-csharp">Log.Initialize(Log.Mode.DEFAULT_THREAD_LOG);//thread log will be used by default
 Log.Inform("test message");//shortcut for Log.Head.Thread.Inform()</code>

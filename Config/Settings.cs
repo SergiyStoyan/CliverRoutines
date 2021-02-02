@@ -25,7 +25,7 @@ namespace Cliver
         /// For some rare needs (for instance when a Settings object was created by deserialization/cloning and so has empty __Info), setting __Info from an application is allowed (with caution!).
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
-        public SettingsFieldInfo __Info
+        public SettingsMemberInfo __Info
         {
             get
             {
@@ -34,22 +34,22 @@ namespace Cliver
             set
             {
                 if (value == null)
-                    throw new Exception("SettingsFieldInfo cannot be set to NULL.");//to ensure that no __Info object can be lost in the custom application scope
+                    throw new Exception("SettingsMemberInfo cannot be set to NULL.");//to ensure that no __Info object can be lost in the custom application scope
                 if (value.Type != GetType())
-                    throw new Exception("Disaccording SettingsFieldInfo Type field. It must be: " + GetType().FullName + " but set: " + value.Type.FullName);
+                    throw new Exception("Disaccording SettingsMemberInfo Type field. It must be: " + GetType().FullName + " but set: " + value.Type.FullName);
                 settingsFieldInfo = value;
             }
         }
-        SettingsFieldInfo settingsFieldInfo = null;
+        SettingsMemberInfo settingsFieldInfo = null;
 
-        internal static Settings Create(SettingsFieldInfo settingsFieldInfo, bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
+        internal static Settings Create(SettingsMemberInfo settingsFieldInfo, bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
         {
             Settings settings = create(settingsFieldInfo, reset, throwExceptionIfCouldNotLoadFromStorageFile);
             settings.__Info = settingsFieldInfo;
             settings.Loaded();
             return settings;
         }
-        static Settings create(SettingsFieldInfo settingsFieldInfo, bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
+        static Settings create(SettingsMemberInfo settingsFieldInfo, bool reset, bool throwExceptionIfCouldNotLoadFromStorageFile)
         {
             if (!reset && File.Exists(settingsFieldInfo.File))
                 try
@@ -105,7 +105,7 @@ namespace Cliver
             Cliver.Serialization.Json.Save(__Info.File, this, __Info.Indented, true);
             Saved();
         }
-        internal void Save(SettingsFieldInfo settingsFieldInfo)//this avoids a redundant operation and provides an appropriate exception message
+        internal void Save(SettingsMemberInfo settingsFieldInfo)//this avoids a redundant operation and provides an appropriate exception message
         {
             lock (this)
             {
@@ -170,12 +170,6 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Indicates that a Settings field with this attribute should not be initiated by Config by default.
-        /// Such a field should be initiated explisitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
-        /// </summary>
-        public class Optional : Attribute { }
-
-        /// <summary>
         /// Folder where storage files for this Settings derived type are to be saved by Config.
         /// Each Settings derived class must have it defined. 
         /// Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
@@ -183,6 +177,27 @@ namespace Cliver
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         public abstract string __StorageDir { get; }
+    }
+
+    /// <summary>
+    /// Settings field attribute.
+    /// </summary>
+    public class SettingsAttribute : Attribute
+    {
+        /// <summary>
+        /// Indicates that the Settings field will be stored with indention.
+        /// /// </summary>
+        readonly public bool Indented = true;
+        /// <summary>
+        /// Indicates that the Settings field should not be initiated by Config by default.
+        /// Such a field should be initiated explisitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
+        /// </summary>
+        readonly public bool Optional = false;
+        public SettingsAttribute(bool indented = true, bool optional = false)
+        {
+            Indented = indented;
+            Optional = optional;
+        }
     }
 
     /// <summary>

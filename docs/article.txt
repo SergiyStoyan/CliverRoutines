@@ -46,7 +46,7 @@ Set your project&#39;s company name because it co-defines the storage directory.
 
 <p>Define a&nbsp;settings type&nbsp;according to your needs. Generally a settings type is an ordinary class which inherits from&nbsp;<code>Cliver.Settings</code>&nbsp;or one of its derivatives, e.g.&nbsp;<code>Cliver.UserSettings</code>.&nbsp;</p>
 
-<p>(!)Fields or properties to be serialized/deserialized, must be&nbsp;<code>public</code>&nbsp;and non-static .</p>
+<p>(!)Fields or properties to be serialized/deserialized, must be non-static (<code>public</code> modifier is optional).</p>
 
 <p>See&nbsp;the&nbsp;example:</p>
 

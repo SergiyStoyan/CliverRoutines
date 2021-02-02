@@ -24,10 +24,11 @@ namespace Example
 
             editSmtpInDialog();
 
-            User user = new User { Name = "Tom", Email = "tom@company.com" };
-            Settings.General.Users[user.Name] = user;
-            Settings.General.Save();
+            User user = new User { Name = "Tom2", Email = "tom@company.com" };
             user.Notify("test");
+            Settings.General.Users[user.Name] = user;
+
+            Config.Save();
         }
 
         // bogus editor
