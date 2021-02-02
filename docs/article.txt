@@ -3,7 +3,7 @@
 <p>CliverRoutines is a cross-platform C# lib which provides:</p>
 
 <ul>
-	<li>settings manager that supersedes .NET ConfigurationManager;</li>
+	<li>settings manager which supersedes .NET ConfigurationManager;</li>
 	<li>logger with threading and session support;</li>
 	<li>auxiliary routines;</li>
 </ul>

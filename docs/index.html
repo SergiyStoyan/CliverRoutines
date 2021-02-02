@@ -672,8 +672,11 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 
             <h2><a name='log_session'>Session</a></h2>
 
-            Each log belongs to a <a href='#log_session'>session</a>. 
-			<p>Depending on configuration, each <a href='#log_session'>session</a> can create its own folder so that all its logs are written there, otherwise, if all sessions must share the same folder, log files have their session name in their names.
+        A <a href='#log_session'>session</a> is a collection of logs that is dedicated to a certain logical task. All logs are created within some <a href='#log_session'>session</a>. 
+			
+			<p>Depending on <a href='#log'><code>Cliver.Log</code></a> configuration, either:
+			<br> - all <a href='#log_session'>sessions</a> share the same folder and log files have their session name in their names;
+			<br> - or, each <a href='#log_session'>session</a> creates its own folder to which all its logs are written;
 			
             <p> Session folders can be used to store additional data like caches etc.
 			
@@ -689,8 +692,8 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 <pre>
 <code class="language-csharp">using Cliver;
 ...
-//write to the default session
-Log.Write("message");// it is shortcut for Log.Head.Write("message");</code>
+//write to the default log of the default session
+Log.Write("message");//shortcut for Log.Head.Write("message");</code>
 </pre>
 
 
@@ -699,18 +702,16 @@ Log.Write("message");// it is shortcut for Log.Head.Write("message");</code>
 			<h3><a name='default_log'>Default log</a></h3>
 <a href='#default_log'>The default log</a> of a <a href='#log_session'>session</a> is the log that is called without explicit reference. Depending on <a href='#log'><code>Cliver.Log</code></a> configuration, it can be either <a href='#main_log'>the main log</a> (by default) or <a href='#thread_log'>thread log</a>.
 		
-    <p><a href='#default_log'>The default log</a> is handy as a shortcut for trivial logging:
+    <p><a href='#default_log'>The default log</a> is handy as a shortcut for trivial logging when everything is written to the same file:
 <pre><code class="language-csharp">using Cliver;
 ...
-
-//writing to the default log in the default (Head) session
-Log.Inform("test message");//It is a shortcut for Log.Head.Main.Inform() or Log.Head.Thread.Inform()</code>
+Log.Inform("test message");//shortcut for Log.Head.Main.Inform()</code>
 </pre>
 
-Or:
-<pre><code class="language-csharp">//writing to the default log of the session "Game1"
-Log.Session game1Session = Log.Session.Get("Game1");
-game1Session.Inform("test message");//It is a shortcut for game1Session.Main.Inform() or game1Session.Thread.Inform()</code>
+			<p>Switch <a href='#default_log'>the default log</a> to <a href='#thread_log'>thread log</a>:
+<pre>
+<code class="language-csharp">Log.Initialize(Log.Mode.DEFAULT_THREAD_LOG);//thread log will be used by default
+Log.Inform("test message");//shortcut for Log.Head.Thread.Inform()</code>
 </pre>
 
 
@@ -719,9 +720,11 @@ game1Session.Inform("test message");//It is a shortcut for game1Session.Main.Inf
 <pre>
 <code class="language-csharp">using Cliver;
 ...
-//create or get an existing session
-Log.Session game1Log = Log.Session.Get("Game1");
+//make each session create its own folder
+Log.Initialize(Log.Mode.FOLDER_PER_SESSION);
 ...
+//create or get the existing session
+Log.Session game1Log = Log.Session.Get("Game1");
 //write to the default log of the session
 game1Log.Write("message");
 ...
@@ -733,19 +736,19 @@ game1Log.Close(true);//optional call to free memory</code>
 
 
 
-			<h3><a name="#work_directory">Work directory</a></h3>
+			<h3><a name="#base_directory">Base directory</a></h3>
 <br>
-			All <a href='#log_session'>sessions</a> are created within the same <a href="work_directory">work directory</a> which is defined at the first log writing or call of <code>Log.Initialize()</code>
+			All <a href='#log_session'>sessions</a> are created within the <a href="base_directory">base directory</a> which is defined at the first logging or by <code>Log.Initialize()</code>
 			
 			
-			<p>By default the <a href="work_directory">work directory</a> is defined in the order by which <a href='#log'><code>Cliver.Log</code></a> tries to write to:
+			<p>By default the <a href="base_directory">base directory</a> is defined in the order by which <a href='#log'><code>Cliver.Log</code></a> tries to write to:
 			<br> - the folder where the application is located;
 			<br> - the user data folder;
 			<br> - the common data folder;
 			<br> - the desktop folder;
 			<br> - the temp folder;
 			
-			<p>The <a href="work_directory">work directory</a> definition can be customized while initializing:
+			<p>The <a href="base_directory">base directory</a> definition can be customized while initializing:
 <pre>
 <code class="language-csharp">//optional initialization before using logs
 Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.CompanyUserDataDir });//logs will be recorded to the user data folder</code>

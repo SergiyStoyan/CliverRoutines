@@ -38,7 +38,7 @@ namespace Cliver
         }
         static List<string> parentDirs = null;
         static int deleteLogsOlderThanDays = 10;
-        static Mode mode = Mode.ONE_FOLDER | Mode.NAMED_DEFAULT_LOG;
+        static Mode mode = Mode.ONE_FOLDER | Mode.DEFAULT_NAMED_LOG;
 
         /// <summary>
         /// Log level which is passed to each log as default.
@@ -89,11 +89,11 @@ namespace Cliver
             /// Default log is named log.
             /// It is default option if not THREAD_DEFAULT_LOG, otherwise, ignored.
             /// </summary>
-            NAMED_DEFAULT_LOG = 4,//0100
+            DEFAULT_NAMED_LOG = 4,//0100
             /// <summary>
             /// Default log is thread log.
             /// </summary>
-            THREAD_DEFAULT_LOG = 8,//1000
+            DEFAULT_THREAD_LOG = 8,//1000
         }
 
         /// <summary>
