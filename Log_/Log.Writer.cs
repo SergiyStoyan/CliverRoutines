@@ -62,18 +62,15 @@ namespace Cliver
                 {
                     //string file2 = Session.Dir + System.IO.Path.DirectorySeparatorChar + Log.ProcessName;
                     string file2 = Session.Dir + System.IO.Path.DirectorySeparatorChar;
-                    switch (Log.mode)
+                    if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
-                        case Log.Mode.SAME_FOLDER:
-                            file2 += (string.IsNullOrWhiteSpace(Session.Name) ? "" : Session.Name + "_") + Session.TimeMark;
-                            //if (!string.IsNullOrWhiteSpace(Name))//not Main log
-                            //    file2 += "_" + DateTime.Now.ToString("yyMMddHHmmss");
-                            break;
-                        case Cliver.Log.Mode.FOLDER_PER_SESSION:
-                            file2 += DateTime.Now.ToString("yyMMddHHmmss");
-                            break;
-                        default:
-                            throw new Exception("Unknown LOGGING_MODE:" + Cliver.Log.mode);
+                        file2 += DateTime.Now.ToString("yyMMddHHmmss");
+                    }
+                    else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
+                    {
+                        file2 += (string.IsNullOrWhiteSpace(Session.Name) ? "" : Session.Name + "_") + Session.TimeMark;
+                        //if (!string.IsNullOrWhiteSpace(Name))//not Main log
+                        //    file2 += "_" + DateTime.Now.ToString("yyMMddHHmmss");
                     }
                     file2 += (string.IsNullOrWhiteSpace(Name) ? "" : "_" + Name) + (fileCounter > 0 ? "[" + fileCounter + "]" : "") + "." + FileExtension;
 

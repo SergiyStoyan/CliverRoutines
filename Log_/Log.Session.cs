@@ -32,19 +32,16 @@ namespace Cliver
                 lock (this.names2NamedWriter)
                 {
                     string dir;
-                    switch (Log.mode)
+                    if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
-                        case Cliver.Log.Mode.SAME_FOLDER:
-                            dir = WorkDir;
-                            break;
-                        case Cliver.Log.Mode.FOLDER_PER_SESSION:
-                            string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
-                            dir = dir0;
-                            for (int count = 1; Directory.Exists(dir); count++)
-                                dir = dir0 + "_" + count.ToString();
-                            break;
-                        default:
-                            throw new Exception("Unknown LOGGING_MODE:" + Cliver.Log.mode);
+                        string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
+                        dir = dir0;
+                        for (int count = 1; Directory.Exists(dir); count++)
+                            dir = dir0 + "_" + count.ToString();
+                    }
+                    else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
+                    {
+                        dir = WorkDir;
                     }
                     return dir;
                 }
@@ -114,17 +111,16 @@ namespace Cliver
 
             /// <summary>
             /// Default log of the session.
-            /// Depending on condition THREAD_LOG_IS_DEFAULT, it is either Main log or Thread log.
+            /// Depending on Mode, it is either Main log or Thread log.
             /// </summary>
             public Writer Default
             {
                 get
                 {
-#if THREAD_LOG_IS_DEFAULT
-                    return Thread;
-#else
-                    return Main;
-#endif
+                    if (mode.HasFlag(Mode.DEFAULT_THREAD_LOG))
+                        return Thread;
+                    else
+                        return Main;
                 }
             }
 
@@ -149,27 +145,24 @@ namespace Cliver
                         {
                             Close(true);
                             string newDir = getDir(newName);
-                            switch (Log.mode)
+                            if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                             {
-                                case Cliver.Log.Mode.SAME_FOLDER:
-                                    dir = newDir;
-                                    foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
-                                    {
-                                        string file0 = w.File;
-                                        w.SetFile();
-                                        if (File.Exists(file0))
-                                            File.Move(file0, w.File);
-                                    }
-                                    break;
-                                case Cliver.Log.Mode.FOLDER_PER_SESSION:
-                                    if (Directory.Exists(dir))
-                                        Directory.Move(dir, newDir);
-                                    dir = newDir;
-                                    foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
-                                        w.SetFile();
-                                    break;
-                                default:
-                                    throw new Exception("Unknown LOGGING_MODE:" + Cliver.Log.mode);
+                                if (Directory.Exists(dir))
+                                    Directory.Move(dir, newDir);
+                                dir = newDir;
+                                foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
+                                    w.SetFile();
+                            }
+                            else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
+                            {
+                                dir = newDir;
+                                foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
+                                {
+                                    string file0 = w.File;
+                                    w.SetFile();
+                                    if (File.Exists(file0))
+                                        File.Move(file0, w.File);
+                                }
                             }
                             lock (names2Session)
                             {

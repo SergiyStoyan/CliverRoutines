@@ -25,19 +25,20 @@ namespace Cliver
         /// <param name="mode">log configuration</param>
         /// <param name="primaryBaseDirs">log directories ordered by preference</param>
         /// <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted</param>
-        public static void Initialize(Mode mode, List<string> primaryBaseDirs = null, int deleteLogsOlderThanDays = 10)
+        public static void Initialize(Mode? mode = null, List<string> primaryBaseDirs = null, int deleteLogsOlderThanDays = 10)
         {
             lock (lockObject)
             {
                 Log.CloseAll();
-                Log.mode = mode;
+                if (mode != null)
+                    Log.mode = (Mode)mode;
                 Log.primaryBaseDirs = primaryBaseDirs;
                 Log.deleteLogsOlderThanDays = deleteLogsOlderThanDays;
             }
         }
         static List<string> primaryBaseDirs = null;
         static int deleteLogsOlderThanDays = 10;
-        static Mode mode = Mode.SAME_FOLDER;
+        static Mode mode = Mode.ONE_FOLDER | Mode.DEFAULT_NAMED_LOG;
 
         /// <summary>
         /// Log level which is passed to each log as default.
@@ -71,14 +72,21 @@ namespace Cliver
         public enum Mode
         {
             /// <summary>
+            /// No session folder is created. Log files are in one folder.
+            /// </summary>
+            ONE_FOLDER = 0,//default
+            /// <summary>
             /// Each session creates its own folder.
             /// </summary>
-            FOLDER_PER_SESSION,
+            FOLDER_PER_SESSION = 1,
             /// <summary>
-            /// <summary>
-            /// No session folder is created. Log files are in the same folder.
+            /// Default log is named log.
             /// </summary>
-            SAME_FOLDER
+            DEFAULT_NAMED_LOG = 2,//default
+            /// <summary>
+            /// Default log is thread log.
+            /// </summary>
+            DEFAULT_THREAD_LOG = 3,
         }
 
         /// <summary>

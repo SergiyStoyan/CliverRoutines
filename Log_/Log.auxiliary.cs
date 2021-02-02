@@ -42,64 +42,62 @@ namespace Cliver
                         return;
 
                     string alert;
-                    switch (Log.mode)
+                    if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
-                        case Mode.FOLDER_PER_SESSION:
-                            alert = "Session data including caches and logs older than " + firstLogTime.ToString() + " are to be deleted.\r\nDelete?";
-                            foreach (DirectoryInfo d in di.GetDirectories())
+                        alert = "Session data including caches and logs older than " + firstLogTime.ToString() + " are to be deleted.\r\nDelete?";
+                        foreach (DirectoryInfo d in di.GetDirectories())
+                        {
+                            if (headSession != null && d.FullName.StartsWith(headSession.Dir, StringComparison.InvariantCultureIgnoreCase))
+                                continue;
+                            if (d.LastWriteTime >= firstLogTime)
+                                continue;
+                            if (alert != null)
                             {
-                                if (headSession != null && d.FullName.StartsWith(headSession.Dir, StringComparison.InvariantCultureIgnoreCase))
-                                    continue;
-                                if (d.LastWriteTime >= firstLogTime)
-                                    continue;
-                                if (alert != null)
-                                {
-                                    if (askYesNo == null)
-                                        Log.Main.Inform("Deleting session data including caches and logs older than " + firstLogTime.ToString());
-                                    else
-                                    if (!askYesNo(alert))
-                                        return;
-                                    alert = null;
-                                }
-                                Log.Main.Inform("Deleting old directory: " + d.FullName);
-                                try
-                                {
-                                    d.Delete(true);
-                                }
-                                catch (Exception e)
-                                {
-                                    Log.Error(e);
-                                }
+                                if (askYesNo == null)
+                                    Log.Main.Inform("Deleting session data including caches and logs older than " + firstLogTime.ToString());
+                                else
+                                if (!askYesNo(alert))
+                                    return;
+                                alert = null;
                             }
-                            break;
-                        case Mode.SAME_FOLDER:
-                            alert = "Logs older than " + firstLogTime.ToString() + " are to be deleted.\r\nDelete?";
-                            foreach (FileInfo f in di.GetFiles())
+                            Log.Main.Inform("Deleting old directory: " + d.FullName);
+                            try
                             {
-                                if (f.LastWriteTime >= firstLogTime)
-                                    continue;
-                                if (alert != null)
-                                {
-                                    if (askYesNo == null)
-                                        Log.Main.Inform("Deleting logs older than " + firstLogTime.ToString());
-                                    else
-                                    if (!askYesNo(alert))
-                                        return;
-                                    alert = null;
-                                }
-                                Log.Main.Inform("Deleting old file: " + f.FullName);
-                                try
-                                {
-                                    f.Delete();
-                                }
-                                catch (Exception e)
-                                {
-                                    Log.Error(e);
-                                }
+                                d.Delete(true);
                             }
-                            break;
-                        default:
-                            throw new Exception("Unknown LOGGING_MODE:" + Log.mode);
+                            catch (Exception e)
+                            {
+                                Log.Error(e);
+                            }
+                        }
+                    }
+                    else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
+                    {
+                        alert = "Logs older than " + firstLogTime.ToString() + " are to be deleted.\r\nDelete?";
+                        foreach (FileInfo f in di.GetFiles())
+                        {
+                            if (f.LastWriteTime >= firstLogTime)
+                                continue;
+                            if (alert != null)
+                            {
+                                if (askYesNo == null)
+                                    Log.Main.Inform("Deleting logs older than " + firstLogTime.ToString());
+                                else
+                                if (!askYesNo(alert))
+                                    return;
+                                alert = null;
+                            }
+                            Log.Main.Inform("Deleting old file: " + f.FullName);
+                            try
+                            {
+                                f.Delete();
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e);
+                            }
+                        }
+
                     }
                 }
                 finally
