@@ -79,29 +79,6 @@ namespace Cliver
         /// Company name of the executing file.
         /// </summary>
         public static readonly string CompanyName;
-        ///// <summary>
-        ///// If altering it, do it at the very beginning.
-        ///// </summary>
-        //public static string CompanyName
-        //{
-        //    get
-        //    {
-        //        if (string.IsNullOrWhiteSpace(companyName))
-        //        {
-        //            Assembly entryAssembly = Assembly.GetEntryAssembly();
-        //            if (entryAssembly == null)//!!!when using WCF it happened that GetEntryAssembly() is NULL 
-        //                entryAssembly = Assembly.GetCallingAssembly();
-        //            AssemblyRoutines.AssemblyInfo ai = new AssemblyRoutines.AssemblyInfo(entryAssembly);
-        //            companyName = string.IsNullOrWhiteSpace(ai.Company) ? "CliverSoft" : ai.Company;
-        //        }
-        //        return companyName;
-        //    }
-        //    set
-        //    {
-        //        companyName = value;
-        //    }
-        //}
-        //static string companyName;
 
         /// <summary>
         /// User-independent company data directory.

@@ -679,12 +679,11 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 			
 			<p> Multiple <a href='#log_session'>sessions</a> can be open simultaneously.
 			
-	<p>There is the default <a href='#log_session'>session</a> which has empty name and is referenced as <code>Head</code>.
 			
 
 
 			<h3><a name='log_default_session'>Head session</a></h3>
-<a href='#log_default_session'>The default session</a> is a <a href='#log_session'>session</a> which is used when no <a href='#log_session'>session</a> is called explicitly. It is referenced as <code>Head</code> and has empty name.
+<a href='#log_default_session'>The default session</a> is a <a href='#log_session'>session</a> that is used when no <a href='#log_session'>session</a> is called explicitly. It is referenced as <code>Head</code> and has an empty name.
 
 
 <pre>
@@ -692,6 +691,26 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 ...
 //write to the default session
 Log.Write("message");// it is shortcut for Log.Head.Write("message");</code>
+</pre>
+
+
+
+
+			<h3><a name='default_log'>Default log</a></h3>
+<a href='#default_log'>The default log</a> of a <a href='#log_session'>session</a> is the log that is called without explicit reference. Depending on <a href='#log'><code>Cliver.Log</code></a> configuration, it can be either <a href='#main_log'>the main log</a> or <a href='#thread_log'>thread log</a>.
+		
+    <p><a href='#default_log'>The default log</a> is handy as a shortcut for trivial logging:
+<pre><code class="language-csharp">using Cliver;
+...
+
+//writing to the default log in the default (Head) session
+Log.Inform("test message");//It is a shortcut for Log.Head.Main.Inform() or Log.Head.Thread.Inform()</code>
+</pre>
+
+Or:
+<pre><code class="language-csharp">//writing to the default log of the session "Game1"
+Log.Session game1Session = Log.Session.Get("Game1");
+game1Session.Inform("test message");//It is a shortcut for game1Session.Main.Inform() or game1Session.Thread.Inform()</code>
 </pre>
 
 
@@ -737,34 +756,31 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.CompanyUserDa
 
 
     <h2><a name='named_log'>Named log</a></h2>
-    <a href='#default_log'>Named log</a> is a log which can be referenced by custom name.
-	<p>The name of a <a href='#default_log'>named log</a> is a part of its file name.
+    <a href='#named_log'>Named log</a> is a log which can be referenced by custom name.
+	<p>The name of a <a href='#named_log'>named log</a> is a part of its file name.
 
 
 
 
-			<h3><a name='default_log'>Main log</a></h3>
-<a href='#default_log'>The default log</a> of a <a href='#log_session'>session</a> is a <a href='#default_log'>named log</a> which is used when no <a href='#named_log'>named log</a> is called explicitly. It is referenced as <code>Main</code> and has empty name.
+			<h3><a name='main_log'>Main log</a></h3>
+<a href='#main_log'>The main log</a> of a <a href='#log_session'>session</a> is a <a href='#named_log'>named log</a> that is not created explicitly and is referenced as <code>Main</code>. It has an empty name.
 
 		
-    <p><a href='#default_log'>The default log</a> is handy for trivial logging when everything is written to the same file:
+    
+    <p><a href='#main_log'>The main log</a> is handy as a ready-to-use log:
 <pre>
     <code class="language-csharp">using Cliver;
 ...
 
-//writing to the default (Main) log in the default (Head) session
-Log.Inform("test message");//It is a shortcut for Log.Head.Main.Inform()
-
-//writing to the default (Main) log of the session "Game1"
-Log.Session game1Session = Log.Session.Get("Game1");
-game1Session.Inform("test message");//It is a shortcut for game1Session.Main.Inform()</code>
+//writing to the main log in the default (Head) session
+Log.Main.Inform("test message");//It is a shortcut for Log.Head.Main.Inform()</code>
 </pre>
 
 Or:
 <pre>
-    <code class="language-csharp">//writing to the default (Main) log of session "Game1"
+    <code class="language-csharp">//writing to the main log of session "Game1"
 Log.Session game1Session = Log.Session.Get("Game1");
-game1Session.Inform("test message");//It is a shortcut for game1Session.Main.Inform()</code>
+game1Session.Main.Inform("test message");</code>
 </pre>
 
 

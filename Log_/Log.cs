@@ -38,7 +38,7 @@ namespace Cliver
         }
         static List<string> primaryBaseDirs = null;
         static int deleteLogsOlderThanDays = 10;
-        static Mode mode = Mode.ONE_FOLDER | Mode.DEFAULT_NAMED_LOG;
+        static Mode mode = Mode.ONE_FOLDER | Mode.NAMED_DEFAULT_LOG;
 
         /// <summary>
         /// Log level which is passed to each log as default.
@@ -69,24 +69,26 @@ namespace Cliver
         /// <summary>
         /// Log configuration.
         /// </summary>
-        public enum Mode
+        public enum Mode : uint
         {
             /// <summary>
             /// No session folder is created. Log files are in one folder.
+            /// It is default option if not FOLDER_PER_SESSION, otherwise, ignored.
             /// </summary>
-            ONE_FOLDER = 0,//default
+            ONE_FOLDER = 1,//0001
             /// <summary>
             /// Each session creates its own folder.
             /// </summary>
-            FOLDER_PER_SESSION = 1,
+            FOLDER_PER_SESSION = 2,//0010
             /// <summary>
             /// Default log is named log.
+            /// It is default option if not THREAD_DEFAULT_LOG, otherwise, ignored.
             /// </summary>
-            DEFAULT_NAMED_LOG = 2,//default
+            NAMED_DEFAULT_LOG = 4,//0100
             /// <summary>
             /// Default log is thread log.
             /// </summary>
-            DEFAULT_THREAD_LOG = 3,
+            THREAD_DEFAULT_LOG = 8,//1000
         }
 
         /// <summary>

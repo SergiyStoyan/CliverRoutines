@@ -117,7 +117,7 @@ namespace Cliver
             {
                 get
                 {
-                    if (mode.HasFlag(Mode.DEFAULT_THREAD_LOG))
+                    if (mode.HasFlag(Mode.THREAD_DEFAULT_LOG))
                         return Thread;
                     else
                         return Main;
