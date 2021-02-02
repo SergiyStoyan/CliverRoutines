@@ -69,7 +69,7 @@ namespace Cliver
         /// <summary>
         /// Suffix to the base log folder name.
         /// </summary>
-        public static string BaseDirNameSuffix = @"_Logs";
+        public static string BaseDirNameSuffix = @"_LOGS";
 
         /// <summary>
         /// Log configuration.

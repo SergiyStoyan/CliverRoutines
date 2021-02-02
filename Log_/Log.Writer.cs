@@ -60,7 +60,6 @@ namespace Cliver
             {
                 lock (this)
                 {
-                    //string file2 = Session.Dir + System.IO.Path.DirectorySeparatorChar + Log.ProcessName;
                     string file2 = Session.Dir + System.IO.Path.DirectorySeparatorChar;
                     if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
@@ -68,9 +67,8 @@ namespace Cliver
                     }
                     else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
                     {
-                        file2 += (string.IsNullOrWhiteSpace(Session.Name) ? "" : Session.Name + "_") + Session.TimeMark;
-                        //if (!string.IsNullOrWhiteSpace(Name))//not Main log
-                        //    file2 += "_" + DateTime.Now.ToString("yyMMddHHmmss");
+                        //file2 += (string.IsNullOrWhiteSpace(Session.Name) ? "" : Session.Name + "_") + Session.TimeMark;//separates session name from log name
+                        file2 += Session.TimeMark + (string.IsNullOrWhiteSpace(Session.Name) ? "" : "_" + Session.Name);
                     }
                     file2 += (string.IsNullOrWhiteSpace(Name) ? "" : "_" + Name) + (fileCounter > 0 ? "[" + fileCounter + "]" : "") + "." + FileExtension;
 

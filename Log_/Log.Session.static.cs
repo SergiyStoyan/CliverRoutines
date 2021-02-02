@@ -61,5 +61,32 @@ namespace Cliver
                 }
             }
         }
+
+        //public static readonly sessions Sessions = new sessions();
+        //public class sessions
+        //{
+        //    /// <summary>
+        //    /// alias for Session.Get(s)
+        //    /// </summary>
+        //    /// <param name="s"></param>
+        //    /// <returns></returns>
+        //    public Session this[string s]
+        //    {
+        //        get
+        //        {
+        //            return Session.Get(s);
+        //        }
+        //    }
+        //    /// <summary>
+        //    /// alias for Session.GetAll()
+        //    /// </summary>
+        //    /// <returns></returns>
+        //    public static List<Session> GetAll()
+        //    {
+        //        return Session.GetAll();
+        //    }
+
+        //    internal sessions() { }
+        //}
     }
 }

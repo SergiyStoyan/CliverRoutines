@@ -34,7 +34,8 @@ namespace Cliver
                     string dir;
                     if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
-                        string dir0 = BaseDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + "_" + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
+                        //string dir0 = BaseDir + System.IO.Path.DirectorySeparatorChar + (string.IsNullOrEmpty(NamePrefix) ? "" : NamePrefix + "_") + (string.IsNullOrWhiteSpace(name) ? "" : name + "_") + TimeMark;
+                        string dir0 = BaseDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
                         dir = dir0;
                         for (int count = 1; Directory.Exists(dir); count++)
                             dir = dir0 + "_" + count.ToString();
@@ -48,9 +49,9 @@ namespace Cliver
             }
 
             /// <summary>
-            /// Session name prefix in the session directory.
+            /// Prefix to the session folder name.
             /// </summary>
-            public static string NamePrefix = "Session";
+            public static string NamePrefix = "";
 
             /// <summary>
             /// Session name.
@@ -127,58 +128,71 @@ namespace Cliver
             /// <summary>
             /// Close all log files in the session.  
             /// Nevertheless the session can be re-used after.
+            /// Make sure that during this call no log of this session is used.
             /// </summary>
             /// <param name="newName">new name</param>
             /// <param name="tryMaxCount">number of attempts if the session foldr is locked</param>
             /// <param name="tryDelayMss">time span between attempts</param>
             public void Rename(string newName, int tryMaxCount = 10, int tryDelayMss = 50)
             {
-                lock (this.names2NamedWriter)
+                lock (names2NamedWriter)
                 {
-                    if (newName == Name)
-                        return;
+                    lock (threadIds2TreadWriter)
+                    {
+                        if (newName == Name)
+                            return;
 
-                    Write("Renaming session...: '" + Name + "' to '" + newName + "'");
+                        Write("Renaming session...: '" + Name + "' to '" + newName + "'");
 
-                    for (int tryCount = 1; ; tryCount++)
-                        try
+                        lock (names2Session)
                         {
+                            if (names2Session.ContainsKey(newName))
+                                throw new Exception("Such session already exists.");
+
                             Close(true);
-                            string newDir = getDir(newName);
-                            if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
-                            {
-                                if (Directory.Exists(dir))
-                                    Directory.Move(dir, newDir);
-                                dir = newDir;
-                                foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
-                                    w.SetFile();
-                            }
-                            else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
-                            {
-                                dir = newDir;
-                                foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
+
+                            names2Session.Remove(name);
+                            name = newName;
+                            names2Session[name] = this;
+                        }
+                        string newDir = getDir(newName);
+
+                        if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
+                        {
+                            for (int tryCount = 1; ; tryCount++)
+                                try
                                 {
+                                    if (Directory.Exists(dir))
+                                        Directory.Move(dir, newDir);
+                                    break;
+                                }
+                                catch (Exception e)//if another thread calls a log in this session then it locks the folder against renaming
+                                {
+                                    if (tryCount >= tryMaxCount)
+                                        throw new Exception("Could not rename log session.", e);
+                                    Error(e);
+                                    System.Threading.Thread.Sleep(tryDelayMss);
+                                }
+                            dir = newDir;
+                            foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
+                                w.SetFile();
+                        }
+                        else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
+                        {
+                            dir = newDir;
+                            foreach (Writer w in names2NamedWriter.Values.Select(a => (Writer)a).Concat(threadIds2TreadWriter.Values))
+                            {
+                                lock (w)
+                                {
+                                    w.Close();
                                     string file0 = w.File;
                                     w.SetFile();
                                     if (File.Exists(file0))
                                         File.Move(file0, w.File);
                                 }
                             }
-                            lock (names2Session)
-                            {
-                                names2Session.Remove(name);
-                                name = newName;
-                                names2Session[name] = this;
-                            }
-                            return;
                         }
-                        catch (Exception e)//if another thread calls a log in this session then it locks the folder against renaming
-                        {
-                            if (tryCount >= tryMaxCount)
-                                throw new Exception("Could not rename log session.", e);
-                            Error(e);
-                            System.Threading.Thread.Sleep(tryDelayMss);
-                        }
+                    }
                 }
             }
 

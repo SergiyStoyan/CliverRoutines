@@ -8,6 +8,14 @@ namespace Example
     {
         public static void Run()
         {
+            //default configuration: everything is written to the same file in the same folder:
+            Log.Inform("write out of box");
+            Log.Thread.Inform("write out of box2");
+            Log.Head["test"].Inform("write out of box3");
+            Log.Session.Get("GAME")["client"].Inform("write out of box4");
+            Log.Session.Get("GAME").Rename("Game");
+
+
             //optional; initialize log            
             Log.Initialize(Log.Mode.FOLDER_PER_SESSION);//if permissions allow it, log will be created in the executable directory
 
@@ -22,20 +30,20 @@ namespace Example
             ThreadRoutines.Start(task);
 
             //writing to an explicitly created session
-            Log.Session logSession_Task = Log.Session.Get("Task");//create if not exists
-            logSession_Task.Inform("write to the default log of the session 'Task'");
+            Log.Session logSession_Task = Log.Session.Get("TASK");//create if not exists
+            logSession_Task.Inform("write to the default log of the session '"+ logSession_Task.Name+"'");
             Log.Writer log_Task_Subtask = logSession_Task["Subtask"];//create if not exists
-            log_Task_Subtask.Error("write to log '" + log_Task_Subtask.Name + "' of session 'Task'");
+            log_Task_Subtask.Error("write to log '" + log_Task_Subtask.Name + "' of session '" + logSession_Task.Name + "''");
             logSession_Task.Trace("write to the default log of the session '" + logSession_Task.Name + "'");
             logSession_Task.Thread.Inform("write to the thread log " + Log.Thread.Id + " of the session '" + logSession_Task.Name + "'");
             //sometimes you may need to rename a log session:
-            logSession_Task.Rename("renamed_Task");
+            logSession_Task.Rename("renamed_TASK");
             //optional; close the handlers and free memory
             logSession_Task.Close(false);
 
             //writing thread logs to explicitly created sessions
-            Task.Start("Task1");
-            Task.Start("Task2");
+            Task.Start("TASK1");
+            Task.Start("TASK2");
         }
 
         static void task()
