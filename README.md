@@ -1,8 +1,8 @@
 # CliverRoutines
 
-A cross-platform C# lib which provides the frequently needed routines:
+A cross-platform C# lib which provides the following frequently needed routines:
 
-- application settings manager that supersedes .NET ConfigurationManager;
+- application settings manager which supersedes .NET ConfigurationManager;
 - logger with multi-threading and session support;
 - auxiliary routines;
 
