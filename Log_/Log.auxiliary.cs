@@ -37,7 +37,7 @@ namespace Cliver
                     if (firstLogTime > currentLogTime)
                         firstLogTime = currentLogTime;
 
-                    DirectoryInfo di = new DirectoryInfo(Log.BaseDir);
+                    DirectoryInfo di = new DirectoryInfo(Log.WorkDir);
                     if (!di.Exists)
                         return;
 

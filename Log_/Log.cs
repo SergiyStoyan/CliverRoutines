@@ -23,20 +23,20 @@ namespace Cliver
         /// Shuts down the log engine and re-initializes it. Optional.
         /// </summary>
         /// <param name="mode">log configuration</param>
-        /// <param name="parentDirs">parent log directories ordered by preference</param>
+        /// <param name="baseDirs">directories for logging, ordered by preference</param>
         /// <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted</param>
-        public static void Initialize(Mode? mode = null, List<string> parentDirs = null, int deleteLogsOlderThanDays = 10)
+        public static void Initialize(Mode? mode = null, List<string> baseDirs = null, int deleteLogsOlderThanDays = 10)
         {
             lock (lockObject)
             {
                 Log.CloseAll();
                 if (mode != null)
                     Log.mode = (Mode)mode;
-                Log.parentDirs = parentDirs;
+                Log.baseDirs = baseDirs;
                 Log.deleteLogsOlderThanDays = deleteLogsOlderThanDays;
             }
         }
-        static List<string> parentDirs = null;
+        static List<string> baseDirs = null;
         static int deleteLogsOlderThanDays = 10;
         static Mode mode = Mode.ONE_FOLDER | Mode.DEFAULT_NAMED_LOG;
 
@@ -69,7 +69,7 @@ namespace Cliver
         /// <summary>
         /// Suffix to the base log folder name.
         /// </summary>
-        public static string BaseDirNameSuffix = @"_LOGS";
+        public static string BaseDirNameSuffix = @"_Sessions";
 
         /// <summary>
         /// Log configuration.
@@ -182,7 +182,7 @@ namespace Cliver
             lock (lockObject)
             {
                 Session.CloseAll();
-                baseDirs = null;
+                workDir = null;
                 headSession = null;
 
                 GC.Collect();
@@ -190,66 +190,72 @@ namespace Cliver
         }
 
         /// <summary>
-        ///Base log directory.
+        ///Directory contaning log sessions.
         /// </summary>
-        public static string BaseDir
+        public static string WorkDir
         {
             get
             {
-                if (baseDirs == null)
-                    setBaseDir(DefaultLevel > Level.NONE);
-                return baseDirs;
+                if (workDir == null)
+                    setWorkDir(DefaultLevel > Level.NONE);
+                return workDir;
             }
         }
-        static string baseDirs = null;
+        static string workDir = null;
         static Thread deletingOldLogsThread = null;
         public static Func<string, bool> DeleteOldLogsDialog = null;
 
-        static void setBaseDir(bool create)
+        static void setWorkDir(bool create)
         {
             lock (lockObject)
             {
-                if (baseDirs != null)
+                if (workDir != null)
                 {
                     if (!create)
                         return;
-                    if (Directory.Exists(baseDirs))
+                    if (Directory.Exists(workDir))
                         return;
                 }
-                List<string> parentDirs = new List<string> {
+                List<string> baseDirs = new List<string> {
                                 Log.AppDir,
                                 CompanyUserDataDir,
                                 CompanyCommonDataDir,
                                 Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
                                 Path.GetTempPath() + Path.DirectorySeparatorChar + CompanyName + Path.DirectorySeparatorChar,
                                 };
-                if (Log.parentDirs != null)
-                    parentDirs.InsertRange(0, Log.parentDirs);
-                foreach (string parentDir in parentDirs)
+                if (Log.baseDirs != null)
+                    baseDirs.InsertRange(0, Log.baseDirs);
+                foreach (string baseDir in baseDirs)
                 {
-                    baseDirs = parentDir + Path.DirectorySeparatorChar + Log.ProcessName + BaseDirNameSuffix;
+                    BaseDir = baseDir;
+                    workDir = BaseDir + Path.DirectorySeparatorChar + Log.ProcessName + BaseDirNameSuffix;
                     if (create)
                         try
                         {
-                            if (!Directory.Exists(baseDirs))
-                                FileSystemRoutines.CreateDirectory(baseDirs);
-                            string testFile = baseDirs + Path.DirectorySeparatorChar + "test";
+                            if (!Directory.Exists(workDir))
+                                FileSystemRoutines.CreateDirectory(workDir);
+                            string testFile = workDir + Path.DirectorySeparatorChar + "test";
                             File.WriteAllText(testFile, "test");
                             File.Delete(testFile);
                             break;
                         }
                         catch //(Exception e)
                         {
-                            baseDirs = null;
+                            workDir = null;
                         }
                 }
-                if (baseDirs == null)
+                if (workDir == null)
                     throw new Exception("Could not access any log directory.");
-                baseDirs = PathRoutines.GetNormalizedPath(baseDirs, false);
-                if (Directory.Exists(baseDirs) && deleteLogsOlderThanDays >= 0)
+                workDir = PathRoutines.GetNormalizedPath(workDir, false);
+                if (Directory.Exists(workDir) && deleteLogsOlderThanDays >= 0)
                     deletingOldLogsThread = ThreadRoutines.Start(() => { Log.DeleteOldLogs(deleteLogsOlderThanDays, DeleteOldLogsDialog); });//to avoid a concurrent loop while accessing the log file from the same thread 
             }
         }
+
+    /// <summary>
+    ///Actual base directory for logging.
+    /// </summary>
+    public static string BaseDir { get; private set; }
     }
 
     /// <summary>

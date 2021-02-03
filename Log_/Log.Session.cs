@@ -34,15 +34,15 @@ namespace Cliver
                     string dir;
                     if (Log.mode.HasFlag(Mode.FOLDER_PER_SESSION))
                     {
-                        //string dir0 = BaseDir + System.IO.Path.DirectorySeparatorChar + (string.IsNullOrEmpty(NamePrefix) ? "" : NamePrefix + "_") + (string.IsNullOrWhiteSpace(name) ? "" : name + "_") + TimeMark;
-                        string dir0 = BaseDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
+                        //string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + (string.IsNullOrEmpty(NamePrefix) ? "" : NamePrefix + "_") + (string.IsNullOrWhiteSpace(name) ? "" : name + "_") + TimeMark;
+                        string dir0 = WorkDir + System.IO.Path.DirectorySeparatorChar + NamePrefix + TimeMark + (string.IsNullOrWhiteSpace(name) ? "" : "_" + name);
                         dir = dir0;
                         for (int count = 1; Directory.Exists(dir); count++)
                             dir = dir0 + "_" + count.ToString();
                     }
                     else //if (Log.mode.HasFlag(Mode.ONE_FOLDER))//default
                     {
-                        dir = BaseDir;
+                        dir = WorkDir;
                     }
                     return dir;
                 }
@@ -211,13 +211,13 @@ namespace Cliver
 
                     foreach (NamedWriter nw in names2NamedWriter.Values)
                         nw.Close();
-                    //names2NamedWriter.Clear(); !!! clearing writers will bring to duplicating them if they are referenced in the custom code.
+                    //names2NamedWriter.Clear(); !!! clearing writers will bring to duplicating them if they are referenced in the calling code.
 
                     lock (threadIds2TreadWriter)
                     {
                         foreach (ThreadWriter tw in threadIds2TreadWriter.Values)
                             tw.Close();
-                        //threadIds2TreadWriter.Clear(); !!!clearing writers will bring to duplicating them if they are referenced in the custom code.
+                        //threadIds2TreadWriter.Clear(); !!!clearing writers will bring to duplicating them if they are referenced in the calling code.
                     }
 
                     if (!reuse)
@@ -225,6 +225,7 @@ namespace Cliver
                         dir = null;
                         CreatedTime = DateTime.MinValue;
                         timeMark = null;
+                        //names2Session.Remove(name);!!!removing session will bring to duplicating it if it is referenced in the calling code.
                     }
                 }
             }
