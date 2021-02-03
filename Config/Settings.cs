@@ -115,9 +115,15 @@ namespace Cliver
             }
         }
 
+        //for custom encryption
+        //virtual protected void Deserializing(ref string json) { }  TBD
+
         virtual protected void Loaded() { }
 
         virtual protected void Saving() { }
+
+        //for custom encryption
+        //virtual protected void Serialized(ref string json) { }  TBD
 
         virtual protected void Saved() { }
 
@@ -187,12 +193,19 @@ namespace Cliver
         /// <summary>
         /// Indicates that the Settings field will be stored with indention.
         /// /// </summary>
-        readonly public bool Indented = true;
+        readonly public bool Indented;
         /// <summary>
         /// Indicates that the Settings field should not be initiated by Config by default.
         /// Such a field should be initiated explisitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
         /// </summary>
-        readonly public bool Optional = false;
+        readonly public bool Optional;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="indented">Indicates that the Settings field be stored with indention</param>
+        /// <param name="optional">Indicates that the Settings field should not be initiated by Config by default.
+        /// Such a field should be initiated explisitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)</param>
         public SettingsAttribute(bool indented = true, bool optional = false)
         {
             Indented = indented;

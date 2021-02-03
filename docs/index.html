@@ -667,7 +667,7 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            <a href='#log'><code>Cliver.Log</code></a> is a logger designed with usability in mind. 
+            <a href='#log'><code>Cliver.Log</code></a> is a logger. It has been designed with usability and scalability in mind. 
 
 <p><b>Features:</b>
 
@@ -694,7 +694,6 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 			
 			<p> Multiple <a href='#log_session'>sessions</a> can be open simultaneously.
 			
-			<p>In the trivial logging, <a href='#log_default_session'>the default session</a> is automatically created.
 			
 			
 
@@ -702,6 +701,7 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 			<h3><a name='log_default_session'>Head session</a></h3>
 <a href='#log_default_session'>The default session</a> is a <a href='#log_session'>session</a> that is used when no <a href='#log_session'>session</a> is called explicitly. It is referenced as <code>Head</code> and has an empty name.
 
+			<p><a href='#log_default_session'>The default session</a> is used for the trivial logging that is sufficient for the most applications.
 
 <pre>
 <code class="language-csharp">using Cliver;
@@ -740,7 +740,7 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION);
 //create or get the existing session
 Log.Session game1Log = Log.Session.Get("Game1");
 //write to the default log of the session
-game1Log.Write("message");
+game1Log.Debug("message");
 ...
 //close all the file handlers beloning to the session.
 game1Log.Close(true);//optional call to free memory</code>
@@ -789,23 +789,22 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.AppCompanyCom
 ...
 
 //writing to the main log in the default (Head) session
-Log.Main.Inform("test message");//It is a shortcut for Log.Head.Main.Inform()</code>
+Log.Main.Inform0("test message");//It is a shortcut for Log.Head.Main.Inform()</code>
 </pre>
 
 Or:
 <pre><code class="language-csharp">//writing to the main log of session "Game1"
 Log.Session game1Session = Log.Session.Get("Game1");
-game1Session.Main.Inform("test message");</code>
+game1Session.Main.Inform0("test message");</code>
 </pre>
 
 
 
 			<h3>Example</h3>
 
- <p>   Logging to a named log of <a href='#log_default_session'>the default session</a>:
+ <p>   Writing to a named log of <a href='#log_default_session'>the default session</a>:
 <pre><code class="language-csharp">//writig to the log "Inform" of the default session
 Log.Session.NamedWriter informLog = Log.Head["Inform"];
-//writing to the log "Error" in the default session
 Log.Session.NamedWriter errorLog = Log.Head["Error"];
 try
 {
@@ -813,19 +812,18 @@ try
 }
 catch (Exception e)
 {
-	errorLog.Error2(e);
+	errorLog.Error2("Failed", e);
 }</code>
 </pre>
 
- <p>   Logging to a named log of an explicitly created <a href='#log_session'>session</a>:
-<pre><code class="language-csharp">//writing to the session "Game1"
-Log.Session game1Session = Log.Session.Get("Game1");
+ <p>   Writing to a named log of an explicitly created <a href='#log_session'>session</a>:
+<pre><code class="language-csharp">Log.Session game1Session = Log.Session.Get("Game1");
 
 //to the main log
-game1Session.Inform("test message");
+game1Session.Write("test message");
 
 //to the log named "Test"
-game1Session["Test"].Inform("test message");</code>
+game1Session["Test"].Write("test message");</code>
 </pre>
 
 
@@ -877,8 +875,8 @@ static void Main(string[] args)
 <code class="language-csharp">using Cliver;
 ...
 
-//optional configuration can be done at the very beginning. See the API and annotations for options.
-...
+//optional configuration. See the API and annotations for options.
+Log.Level = Log.Level.WARNING;
 
 //optional initialization. It can be called many times where every call closes all the logs and re-initializes the engine.
 Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you are ok with default settings.</code>
