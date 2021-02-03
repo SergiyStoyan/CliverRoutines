@@ -19,7 +19,7 @@
         <p> CliverRoutines is a cross-platform C# lib which contains:
 
  <ul>
-                <li> <a href="#config">application settings manager</a> which supersedes .NET <code>ConfigurationManager</code>;</li>
+                <li> <a href="#config">application settings manager</a> superseding .NET <code>ConfigurationManager</code>;</li>
                 <li> <a href="#log">logger</a> with <a href='#thread_log'>threading</a> and <a href='#log_session'>session</a> support;</li>
                 <li> <a href="#miscellaneous">auxiliary routines</a>;</li>
             </ul>
@@ -74,7 +74,7 @@ setLicense();
 
             <h1><a name='config'>Config</a></h1>
 
-<a href='#config'><code>Cliver.Config</code></a> is a settings manager intended for replacement of .NET ConfigurationManager. Simple in use and very capable. 
+<a href='#config'><code>Cliver.Config</code></a> is an application settings manager intended as a capable, yet simple in use replacement for .NET ConfigurationManager.
 
 <p><b>Features:</b>
 
@@ -667,7 +667,7 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 
             <h1><a name='log'>Log</a></h1>
         <p>
-            <a href='#log'><code>Cliver.Log</code></a> is a logger. It has been designed with usability and scalability in mind. 
+            <a href='#log'><code>Cliver.Log</code></a> is a logger designed with usability and scalability in mind. 
 
 <p><b>Features:</b>
 
@@ -694,14 +694,28 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 			
 			<p> Multiple <a href='#log_session'>sessions</a> can be open simultaneously.
 			
-			
+			<p>Using an explicitly created <a href='#log_session'>session</a>:
+<pre>
+<code class="language-csharp">using Cliver;
+...
+//make each session create its own folder
+Log.Initialize(Log.Mode.FOLDER_PER_SESSION);
+...
+//create or get the existing session
+Log.Session game1Log = Log.Session.Get("Game1");
+//write to the default log of the session
+game1Log.Debug("message");
+...
+//close all the file handlers beloning to the session.
+game1Log.Close(true);//optional call to free memory</code>
+</pre>			
 			
 
 
 			<h3><a name='log_default_session'>Head session</a></h3>
 <a href='#log_default_session'>The default session</a> is a <a href='#log_session'>session</a> that is used when no <a href='#log_session'>session</a> is called explicitly. It is referenced as <code>Head</code> and has an empty name.
 
-			<p><a href='#log_default_session'>The default session</a> is used for the trivial logging that is sufficient for the most applications.
+			<p><a href='#log_default_session'>The default session</a> is used for the trivial logging which is sufficient for the most applications:
 
 <pre>
 <code class="language-csharp">using Cliver;
@@ -728,23 +742,6 @@ Log.Inform("test message");//shortcut for Log.Head.Main.Inform()</code>
 Log.Inform("test message");//shortcut for Log.Head.Thread.Inform()</code>
 </pre>
 
-
-
-			<h3>Example</h3>
-<pre>
-<code class="language-csharp">using Cliver;
-...
-//make each session create its own folder
-Log.Initialize(Log.Mode.FOLDER_PER_SESSION);
-...
-//create or get the existing session
-Log.Session game1Log = Log.Session.Get("Game1");
-//write to the default log of the session
-game1Log.Debug("message");
-...
-//close all the file handlers beloning to the session.
-game1Log.Close(true);//optional call to free memory</code>
-</pre>
 
 
 
@@ -776,32 +773,7 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION, new List<string> { Log.AppCompanyCom
     <a href='#named_log'>Named log</a> is a log that can be referenced by a custom name.
 	<p>The name of a <a href='#named_log'>named log</a> is a part of its file name.
 
-
-
-
-			<h3><a name='main_log'>Main log</a></h3>
-<a href='#main_log'>The main log</a> of a <a href='#log_session'>session</a> is a <a href='#named_log'>named log</a> that is not created explicitly and is referenced as <code>Main</code>. It has an empty name.
-
-		
-    
-    <p><a href='#main_log'>The main log</a> is handy as a ready-to-use log:
-<pre><code class="language-csharp">using Cliver;
-...
-
-//writing to the main log in the default (Head) session
-Log.Main.Inform0("test message");//It is a shortcut for Log.Head.Main.Inform()</code>
-</pre>
-
-Or:
-<pre><code class="language-csharp">//writing to the main log of session "Game1"
-Log.Session game1Session = Log.Session.Get("Game1");
-game1Session.Main.Inform0("test message");</code>
-</pre>
-
-
-
-			<h3>Example</h3>
-
+			
  <p>   Writing to a named log of <a href='#log_default_session'>the default session</a>:
 <pre><code class="language-csharp">//writig to the log "Inform" of the default session
 Log.Session.NamedWriter informLog = Log.Head["Inform"];
@@ -830,11 +802,35 @@ game1Session["Test"].Write("test message");</code>
 
 
 
+			<h3><a name='main_log'>Main log</a></h3>
+<a href='#main_log'>The main log</a> of a <a href='#log_session'>session</a> is a <a href='#named_log'>named log</a> that is not created explicitly and is referenced as <code>Main</code>. It has an empty name.
+
+		
+    
+    <p><a href='#main_log'>The main log</a> is handy as a ready-to-use log:
+<pre><code class="language-csharp">using Cliver;
+...
+
+//writing to the main log in the default (Head) session
+Log.Main.Inform0("test message");//It is a shortcut for Log.Head.Main.Inform()</code>
+</pre>
+
+Or:
+<pre><code class="language-csharp">//writing to the main log of session "Game1"
+Log.Session game1Session = Log.Session.Get("Game1");
+game1Session.Main.Inform0("test message");</code>
+</pre>
+
+
+
+
+
+
     <h2><a name='thread_log'>Thread log</a></h2>
-    A <a href='#thread_log'>thread log</a> is a log that belongs to only one and the same .NET thread.
+    <p>A <a href='#thread_log'>thread log</a> is a log that belongs to only one and the same .NET thread.
+	
 	<p>Each <a href='#thread_log'>thread log</a> has a unique ID which is a part of its file name. Depending on configuration, those ID's can be reused or be endlessly incremented for each new <a href='#thread_log'>thread log</a>.
 	
-			<h3>Example</h3>
 	<p>In this example, each downloading thread writes its own log:
 <pre>
 <code class="language-csharp">using Cliver;
@@ -885,7 +881,7 @@ Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you
 
          <p>      Write to log:
 <pre>
-<code class="language-csharp">Log.Inform("test message"); //trivial log usage</code>
+<code class="language-csharp">Log.Inform("test message"); //trivial logging</code>
 </pre> 
 			<p>To see live examples, refer to CliverRoutinesExample project in CliverRoutines solution. 
 			<br>For the complete usage options, review <a href='#log'><code>Cliver.Log</code></a> API and annotations.

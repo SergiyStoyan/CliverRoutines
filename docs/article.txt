@@ -3,7 +3,7 @@
 <p>CliverRoutines is a cross-platform C# lib which contains:</p>
 
 <ul>
-	<li>settings manager which supersedes .NET ConfigurationManager;</li>
+	<li>settings manager&nbsp;superseding&nbsp;.NET ConfigurationManager;</li>
 	<li>logger with threading and session support;</li>
 	<li>auxiliary routines;</li>
 </ul>
@@ -22,7 +22,7 @@
 
 <h2>Config</h2>
 
-<p><a href="#_localAnchor_config"><code>Cliver.Config</code></a>&nbsp;&nbsp;is a settings manager intended for&nbsp;replacement of .NET ConfigurationManager.&nbsp;</p>
+<p><a href="#_localAnchor_config"><code>Cliver.Config</code></a>&nbsp;is an application settings manager intended as a replacement for .NET ConfigurationManager.</p>
 
 <p><strong>Features:</strong></p>
 
@@ -186,6 +186,6 @@ For the complete usage options, review&nbsp;<code>Cliver.Log</code>&nbsp;API.</p
 
 <h2>Enjoy!</h2>
 
-<div id="gtx-trans" style="position: absolute; left: 44px; top: 2263.8px;">
+<div id="gtx-trans" style="position: absolute; left: 170px; top: 138.2px;">
 <div class="gtx-trans-icon">&nbsp;</div>
 </div>
