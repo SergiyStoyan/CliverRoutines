@@ -31,9 +31,10 @@ namespace Cliver
                 try
                 {
                     if (deleteLogsOlderDays < 0)
-                        return;
-                    DateTime firstLogTime = DateTime.Now.AddDays(-deleteLogsOlderDays);
-                    DateTime currentLogTime = Session.GetAll().Min(a => a.CreatedTime);
+                        return; 
+                        DateTime firstLogTime = DateTime.Now.AddDays(-deleteLogsOlderDays);
+                    //!!!sometimes no session is created yet by this moment or this function is called without log at all, so the session list can be empty
+                    DateTime currentLogTime = Session.GetAll().Select(a => a.CreatedTime).DefaultIfEmpty(DateTime.Now.AddHours(-1)).Min();
                     if (firstLogTime > currentLogTime)
                         firstLogTime = currentLogTime;
 
