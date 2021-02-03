@@ -1,8 +1,8 @@
 # CliverRoutines
 
-A cross-platform C# lib which provides the following frequently needed routines:
+CliverRoutines is a cross-platform C# lib providing what is needed in the most applications:
 
-- application settings manager which supersedes .NET ConfigurationManager;
+- settings manager that supersedes .NET ConfigurationManager;
 - logger with multi-threading and session support;
 - auxiliary routines;
 
@@ -13,18 +13,26 @@ Tested on:
 - macOS High Sierra 10.12 in Xamarin.Mac projects built in Visual Studio for Mac;
 
 ## Application settings manager
-Aplication settings manager is easy to use and yet more versatile and flexible than .NET ConfigurationManager.
+Cliver.Config is an application settings manager intended as a capable, yet simple in use replacement for .NET ConfigurationManager.
 
 Features:
-- class fields/properties in your code can be automatically serialazed/deserialazed on disk;
-- serializable types are tailored in your code according to your needs;
+- cross-platform;
+- natively enables setting types of any complexity and functionality;
+- settings are easily modified directly in code;
+- enables settings polymorphism;
+- thread-safe;
+- serializes data in JSON;
 
 ## Logger 
+Cliver.Log is a logger designed with usability and scalability in mind.
+
 Features:
+- cross-platform;
 - thread-safe;
-- writting thead logs;
-- simultaneous multiple log sessions;
-- automatic old log cleanup; 
+- session oriented - an application can write multiple log sessions successively or simultaneously. It is helpful when an application performs multiple independent tasks;
+- thread oriented - it can automatically write a log per thread;
+- auto-cleanup of old logs;
+- diagnostic output;
 
 ## Auxiliary routines 
 Anything handy that is needed in general development.
