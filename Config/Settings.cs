@@ -175,13 +175,14 @@ namespace Cliver
             }
         }
 
+        /*//version with static __StorageDir
         /// <summary>
-        /// (!)A Settings derivative or some of its ancestors can hide this public static getter with its own definition.
+        /// (!)A Settings derivative or some of its ancestors must hide this public static getter with a new definition to change the storage directory.
         /// It specifies the storage folder for the type which defines this property. 
         /// </summary>
         public static string __StorageDir { get { return Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME; } }
+        */
 
-        /*//version with non-static __StorageDir
         /// <summary>
         /// Folder where storage files for this Settings derived type are to be saved by Config.
         /// Each Settings derived class must have it defined. 
@@ -190,7 +191,6 @@ namespace Cliver
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         public abstract string __StorageDir { get; protected set; }
-        */
     }
 
     /// <summary>
@@ -227,13 +227,13 @@ namespace Cliver
     /// </summary>
     public class AppSettings : Settings
     {
-        /*//version with non-static __StorageDir
         sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
-        */        
+        /*//version with static __StorageDir
         /// <summary>
-        /// (!)A Settings derivative or some of its ancestors must define this public static getter.
+        /// (!)A Settings derivative or some of its ancestors must define this public static getter to specify the storage directory.
         /// </summary>
-        new public static string __StorageDir { get; private set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;        
+        new public static string __StorageDir { get; private set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME; 
+        */
     }
 
     /// <summary>
@@ -241,13 +241,12 @@ namespace Cliver
     /// </summary>
     public class UserSettings : Settings
     {
-        /*//version with non-static __StorageDir
         sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
-        */
-        //version with static __StorageDir
+        /*//version with static __StorageDir
         /// <summary>
-        /// (!)A Settings derivative or some of its ancestors must define this public static getter.
+        /// (!)A Settings derivative or some of its ancestors must define this public static getter to specify the storage directory.
         /// </summary>
         new public static string __StorageDir { get; private set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        */
     }
 }
