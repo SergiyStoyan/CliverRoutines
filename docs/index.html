@@ -92,7 +92,7 @@ setLicense();
 
 <p>While <a href='#config'><code>Cliver.Config</code></a> was designed primarily as a settings manager, in conjunction with <code>System.Linq</code> it can be used as a simple nosql database.			
 
-<p>To grasp how to use it by an example, refer directly to <a href='#config_usage'>the usage</a>.	
+<p>To grasp how to use it by example, refer directly to <a href='#config_usage'>the usage</a>.	
 			
 			
 			
@@ -100,25 +100,48 @@ setLicense();
 			
 			
 
-            <h2><a name='settings_class'>Settings type</a></h2>
-			<a href='#settings_class'>Settings type</a> is a custom class whose fields and properties are serialized/deserialized according to the needs of the application. 
+<h2><a name='settings_class'>Settings type</a></h2>
+<a href='#settings_class'>Settings type</a> is a custom class whose fields and properties are serialized/deserialized according to the needs of the application. 
+
+<p>While generally a <a href='#settings_class'>settings class</a> should be considered a fully functional class, it must comply with the following conditions:
+<br> - it must inherit from <a href='#cliver_settings'><code>Cliver.Settings</code></a> class. This inheritance can be indirectly via another classes;
+<br> - it must either have no explicit constructor or have a <code>public</code> parameterless one;
+		
+<p>There can be any number of <a href='#settings_class'>settings types</a> defined in your code.
+
 			
-			<p>While generally a <a href='#settings_class'>settings class</a> should be considered a fully functional class, it must comply with the following conditions:
-			<br> - it must inherit from <a href='#cliver_settings'><code>Cliver.Settings</code></a> class. This inheritance can be indirectly via another classes;
-			<br> - it must either have no explicit constructor or have a <code>public</code> parameterless one;
-					
-			<p>There can be any number of <a href='#settings_class'>settings types</a> defined in your code.
 			
-			
+<p>Example of a <a href='#settings_class'>settings type</a>:			
+<pre>
+<code class="language-csharp">public class GeneralSettings : Cliver.UserSettings //serialized to the user data directory.
+{   	
+	public List&lt;string&gt; RecentFiles; 	
+	public Color HighlightColor = Color.Orange;
+	
+	protected override void Loaded()
+	{
+		if(RecentFiles == null)
+			RecentFiles = new List<string>(); 
+	}
+	
+	protected override void Saving()
+	{
+		RecentFiles = RecentFiles.Distinct();
+	}
+}</code>
+</pre>
+
+	
+	
+	
 			
 			
 
 <h3><a name='serializable_field'>Serializable fields</a></h3>
-(!)<a href='#serializable_field'>Serializable fields</a> are fields or properties of a <a href='#settings_class'>settings class</a> that are <code>public</code> and non-static. Optionally they can be <code>readonly</code>.
+<a href='#serializable_field'>Serializable fields</a> are fields or properties of a <a href='#settings_class'>settings class</a> that are (!)<code>public</code> and non-static. Optionally they can be <code>readonly</code>.
 
-			<p>Serialization/deserialization is performed by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.			
-			Hence, you can apply attributes provided by <code>Newtonsoft.Json</code> to <a href='#serializable_field'>serializable fields</a> to alter their serialization behavior. To do so, you have to reference <code>Newtonsoft.Json</code> in your project. (!)To avoid compilation problems, make sure that it is the same version that is referenced by CliverRoutines.
-<br>			For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
+<p>Serialization/deserialization is performed by <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> engine.			
+Hence, you can apply attributes provided by Newtonsoft.Json to <a href='#serializable_field'>serializable fields</a> to alter their serialization behavior. To do so, you have to reference Newtonsoft.Json in your project. (!)To avoid compilation problems, make sure that it is the same version that is referenced by CliverRoutines. For more info refer to <a href='https://www.newtonsoft.com/json'>Newtonsoft.Json</a> documentation. 			
 			
 <p>(!)While a <a href='#settings_class'>settings class</a> can implement any logic and members, remember that nevertheless there are restrictions for what and how can be serialized. For instance, data which depend on the current application state like <code>events, FieldInfo</code> types will be lost through serialization.
 
@@ -152,31 +175,7 @@ setLicense();
 
 				    
 				   
-
-			
-<h3>Example</h3>
-			
-<pre>
-<code class="language-csharp">//a settings type 
-public class GeneralSettings : Cliver.UserSettings //serialized to the user data directory.
-{   	
-	public List&lt;string&gt; RecentFiles; 	
-	public Color HighlightColor = Color.Orange;
-	
-	protected override void Loaded()
-	{
-		if(RecentFiles == null)
-			RecentFiles = new List<string>(); 
-	}
-	
-	protected override void Saving()
-	{
-		RecentFiles = RecentFiles.Distinct();
-	}
-}</code>
-</pre>
-
-			
+		
 
 			
 
@@ -190,21 +189,14 @@ public class GeneralSettings : Cliver.UserSettings //serialized to the user data
 <br> - it is <code>static</code> (<code>public</code> is optional); 
 
 			
-			<p><a href='#settings_field'>Settings fields</a> are automatically detected and initialized by <a href='#config'><code>Cliver.Config</code></a>.
-			<p>Behavior of a <a href='#settings_field'>settings field</a> can be influenced by <code>Cliver.SettingsAttribute</code> applied to it. 
-			
-			<p>There can be any number of <a href='#settings_field'>settings fields</a> in your code.
-                  <br> Usually you will need only one <a href='#settings_field'>settings field</a> per <a href='#settings_class'>settings type</a>, but there is no problem to declare any number of <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>settings type</a>.
-				   				
+<p><a href='#settings_field'>Settings fields</a> are automatically detected and initialized by <a href='#config'><code>Cliver.Config</code></a>.
+<p>Behavior of a <a href='#settings_field'>settings field</a> can be influenced by <code>Cliver.SettingsAttribute</code> applied to it. 
 
-
-			
-
-								
+<p>There can be any number of <a href='#settings_field'>settings fields</a> in your code.
+<br> Usually you will need only one <a href='#settings_field'>settings field</a> per <a href='#settings_class'>settings type</a>, but there is no problem to declare any number of <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>settings type</a>.
 				   
-<h3>Example</h3>
-<pre>
-<code class="language-csharp">namespace App
+<p>Example of a <a href='#settings_field'>settings field</a>:
+<pre><code class="language-csharp">namespace App
 {
 	public class Settings
 	{
@@ -213,6 +205,11 @@ public class GeneralSettings : Cliver.UserSettings //serialized to the user data
 	}
 }</code>
 </pre>
+
+
+
+
+
 		
 <h3>Initialization</h3>
         <br> Detection and initialization of <a href='#settings_field'>settings field</a>s must be triggered from your code. It can be preceded by optional configuration of <a href='#config'><code>Cliver.Config</code></a> (see its API).
@@ -271,13 +268,13 @@ The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>s
 			<tr>
 			<td style="border:0;">storage file path:</td>
 			<td bgcolor="#ddf" style="margin:0;padding:0;border:0;border-collapse:collapse;">C:\Users\serge\AppData\Local\</td>
-			<td bgcolor="#def" style="margin:0;padding:0;border:0;border-collapse:collapse;">SuperDuperSoft\App\config\</td>
+			<td bgcolor="#def" style="margin:0;padding:0;border:0;border-collapse:collapse;">Supersoft\App\config\</td>
 			<td bgcolor="#dff" style="margin:0;padding:0;border:0;border-collapse:collapse;">App.Settings.General.json</td>
 				</tr>
 				<tr>
 			<td>predetermined by:</td>
 			<td style="width:10px;"><code>Cliver.UserSettings</code></td>
-			<td style="width:10px;">application name 'App' and company name 'SuperDuperSoft'</td>
+			<td style="width:10px;">application name 'App' and company name 'Supersoft'</td>
 			<td style="width:10px;">the full path of field <code>General</code> in the application</td>
 			</tr>
 			</table>
@@ -382,7 +379,7 @@ public class Server
 
         <p>Add this call at the beginning of your application, to make <a href='#config'><code>Cliver.Config</code></a> detect all <a href='#settings_field'>settings fields</a> in the code and initialize them:
 <pre>
-<code class="language-csharp">//It can be called many times where every call re-initializes settings.
+<code class="language-csharp">//it can be called many times; every call re-initializes all the settings.
 Cliver.Config.Reload();//mandatory call before using settings</code>
 </pre>
 
@@ -454,7 +451,7 @@ connect(Settings.General.ClientPort, server.Host, server.Port);</code>
 			
             <h3><a name=''>Ignoring fields/properties</a></h3>
 
-            To make a certain field or property not serializable, make it <code>non-public</code>. Otherwise, reference <code>Newtonsoft.Json</code> and add the attribute as in the example:
+            To make a certain field or property not serializable, make it <code>non-public</code>. Otherwise, reference Newtonsoft.Json and add the attribute as in the example:
 <pre>
 <code class="language-csharp">public class GeneralSettings : Cliver.UserSettings
 {   	
@@ -680,7 +677,7 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 <br> - auto-cleanup of old logs;
 <br> - diagnostic output;
 
-<p>To grasp how to use it for logging that is sufficient for the most applications, refer directly to <a href='#log_usage'>the usage</a>.		
+<p>To grasp how to use it for logging sufficient in the most applications, refer directly to <a href='#log_usage'>the usage</a>.		
 
 
 
@@ -876,7 +873,7 @@ static void Main(string[] args)
 //optional configuration. See the API and annotations for options.
 Log.Level = Log.Level.WARNING;
 
-//optional initialization. It can be called many times where every call closes all the logs and re-initializes the engine.
+//optional initialization. It can be called many times; every call closes all the logs and re-initializes the engine.
 Log.Initialize(Log.Mode.FOLDER_PER_SESSION); //this call is not mandatory if you are ok with default settings.</code>
 </pre>
 
