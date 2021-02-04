@@ -182,7 +182,7 @@ namespace Cliver
         /// (It is not static due to badly awkwardness of C#.)
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
-        public abstract string __StorageDir { get; }
+        public abstract string __StorageDir { get; protected set; }
     }
 
     /// <summary>
@@ -219,8 +219,7 @@ namespace Cliver
     /// </summary>
     public class AppSettings : Settings
     {
-        sealed public override string __StorageDir { get { return StorageDir; } }
-        public static readonly string StorageDir = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 
     /// <summary>
@@ -228,7 +227,6 @@ namespace Cliver
     /// </summary>
     public class UserSettings : Settings
     {
-        sealed public override string __StorageDir { get { return StorageDir; } }
-        public static readonly string StorageDir = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }

@@ -91,6 +91,8 @@ setLicense();
 <br><a href='#settings_class'>Settings types</a> are ordinary C# classes that you define in your code according to your needs thus achieving a great flexibility. <a href='#config'><code>Cliver.Config</code></a> automatically detects <a href='#settings_field'>fields/properties</a> having those types and facilitates their serialization/deserialization to/from disk.
 
 <p>While <a href='#config'><code>Cliver.Config</code></a> was designed primarily as a settings manager, in conjunction with <code>System.Linq</code> it can be used as a simple nosql database.			
+
+<p>To grasp how to use it by an example, refer directly to <a href='#config_usage'>the usage</a>.	
 			
 			
 			
@@ -344,7 +346,7 @@ The <a href='#initial_file'>initial file</a> name of <a href='#settings_field'>s
 
 
 
-<h2><a name=''>Usage</a></h2>
+<h2><a name='config_usage'>Usage</a></h2>
 			Reference CliverRoutines in your project.
 			<br>Set your project's company name because it co-defines the storage directory.
 			
@@ -378,7 +380,7 @@ public class Server
 </pre>
 
 
-        <p>Add this call at the beginning of your application, to make <a href='#config'><code>Cliver.Config</code></a> detect all <a href='#settings_field'>settings fields</a> in code and initialize them:
+        <p>Add this call at the beginning of your application, to make <a href='#config'><code>Cliver.Config</code></a> detect all <a href='#settings_field'>settings fields</a> in the code and initialize them:
 <pre>
 <code class="language-csharp">//It can be called many times where every call re-initializes settings.
 Cliver.Config.Reload();//mandatory call before using settings</code>
@@ -678,7 +680,7 @@ You can pass a <a href='#settings_field'>settings field</a> to another process. 
 <br> - auto-cleanup of old logs;
 <br> - diagnostic output;
 
-		
+<p>To grasp how to use it for logging that is sufficient for the most applications, refer directly to <a href='#log_usage'>the usage</a>.		
 
 
 
@@ -861,7 +863,7 @@ static void Main(string[] args)
 
 
 
-            <h2><a name='example'>Usage</a></h2>
+            <h2><a name='log_usage'>Usage</a></h2>
 			Reference CliverRoutines in your project.
 			<br>Set your project's company name because it co-defines the log directory.
 			
