@@ -67,12 +67,28 @@ namespace Cliver
 
         internal readonly SettingsAttribute Attribute;
 
-        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type type)
+        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType)
         {
-            Type = type;
+            Type = settingType;
             FullName = settingsTypeMemberInfo.DeclaringType.FullName + "." + settingsTypeMemberInfo.Name;
+            string storageDir;
+            for (; ; )
+            {
+                PropertyInfo fi = settingType.GetProperty(nameof(Settings.__StorageDir), BindingFlags.Static | BindingFlags.Public);
+                if (fi != null)
+                {
+                    storageDir = (string)fi.GetValue(null);
+                    break;
+                }
+                settingType = settingType.BaseType;
+                if (settingType == null)
+                    throw new Exception("Settings type " + Type.ToString() + " or some of its ancestors must define the public static getter " + nameof(Settings.__StorageDir));
+            }
+            File = storageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
+            /*//version with non-static __StorageDir
             Settings s = (Settings)Activator.CreateInstance(Type);
             File = s.__StorageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
+            */
             InitFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             Attribute = settingsTypeMemberInfo.GetCustomAttributes<SettingsAttribute>(false).FirstOrDefault();
             Indented = Attribute == null ? true : Attribute.Indented;

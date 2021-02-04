@@ -176,13 +176,21 @@ namespace Cliver
         }
 
         /// <summary>
+        /// (!)A Settings derivative or some of its ancestors can hide this public static getter with its own definition.
+        /// It specifies the storage folder for the type which defines this property. 
+        /// </summary>
+        public static string __StorageDir { get { return Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME; } }
+
+        /*//version with non-static __StorageDir
+        /// <summary>
         /// Folder where storage files for this Settings derived type are to be saved by Config.
         /// Each Settings derived class must have it defined. 
         /// Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
-        /// (It is not static due to badly awkwardness of C#.)
+        /// (It is not static as C# has no static polymorphism.)
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         public abstract string __StorageDir { get; protected set; }
+        */
     }
 
     /// <summary>
@@ -219,7 +227,13 @@ namespace Cliver
     /// </summary>
     public class AppSettings : Settings
     {
+        /*//version with non-static __StorageDir
         sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        */        
+        /// <summary>
+        /// (!)A Settings derivative or some of its ancestors must define this public static getter.
+        /// </summary>
+        new public static string __StorageDir { get; private set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;        
     }
 
     /// <summary>
@@ -227,6 +241,13 @@ namespace Cliver
     /// </summary>
     public class UserSettings : Settings
     {
+        /*//version with non-static __StorageDir
         sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        */
+        //version with static __StorageDir
+        /// <summary>
+        /// (!)A Settings derivative or some of its ancestors must define this public static getter.
+        /// </summary>
+        new public static string __StorageDir { get; private set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }
