@@ -196,7 +196,7 @@ namespace Cliver
         readonly public bool Indented;
         /// <summary>
         /// Indicates that the Settings field should not be initiated by Config by default.
-        /// Such a field should be initiated explisitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
+        /// Such a field should be initiated explicitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
         /// </summary>
         readonly public bool Optional;
 
@@ -205,7 +205,7 @@ namespace Cliver
         /// </summary>
         /// <param name="indented">Indicates that the Settings field be stored with indention</param>
         /// <param name="optional">Indicates that the Settings field should not be initiated by Config by default.
-        /// Such a field should be initiated explisitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)</param>
+        /// Such a field should be initiated explicitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)</param>
         public SettingsAttribute(bool indented = true, bool optional = false)
         {
             Indented = indented;
