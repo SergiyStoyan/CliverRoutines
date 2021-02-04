@@ -86,7 +86,7 @@ namespace Cliver
             }
             File = storageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             /*//version with non-static __StorageDir
-            Settings s = (Settings)Activator.CreateInstance(Type);
+            Settings s = (Settings)Activator.CreateInstance(Type); //!!!slightly slowler than calling a static by reflection. No time increased for a bigger class though.
             File = s.__StorageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             */
             InitFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
