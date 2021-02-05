@@ -5,6 +5,7 @@
 //        stoyan@cliversoft.com
 //        http://www.cliversoft.com
 //********************************************************************************************
+#define COMPILE_GetObject_SetObject
 
 using System;
 using System.Collections.Generic;
@@ -55,8 +56,6 @@ namespace Cliver
                 return (Settings)getObject();
             }
         }
-        //abstract protected Settings getObject();
-        readonly Func<object> getObject;
 
         internal void SetObject(Settings settings)
         {
@@ -65,16 +64,27 @@ namespace Cliver
                 setObject(settings);
             }
         }
-        //abstract protected void setObject(Settings settings);
+
+#if !COMPILE_GetObject_SetObject
+        abstract protected object getObject();
+        abstract protected void setObject(Settings settings);
+#else
+        readonly Func<object> getObject;
         readonly Action<Settings> setObject;
+#endif
 
         internal readonly SettingsAttribute Attribute;
 
+#if !COMPILE_GetObject_SetObject
+        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType)
+        {
+#else
         protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType, Func<object> getObject, Action<Settings> setObject)
         {
-            Type = settingType;
             this.getObject = getObject;
             this.setObject = setObject;
+#endif
+            Type = settingType;
             FullName = settingsTypeMemberInfo.DeclaringType.FullName + "." + settingsTypeMemberInfo.Name;
             /*//version with static __StorageDir
             string storageDir;
@@ -102,18 +112,24 @@ namespace Cliver
 
     public class SettingsFieldInfo : SettingsMemberInfo
     {
-        //override protected object getObject()
-        //{
-        //    return FieldInfo.GetValue(null);
-        //}
+#if !COMPILE_GetObject_SetObject
+        override protected object getObject()
+        {
+            return FieldInfo.GetValue(null);
+        }
 
-        //override protected void setObject(Settings settings)
-        //{
-        //    FieldInfo.SetValue(null, settings);
-        //}
+        override protected void setObject(Settings settings)
+        {
+            FieldInfo.SetValue(null, settings);
+        }
 
-        //readonly FieldInfo FieldInfo;
+        readonly FieldInfo FieldInfo;
 
+        internal SettingsFieldInfo(FieldInfo settingsTypeFieldInfo) : base(settingsTypeFieldInfo, settingsTypeFieldInfo.FieldType)
+        {
+            FieldInfo = settingsTypeFieldInfo;
+        }
+#else
         internal SettingsFieldInfo(FieldInfo settingsTypeFieldInfo) : base(
             settingsTypeFieldInfo,
             settingsTypeFieldInfo.FieldType,
@@ -121,7 +137,6 @@ namespace Cliver
             getSetValue(settingsTypeFieldInfo)
             )
         {
-            //FieldInfo = settingsTypeFieldInfo;
         }
         protected static Func<object> getGetValue(FieldInfo fieldInfo)//faster than FieldInfo.GetValue
         {
@@ -137,22 +152,29 @@ namespace Cliver
             BinaryExpression be = Expression.Assign(me, ue);
             return Expression.Lambda<Action<Settings>>(be, pe).Compile();
         }
+#endif
     }
 
     public class SettingsPropertyInfo : SettingsMemberInfo
     {
-        //override protected object getObject()
-        //{
-        //    return PropertyInfo.GetValue(null);
-        //}
+#if !COMPILE_GetObject_SetObject
+        override protected object getObject()
+        {
+            return PropertyInfo.GetValue(null);
+        }
 
-        //override protected void setObject(Settings settings)
-        //{
-        //    PropertyInfo.SetValue(null, settings);
-        //}
+        override protected void setObject(Settings settings)
+        {
+            PropertyInfo.SetValue(null, settings);
+        }
 
-        //readonly PropertyInfo PropertyInfo;
+        readonly PropertyInfo PropertyInfo;
 
+        internal SettingsPropertyInfo(PropertyInfo settingsTypePropertyInfo) : base(settingsTypePropertyInfo, settingsTypePropertyInfo.PropertyType)
+        {
+            PropertyInfo = settingsTypePropertyInfo;
+        }
+#else
         internal SettingsPropertyInfo(PropertyInfo settingsTypePropertyInfo) : base(
             settingsTypePropertyInfo,
             settingsTypePropertyInfo.PropertyType,
@@ -160,7 +182,6 @@ namespace Cliver
             getSetValue(settingsTypePropertyInfo.GetSetMethod(true))
             )
         {
-            //PropertyInfo = settingsTypePropertyInfo;
         }
         protected static Func<object> getGetValue(MethodInfo methodInfo)//faster than PropertyInfo.GetValue
         {
@@ -174,5 +195,6 @@ namespace Cliver
             MethodCallExpression mce = Expression.Call(methodInfo, ue);
             return Expression.Lambda<Action<Settings>>(mce, pe).Compile();
         }
+#endif
     }
 }
