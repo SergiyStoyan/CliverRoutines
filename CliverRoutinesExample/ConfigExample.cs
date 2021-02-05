@@ -10,6 +10,9 @@ namespace Example
 
         public static void Run()
         {
+            var watch =new System.Diagnostics.Stopwatch();
+            watch.Start();
+
             //mandatory; initialize settings
             Config.Reload();
 
@@ -29,6 +32,8 @@ namespace Example
             Settings.General.Users[user.Name] = user;
 
             Config.Save();
+
+            watch.Stop();
         }
 
         // bogus editor

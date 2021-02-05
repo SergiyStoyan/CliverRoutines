@@ -5,7 +5,7 @@
 //        stoyan@cliversoft.com
 //        http://www.cliversoft.com
 //********************************************************************************************
-#define COMPILE_GetObject_SetObject
+#define COMPILE_GetObject_SetObject1 //Stopwatch shows that compiling is not faster! Probably the reflection was improved.
 
 using System;
 using System.Collections.Generic;
@@ -65,20 +65,18 @@ namespace Cliver
             }
         }
 
-#if !COMPILE_GetObject_SetObject
-        abstract protected object getObject();
-        abstract protected void setObject(Settings settings);
-#else
-        readonly Func<object> getObject;
-        readonly Action<Settings> setObject;
-#endif
-
         internal readonly SettingsAttribute Attribute;
 
 #if !COMPILE_GetObject_SetObject
+        abstract protected object getObject();
+        abstract protected void setObject(Settings settings);
+
         protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType)
         {
 #else
+        readonly Func<object> getObject;
+        readonly Action<Settings> setObject;
+
         protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType, Func<object> getObject, Action<Settings> setObject)
         {
             this.getObject = getObject;
@@ -138,13 +136,13 @@ namespace Cliver
             )
         {
         }
-        protected static Func<object> getGetValue(FieldInfo fieldInfo)//faster than FieldInfo.GetValue
+        protected static Func<object> getGetValue(FieldInfo fieldInfo)
         {
             MemberExpression me = Expression.Field(null, fieldInfo);
             return Expression.Lambda<Func<object>>(me).Compile();
 
         }
-        protected static Action<Settings> getSetValue(FieldInfo fieldInfo)//faster than FieldInfo.SetValue
+        protected static Action<Settings> getSetValue(FieldInfo fieldInfo)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
             UnaryExpression ue = Expression.Convert(pe, fieldInfo.FieldType);
@@ -183,12 +181,12 @@ namespace Cliver
             )
         {
         }
-        protected static Func<object> getGetValue(MethodInfo methodInfo)//faster than PropertyInfo.GetValue
+        protected static Func<object> getGetValue(MethodInfo methodInfo)
         {
             MethodCallExpression mce = Expression.Call(methodInfo);
             return Expression.Lambda<Func<object>>(mce).Compile();
         }
-        protected static Action<Settings> getSetValue(MethodInfo methodInfo)//faster than PropertyInfo.SetValue
+        protected static Action<Settings> getSetValue(MethodInfo methodInfo)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
             UnaryExpression ue = Expression.Convert(pe, methodInfo.GetParameters().First().ParameterType);
