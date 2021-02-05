@@ -24,7 +24,7 @@ namespace Example
 
             editSmtpInDialog();
 
-            User user = new User { Name = "Tom2", Email = "tom@company.com" };
+            User user = new User { Name = "Tom3", Email = "tom@company.com" };
             user.Notify("test");
             Settings.General.Users[user.Name] = user;
 
@@ -40,7 +40,7 @@ namespace Example
 
                 //expose smtp2 in an editing dialog and get new values
                 smtp2.Host = "smtp.server.com";
-                smtp2.Port = 29;
+                smtp2.Port = 30;
 
                 if (!isValid(smtp2))
                     return;

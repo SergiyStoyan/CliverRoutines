@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Diagnostics;
 
 namespace Cliver
@@ -51,10 +52,10 @@ namespace Cliver
         {
             lock (this)
             {
-                return getObject();
+                return (Settings)getObject();
             }
         }
-        abstract protected Settings getObject();
+        abstract protected object getObject();
 
         internal void SetObject(Settings settings)
         {
@@ -97,9 +98,9 @@ namespace Cliver
 
     public class SettingsFieldInfo : SettingsMemberInfo
     {
-        override protected Settings getObject()
+        override protected object getObject()
         {
-            return (Settings)FieldInfo.GetValue(null);
+            return FieldInfo.GetValue(null);
         }
 
         override protected void setObject(Settings settings)
@@ -113,13 +114,28 @@ namespace Cliver
         {
             FieldInfo = settingsTypeFieldInfo;
         }
+        //!!!needs fix for structs
+        //protected static Func<object> getGetValue(FieldInfo fieldInfo)//faster than FieldInfo.GetValue
+        //{
+        //    MemberExpression me = Expression.Field(null, fieldInfo);
+        //    return Expression.Lambda<Func<object>>(me).Compile();
+
+        //}
+        //protected static Action<Settings> getSetValue(FieldInfo fieldInfo)//faster than FieldInfo.SetValue
+        //{
+        //    ParameterExpression pe = Expression.Parameter(typeof(object));
+        //    UnaryExpression ue = Expression.Convert(pe, fieldInfo.FieldType);
+        //    MemberExpression me = Expression.Field(null, fieldInfo);
+        //    BinaryExpression be = Expression.Assign(me, ue);
+        //    return Expression.Lambda<Action<Settings>>(be, pe).Compile();
+        //}
     }
 
     public class SettingsPropertyInfo : SettingsMemberInfo
     {
-        override protected Settings getObject()
+        override protected object getObject()
         {
-            return (Settings)PropertyInfo.GetValue(null);
+            return PropertyInfo.GetValue(null);
         }
 
         override protected void setObject(Settings settings)
@@ -133,5 +149,18 @@ namespace Cliver
         {
             PropertyInfo = settingsTypePropertyInfo;
         }
+        //???needs fix for structs
+        //protected static Func<object> getGetValue(MethodInfo methodInfo)//faster than PropertyInfo.GetValue
+        //{
+        //    MethodCallExpression mce = Expression.Call(methodInfo);
+        //    return Expression.Lambda<Func<object>>(mce).Compile();
+        //}
+        //protected static Action<Settings> getSetValue(MethodInfo methodInfo)//faster than PropertyInfo.SetValue
+        //{
+        //    ParameterExpression pe = Expression.Parameter(typeof(object));
+        //    UnaryExpression ue = Expression.Convert(pe, methodInfo.GetParameters().First().ParameterType);
+        //    MethodCallExpression mce = Expression.Call(methodInfo, ue);
+        //    return Expression.Lambda<Action<Settings>>(mce, pe).Compile();
+        //}
     }
 }
