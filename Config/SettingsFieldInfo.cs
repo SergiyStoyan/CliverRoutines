@@ -52,31 +52,29 @@ namespace Cliver
         {
             lock (this)
             {
-                //return (Settings)getObject();
-                return (Settings)getValue();
+                return (Settings)getObject();
             }
         }
         //abstract protected Settings getObject();
-        readonly Func<object> getValue;
+        readonly Func<object> getObject;
 
         internal void SetObject(Settings settings)
         {
             lock (this)
             {
-                //setObject(settings);
-                setValue(settings);
+                setObject(settings);
             }
         }
         //abstract protected void setObject(Settings settings);
-        readonly Action<Settings> setValue;
+        readonly Action<Settings> setObject;
 
         internal readonly SettingsAttribute Attribute;
 
-        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType, Func<object> getValue, Action<Settings> setValue)
+        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType, Func<object> getObject, Action<Settings> setObject)
         {
             Type = settingType;
-            this.getValue = getValue;
-            this.setValue = setValue;
+            this.getObject = getObject;
+            this.setObject = setObject;
             FullName = settingsTypeMemberInfo.DeclaringType.FullName + "." + settingsTypeMemberInfo.Name;
             /*//version with static __StorageDir
             string storageDir;
@@ -94,7 +92,7 @@ namespace Cliver
             }
             File = storageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             */
-            Settings s = (Settings)Activator.CreateInstance(Type); //!!!slightly slowler than calling a static by reflection. No slower for a bigger class though.
+            Settings s = (Settings)Activator.CreateInstance(Type); //!!!slightly slowler than calling a static by reflection. Doesn't run slower for a bigger class though.
             File = s.__StorageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             InitFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             Attribute = settingsTypeMemberInfo.GetCustomAttributes<SettingsAttribute>(false).FirstOrDefault();
