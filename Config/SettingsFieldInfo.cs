@@ -52,25 +52,31 @@ namespace Cliver
         {
             lock (this)
             {
-                return (Settings)getObject();
+                //return (Settings)getObject();
+                return (Settings)getValue();
             }
         }
-        abstract protected object getObject();
+        //abstract protected Settings getObject();
+        readonly Func<object> getValue;
 
         internal void SetObject(Settings settings)
         {
             lock (this)
             {
-                setObject(settings);
+                //setObject(settings);
+                setValue(settings);
             }
         }
-        abstract protected void setObject(Settings settings);
+        //abstract protected void setObject(Settings settings);
+        readonly Action<Settings> setValue;
 
         internal readonly SettingsAttribute Attribute;
 
-        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType)
+        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType, Func<object> getValue, Action<Settings> setValue)
         {
             Type = settingType;
+            this.getValue = getValue;
+            this.setValue = setValue;
             FullName = settingsTypeMemberInfo.DeclaringType.FullName + "." + settingsTypeMemberInfo.Name;
             /*//version with static __StorageDir
             string storageDir;
@@ -98,69 +104,77 @@ namespace Cliver
 
     public class SettingsFieldInfo : SettingsMemberInfo
     {
-        override protected object getObject()
-        {
-            return FieldInfo.GetValue(null);
-        }
-
-        override protected void setObject(Settings settings)
-        {
-            FieldInfo.SetValue(null, settings);
-        }
-
-        readonly FieldInfo FieldInfo;
-
-        internal SettingsFieldInfo(FieldInfo settingsTypeFieldInfo) : base(settingsTypeFieldInfo, settingsTypeFieldInfo.FieldType)
-        {
-            FieldInfo = settingsTypeFieldInfo;
-        }
-        //!!!needs fix for structs
-        //protected static Func<object> getGetValue(FieldInfo fieldInfo)//faster than FieldInfo.GetValue
+        //override protected object getObject()
         //{
-        //    MemberExpression me = Expression.Field(null, fieldInfo);
-        //    return Expression.Lambda<Func<object>>(me).Compile();
+        //    return FieldInfo.GetValue(null);
+        //}
 
-        //}
-        //protected static Action<Settings> getSetValue(FieldInfo fieldInfo)//faster than FieldInfo.SetValue
+        //override protected void setObject(Settings settings)
         //{
-        //    ParameterExpression pe = Expression.Parameter(typeof(object));
-        //    UnaryExpression ue = Expression.Convert(pe, fieldInfo.FieldType);
-        //    MemberExpression me = Expression.Field(null, fieldInfo);
-        //    BinaryExpression be = Expression.Assign(me, ue);
-        //    return Expression.Lambda<Action<Settings>>(be, pe).Compile();
+        //    FieldInfo.SetValue(null, settings);
         //}
+
+        //readonly FieldInfo FieldInfo;
+
+        internal SettingsFieldInfo(FieldInfo settingsTypeFieldInfo) : base(
+            settingsTypeFieldInfo,
+            settingsTypeFieldInfo.FieldType,
+            getGetValue(settingsTypeFieldInfo),
+            getSetValue(settingsTypeFieldInfo)
+            )
+        {
+            //FieldInfo = settingsTypeFieldInfo;
+        }
+        protected static Func<object> getGetValue(FieldInfo fieldInfo)//faster than FieldInfo.GetValue
+        {
+            MemberExpression me = Expression.Field(null, fieldInfo);
+            return Expression.Lambda<Func<object>>(me).Compile();
+
+        }
+        protected static Action<Settings> getSetValue(FieldInfo fieldInfo)//faster than FieldInfo.SetValue
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(object));
+            UnaryExpression ue = Expression.Convert(pe, fieldInfo.FieldType);
+            MemberExpression me = Expression.Field(null, fieldInfo);
+            BinaryExpression be = Expression.Assign(me, ue);
+            return Expression.Lambda<Action<Settings>>(be, pe).Compile();
+        }
     }
 
     public class SettingsPropertyInfo : SettingsMemberInfo
     {
-        override protected object getObject()
-        {
-            return PropertyInfo.GetValue(null);
-        }
-
-        override protected void setObject(Settings settings)
-        {
-            PropertyInfo.SetValue(null, settings);
-        }
-
-        readonly PropertyInfo PropertyInfo;
-
-        internal SettingsPropertyInfo(PropertyInfo settingsTypePropertyInfo) : base(settingsTypePropertyInfo, settingsTypePropertyInfo.PropertyType)
-        {
-            PropertyInfo = settingsTypePropertyInfo;
-        }
-        //???needs fix for structs
-        //protected static Func<object> getGetValue(MethodInfo methodInfo)//faster than PropertyInfo.GetValue
+        //override protected object getObject()
         //{
-        //    MethodCallExpression mce = Expression.Call(methodInfo);
-        //    return Expression.Lambda<Func<object>>(mce).Compile();
+        //    return PropertyInfo.GetValue(null);
         //}
-        //protected static Action<Settings> getSetValue(MethodInfo methodInfo)//faster than PropertyInfo.SetValue
+
+        //override protected void setObject(Settings settings)
         //{
-        //    ParameterExpression pe = Expression.Parameter(typeof(object));
-        //    UnaryExpression ue = Expression.Convert(pe, methodInfo.GetParameters().First().ParameterType);
-        //    MethodCallExpression mce = Expression.Call(methodInfo, ue);
-        //    return Expression.Lambda<Action<Settings>>(mce, pe).Compile();
+        //    PropertyInfo.SetValue(null, settings);
         //}
+
+        //readonly PropertyInfo PropertyInfo;
+
+        internal SettingsPropertyInfo(PropertyInfo settingsTypePropertyInfo) : base(
+            settingsTypePropertyInfo,
+            settingsTypePropertyInfo.PropertyType,
+            getGetValue(settingsTypePropertyInfo.GetGetMethod(true)),
+            getSetValue(settingsTypePropertyInfo.GetSetMethod(true))
+            )
+        {
+            //PropertyInfo = settingsTypePropertyInfo;
+        }
+        protected static Func<object> getGetValue(MethodInfo methodInfo)//faster than PropertyInfo.GetValue
+        {
+            MethodCallExpression mce = Expression.Call(methodInfo);
+            return Expression.Lambda<Func<object>>(mce).Compile();
+        }
+        protected static Action<Settings> getSetValue(MethodInfo methodInfo)//faster than PropertyInfo.SetValue
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(object));
+            UnaryExpression ue = Expression.Convert(pe, methodInfo.GetParameters().First().ParameterType);
+            MethodCallExpression mce = Expression.Call(methodInfo, ue);
+            return Expression.Lambda<Action<Settings>>(mce, pe).Compile();
+        }
     }
 }
