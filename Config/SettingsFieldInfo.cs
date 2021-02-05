@@ -5,16 +5,12 @@
 //        stoyan@cliversoft.com
 //        http://www.cliversoft.com
 //********************************************************************************************
-#define COMPILE_GetObject_SetObject1 //Stopwatch shows that compiling is not faster! Probably the reflection was improved.
+#define COMPILE_GetObject_SetObject1 //!!!Stopwatch shows that compiling is not faster. Probably the reflection was improved.
 
 using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.IO;
 using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Diagnostics;
 
 namespace Cliver
 {
