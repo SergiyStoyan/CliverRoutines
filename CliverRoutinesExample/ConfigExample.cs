@@ -10,7 +10,7 @@ namespace Example
 
         public static void Run()
         {
-            var watch =new System.Diagnostics.Stopwatch();
+            var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
             //mandatory; initialize settings
@@ -64,7 +64,7 @@ namespace Example
         {
             return true;
         }
-        
+
         // bogus mailer
         public static void Email(string host, int port, string password, string message)
         {
