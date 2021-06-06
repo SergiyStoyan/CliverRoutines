@@ -83,7 +83,7 @@ namespace Cliver
         {
             return __Info != null
                 && Config.GetSettingsFieldInfo(__Info.FullName).GetObject() == this;//is referenced by the field
-              //&& __Info.GetObject() == this;//is referenced by the field//!!!if Config was reloaded and __Info was recreated, it still would work which is wrong
+                                                                                    //&& __Info.GetObject() == this;//is referenced by the field//!!!if Config was reloaded and __Info was recreated, it still would work which is wrong
         }
 
         /// <summary>
@@ -227,13 +227,15 @@ namespace Cliver
     /// </summary>
     public class AppSettings : Settings
     {
-        sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
         /*//version with static __StorageDir
         /// <summary>
         /// (!)A Settings derivative or some of its ancestors must define this public static getter to specify the storage directory.
         /// </summary>
         new public static string __StorageDir { get; private set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME; 
         */
+
+        sealed public override string __StorageDir { get; protected set; } = StorageDir;
+        public static readonly string StorageDir = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 
     /// <summary>
@@ -241,12 +243,14 @@ namespace Cliver
     /// </summary>
     public class UserSettings : Settings
     {
-        sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
         /*//version with static __StorageDir
         /// <summary>
         /// (!)A Settings derivative or some of its ancestors must define this public static getter to specify the storage directory.
         /// </summary>
         new public static string __StorageDir { get; private set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
         */
+
+        sealed public override string __StorageDir { get; protected set; } = StorageDir;
+        public static readonly string StorageDir = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }
