@@ -54,7 +54,7 @@ namespace Cliver
             if (!reset && File.Exists(settingsFieldInfo.File))
                 try
                 {
-                    return (Settings)Cliver.Serialization.Json.Load(settingsFieldInfo.Type, settingsFieldInfo.File, true, true);
+                    return load(settingsFieldInfo);
                 }
                 catch (Exception e)
                 {
@@ -66,7 +66,7 @@ namespace Cliver
                 FileSystemRoutines.CopyFile(settingsFieldInfo.InitFile, settingsFieldInfo.File, true);
                 try
                 {
-                    return (Settings)Cliver.Serialization.Json.Load(settingsFieldInfo.Type, settingsFieldInfo.InitFile, true, true);
+                    return load(settingsFieldInfo);
                 }
                 catch (Exception e)
                 {
@@ -74,6 +74,13 @@ namespace Cliver
                 }
             }
             return (Settings)Activator.CreateInstance(settingsFieldInfo.Type);
+        }
+        static Settings load(SettingsMemberInfo settingsFieldInfo)
+        {
+            string s = File.ReadAllText(settingsFieldInfo.File);
+            if (settingsFieldInfo.Attribute?.Crypto != null)
+                s = settingsFieldInfo.Attribute.Crypto.Decrypt(s);
+            return (Settings)Serialization.Json.Deserialize(settingsFieldInfo.Type, s, true, true);
         }
 
         /// <summary>
@@ -102,7 +109,11 @@ namespace Cliver
         void save()
         {
             Saving();
-            Cliver.Serialization.Json.Save(__Info.File, this, __Info.Indented, true);
+            string s = Serialization.Json.Serialize(this, __Info.Indented, true);
+            if (__Info.Attribute?.Crypto != null)
+                s = __Info.Attribute.Crypto.Encrypt(s);
+            FileSystemRoutines.CreateDirectory(PathRoutines.GetFileDir(__Info.File));
+            File.WriteAllText(__Info.File, s);
             Saved();
         }
         internal void Save(SettingsMemberInfo settingsFieldInfo)//avoids a redundant check and provides an appropriate exception message
@@ -115,15 +126,21 @@ namespace Cliver
             }
         }
 
-        //for custom decryption
-        //virtual protected void Deserializing(ref string json) { }  TBD
+        ///// <summary>
+        ///// Override for custom decryption
+        ///// </summary>
+        ///// <param name="json"></param>
+        //virtual protected void Deserializing(ref string json) { }  
 
         virtual protected void Loaded() { }
 
         virtual protected void Saving() { }
 
-        //for custom encryption
-        //virtual protected void Serialized(ref string json) { }  TBD
+        ///// <summary>
+        ///// Override for custom decryption
+        ///// </summary>
+        ///// <param name="json"></param>
+        //virtual protected void Serialized(ref string json) { }  
 
         virtual protected void Saved() { }
 
@@ -196,12 +213,14 @@ namespace Cliver
     /// <summary>
     /// Settings field attribute.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class SettingsAttribute : Attribute
     {
         /// <summary>
         /// Indicates that the Settings field will be stored with indention.
         /// /// </summary>
         readonly public bool Indented;
+
         /// <summary>
         /// Indicates that the Settings field should not be initiated by Config by default.
         /// Such a field should be initiated explicitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
@@ -209,15 +228,53 @@ namespace Cliver
         readonly public bool Optional;
 
         /// <summary>
+        /// Optional encrypt/decrypt facility for the Settings field.
+        /// </summary>
+        readonly public StringCrypto Crypto;
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="indented">Indicates that the Settings field be stored with indention</param>
         /// <param name="optional">Indicates that the Settings field should not be initiated by Config by default.
-        /// Such a field should be initiated explicitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)</param>
-        public SettingsAttribute(bool indented = true, bool optional = false)
+        /// When needed, such a field should be initiated explicitly by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)</param>
+        /// <param name="stringCryptoGetterHostingType">Class that exposes the StringCrypto getter. Used for encrypting.</param>
+        /// <param name="stringCryptoGetter">Name of the StringCrypto getter. The getter must be public static. Used for encrypting.</param>
+        public SettingsAttribute(bool indented = true, bool optional = false, Type stringCryptoGetterHostingType = null, string stringCryptoGetter = null)
         {
             Indented = indented;
             Optional = optional;
+            if (stringCryptoGetterHostingType != null)
+            {
+                if (stringCryptoGetter == null)
+                    throw new Exception("stringCryptoGetter is not set while stringCryptoGetterHostingType is.");
+                Crypto = (StringCrypto)stringCryptoGetterHostingType.GetProperty(stringCryptoGetter).GetValue(null);
+            }
+        }
+    }
+
+    public abstract class StringCrypto
+    {
+        public abstract string Encrypt(string s);
+        public abstract string Decrypt(string s);
+
+        public class Rijndael : StringCrypto
+        {
+            public Rijndael(string key)
+            {
+                crypto = new Cliver.Crypto.Rijndael(key);
+            }
+            Crypto.Rijndael crypto;
+
+            override public string Encrypt(string s)
+            {
+                return crypto.Encrypt(s);
+            }
+
+            override public string Decrypt(string s)
+            {
+                return crypto.Decrypt(s);
+            }
         }
     }
 
