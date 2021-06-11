@@ -107,8 +107,17 @@ namespace Cliver
         public static void Reset(string settingsFieldFullName)
         {
             SettingsMemberInfo sfi = GetSettingsFieldInfo(settingsFieldFullName);
-            Settings s = Settings.Create(sfi, true, true);
-            sfi.SetObject(s);
+            sfi.SetObject(Settings.Create(sfi, true, true));
+        }
+
+        /// <summary>
+        /// Can be used to initialize an optional Settings field.
+        /// </summary>
+        /// <param name="settingsFieldHostingType">full type name of the class hosting the Settings field</param>
+        /// <param name="settingsFieldName">name of the Settings field</param>
+        public static void Reset(Type settingsFieldHostingType, string settingsFieldName)
+        {
+            Reset(settingsFieldHostingType.FullName + "." + settingsFieldName);
         }
 
         /// <summary>
@@ -119,8 +128,18 @@ namespace Cliver
         public static void Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
         {
             SettingsMemberInfo sfi = GetSettingsFieldInfo(settingsFieldFullName);
-            Settings s = Settings.Create(sfi, false, throwExceptionIfCouldNotLoadFromStorageFile);
-            sfi.SetObject(s);
+            sfi.SetObject(Settings.Create(sfi, false, throwExceptionIfCouldNotLoadFromStorageFile));
+        }
+
+        /// <summary>
+        /// Can be used to initialize an optional Settings field.
+        /// </summary>
+        /// <param name="settingsFieldHostingType">full type name of the class hosting the Settings field</param>
+        /// <param name="settingsFieldName">name of the Settings field</param>
+        /// <param name="throwExceptionIfCouldNotLoadFromStorageFile"></param>
+        public static void Reload(Type settingsFieldHostingType, string settingsFieldName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
+        {
+            Reload(settingsFieldHostingType.FullName + "." + settingsFieldName, throwExceptionIfCouldNotLoadFromStorageFile);
         }
 
         ///// <summary>
