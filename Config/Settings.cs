@@ -46,6 +46,13 @@ namespace Cliver
         {
             Settings settings = create(settingsFieldInfo, reset, throwExceptionIfCouldNotLoadFromStorageFile);
             settings.__Info = settingsFieldInfo;
+            //if (settings.__Info.FormatVersionAttribute?.IsFormatVersionSupported(settings) == false)
+            //{
+            //    if (settings.GetType().GetMethod(nameof(settings.OnFormatVersionIsNotSupported)).DeclaringType == settings.GetType())
+            //        settings.OnFormatVersionIsNotSupported();
+            //    else
+            //        throw new Exception("Unsupported format of " + settings.GetType().FullName + ": " + settings.__Info.FormatVersionAttribute.FormatVersion);
+            //}
             settings.Loaded();
             return settings;
         }
@@ -54,7 +61,7 @@ namespace Cliver
             if (!reset && File.Exists(settingsFieldInfo.File))
                 try
                 {
-                    return load(settingsFieldInfo);
+                    return loadFromFile(settingsFieldInfo);
                 }
                 catch (Exception e)
                 {
@@ -66,21 +73,38 @@ namespace Cliver
                 FileSystemRoutines.CopyFile(settingsFieldInfo.InitFile, settingsFieldInfo.File, true);
                 try
                 {
-                    return load(settingsFieldInfo);
+                    return loadFromFile(settingsFieldInfo);
                 }
                 catch (Exception e)
                 {
                     throw new Exception("Error while loading settings " + settingsFieldInfo.FullName + " from initial file " + settingsFieldInfo.InitFile, e);
                 }
             }
-            return (Settings)Activator.CreateInstance(settingsFieldInfo.Type);
+            Settings settings = (Settings)Activator.CreateInstance(settingsFieldInfo.Type);
+            settings.__TypeVersion = settingsFieldInfo.TypeVersion.Value;
+            return settings;
         }
-        static Settings load(SettingsMemberInfo settingsFieldInfo)
+        static Settings loadFromFile(SettingsMemberInfo settingsFieldInfo)
         {
             string s = File.ReadAllText(settingsFieldInfo.File);
-            if (settingsFieldInfo.Attribute?.Crypto != null)
-                s = settingsFieldInfo.Attribute.Crypto.Decrypt(s);
-            return (Settings)Serialization.Json.Deserialize(settingsFieldInfo.Type, s, true, true);
+            if (settingsFieldInfo.Crypto != null)
+                s = settingsFieldInfo.Crypto.Decrypt(s);
+            Settings settings = (Settings)Serialization.Json.Deserialize(settingsFieldInfo.Type, s, true, true);
+            if (!settingsFieldInfo.TypeVersion.IsTypeVersionSupported(settings))
+            {
+                settings.__Info = settingsFieldInfo;
+                UnsupportedTypeVersionHandlerCommand mode = settings.UnsupportedTypeVersionHandler();
+                switch (mode)
+                {
+                    case UnsupportedTypeVersionHandlerCommand.Reload:
+                        settings = loadFromFile(settingsFieldInfo);
+                        break;
+                    case UnsupportedTypeVersionHandlerCommand.Proceed:
+                    default:
+                        throw new Exception("Uknown option: " + mode);
+                }
+            }
+            return settings;
         }
 
         /// <summary>
@@ -102,16 +126,17 @@ namespace Cliver
             lock (this)
             {
                 if (!IsAttached())//while technically it is possible, it can lead to a confusion.
-                    throw new Exception("This method cannot be performed on this Settings object because it is not attached to its Settings field (" + __Info?.Type + ")");
+                    throw new Exception("This method cannot be performed on this Settings object because it is not attached to its Settings field (" + __Info?.Type.FullName + ")");
                 save();
             }
         }
         void save()
         {
+            __TypeVersion = settingsFieldInfo.TypeVersion.Value;
             Saving();
-            string s = Serialization.Json.Serialize(this, __Info.Indented, true);
-            if (__Info.Attribute?.Crypto != null)
-                s = __Info.Attribute.Crypto.Encrypt(s);
+            string s = Serialization.Json.Serialize(this, __Info.Storage.Indented, __Info.Storage.IgnoreNullValues, false/*!!!default values always must be stored*/);
+            if (__Info.Crypto != null)
+                s = __Info.Crypto.Encrypt(s);
             FileSystemRoutines.CreateDirectory(PathRoutines.GetFileDir(__Info.File));
             File.WriteAllText(__Info.File, s);
             Saved();
@@ -127,20 +152,49 @@ namespace Cliver
         }
 
         ///// <summary>
-        ///// Override for custom decryption
+        ///// Whether serialization to file is to be done with indention.
         ///// </summary>
-        ///// <param name="json"></param>
-        //virtual protected void Deserializing(ref string json) { }  
+        //virtual public bool __Indented { get; } = true;
+
+        #region Type Version support
+
+        /// <summary>
+        /// The actual version of the Settings type restored from a storage file.
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore)]//it serves 2 aims: - ignore when 0; - forces setting through the private setter (yes, it does!)
+        public uint __TypeVersion { get; private set; } = 0;
+
+        /// <summary>
+        /// Called by Config if the storage file content does not match the Settings type version.
+        /// Here you should amend the data to comply with the current version.
+        /// </summary>
+        virtual protected UnsupportedTypeVersionHandlerCommand UnsupportedTypeVersionHandler()
+        {
+            throw new Exception("Unsupported version of " + GetType().FullName + ": " + __TypeVersion);
+        }
+        public enum UnsupportedTypeVersionHandlerCommand
+        {
+            Reload,
+            Proceed
+        }
+
+
+        /// <summary>
+        /// Get the old format data in order to migrate to the current format.
+        /// </summary>
+        /// <returns></returns>
+        public Newtonsoft.Json.Linq.JObject GetJObjectFromStorageFile()
+        {
+            string s = File.ReadAllText(settingsFieldInfo.File);
+            if (settingsFieldInfo.Crypto != null)
+                s = settingsFieldInfo.Crypto.Decrypt(s);
+            return Newtonsoft.Json.Linq.JObject.Parse(s);
+        }
+        #endregion
 
         virtual protected void Loaded() { }
 
         virtual protected void Saving() { }
-
-        ///// <summary>
-        ///// Override for custom decryption
-        ///// </summary>
-        ///// <param name="json"></param>
-        //virtual protected void Serialized(ref string json) { }  
 
         virtual protected void Saved() { }
 
@@ -204,110 +258,9 @@ namespace Cliver
         /// Storage folder for this Settings derivative.
         /// Each Settings derived class must have it defined. 
         /// Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
-        /// (It is not static as C# has no static polymorphism.)
+        /// (It is not static because C# does not support static polymorphism.)
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         public abstract string __StorageDir { get; protected set; }
-    }
-
-    /// <summary>
-    /// Settings field attribute.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class SettingsAttribute : Attribute
-    {
-        /// <summary>
-        /// Indicates that the Settings field will be stored with indention.
-        /// /// </summary>
-        readonly public bool Indented;
-
-        /// <summary>
-        /// Indicates that the Settings field should not be initiated by Config by default.
-        /// Such a field should be initiated explicitly when needed by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)
-        /// </summary>
-        readonly public bool Optional;
-
-        /// <summary>
-        /// Optional encrypt/decrypt facility for the Settings field.
-        /// </summary>
-        readonly public StringCrypto Crypto;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="indented">Indicates that the Settings field be stored with indention</param>
-        /// <param name="optional">Indicates that the Settings field should not be initiated by Config by default.
-        /// When needed, such a field should be initiated explicitly by Config.Reload(string settingsFieldFullName, bool throwExceptionIfCouldNotLoadFromStorageFile = false)</param>
-        /// <param name="stringCryptoGetterHostingType">Class that exposes the StringCrypto getter. Used for encrypting.</param>
-        /// <param name="stringCryptoGetter">Name of the StringCrypto getter. The getter must be public static. Used for encrypting.</param>
-        public SettingsAttribute(bool indented = true, bool optional = false, Type stringCryptoGetterHostingType = null, string stringCryptoGetter = null)
-        {
-            Indented = indented;
-            Optional = optional;
-            if (stringCryptoGetterHostingType != null)
-            {
-                if (stringCryptoGetter == null)
-                    throw new Exception("stringCryptoGetter is not set while stringCryptoGetterHostingType is.");
-                Crypto = (StringCrypto)stringCryptoGetterHostingType.GetProperty(stringCryptoGetter).GetValue(null);
-            }
-        }
-    }
-
-    public abstract class StringCrypto
-    {
-        public abstract string Encrypt(string s);
-        public abstract string Decrypt(string s);
-
-        public class Rijndael : StringCrypto
-        {
-            public Rijndael(string key)
-            {
-                crypto = new Cliver.Crypto.Rijndael(key);
-            }
-            Crypto.Rijndael crypto;
-
-            override public string Encrypt(string s)
-            {
-                return crypto.Encrypt(s);
-            }
-
-            override public string Decrypt(string s)
-            {
-                return crypto.Decrypt(s);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Instances of this class are to be stored in CommonApplicationData folder.
-    /// CliverWinRoutines lib contains AppSettings adapted for Windows.
-    /// </summary>
-    public class AppSettings : Settings
-    {
-        /*//version with static __StorageDir
-        /// <summary>
-        /// (!)A Settings derivative or some of its ancestors must define this public static getter to specify the storage directory.
-        /// </summary>
-        new public static string __StorageDir { get; private set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME; 
-        */
-
-        sealed public override string __StorageDir { get; protected set; } = StorageDir;
-        public static readonly string StorageDir = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
-    }
-
-    /// <summary>
-    /// Instances of this class are to be stored in LocalApplicationData folder.
-    /// </summary>
-    public class UserSettings : Settings
-    {
-        /*//version with static __StorageDir
-        /// <summary>
-        /// (!)A Settings derivative or some of its ancestors must define this public static getter to specify the storage directory.
-        /// </summary>
-        new public static string __StorageDir { get; private set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
-        */
-
-        sealed public override string __StorageDir { get; protected set; } = StorageDir;
-        public static readonly string StorageDir = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }

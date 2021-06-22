@@ -79,9 +79,10 @@ setLicense();
 <p><b>Features:</b>
 
 <br> - cross-platform;
-<br> - natively enables setting types of any complexity and functionality;
+<br> - natively supports types of any complexity and functionality;
 <br> - settings are easily modified directly in code;
-<br> - enables settings polymorphism;
+<br> - natively supports settings polymorphism;
+<br> - supports encryption;
 <br> - thread-safe;
 <br> - serializes data in JSON;
 
@@ -266,16 +267,16 @@ Cliver.Config.Reload();//mandatory</code>
 The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>settings field</a> <code>Settings.General</code> will be:
 			<table style="table-layout:fixed;">
 			<tr>
-			<td style="border:0;">storage file path:</td>
+			<td bgcolor="#efefef">storage file path:</td>
 			<td bgcolor="#ddf" style="margin:0;padding:0;border:0;border-collapse:collapse;">C:\Users\serge\AppData\Local\</td>
 			<td bgcolor="#def" style="margin:0;padding:0;border:0;border-collapse:collapse;">Supersoft\App\config\</td>
 			<td bgcolor="#dff" style="margin:0;padding:0;border:0;border-collapse:collapse;">App.Settings.General.json</td>
 				</tr>
 				<tr>
-			<td>predetermined by:</td>
-			<td style="width:10px;"><code>Cliver.UserSettings</code></td>
-			<td style="width:10px;">application name 'App' and company name 'Supersoft'</td>
-			<td style="width:10px;">the full path of field <code>General</code> in the application</td>
+			<td bgcolor="#efefef">predetermined by:</td>
+			<td bgcolor="#ddf" style="width:10px;"><code>Cliver.UserSettings</code></td>
+			<td bgcolor="#def" style="width:10px;">application name 'App' and company name 'Supersoft'</td>
+			<td bgcolor="#dff" style="width:10px;">the full path of field <code>General</code> in the application</td>
 			</tr>
 			</table>
 			
@@ -316,7 +317,7 @@ The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>s
 	}
 }</code>
 </pre>
-The <a href='#initial_file'>initial file</a> name of <a href='#settings_field'>settings field</a> <code>Settings.General</code> will be 'App.Settings.General.json'.
+Name of the <a href='#initial_file'>initial file</a> of the <a href='#settings_field'>settings field</a> <code>Settings.General</code> will be 'App.Settings.General.json'.
 
 
 
@@ -424,6 +425,8 @@ connect(Settings.General.ClientPort, server.Host, server.Port);</code>
 
 
 
+<h2>Attributes</h2>
+<p><a href='#config'><code>Cliver.Config</code></a> provides attributes for <a href='#settings_field'>settings fields</a> and <a href='#settings_class'>settings types</a>. Those attributes allow to alter the engine's behavior. See the API and annotations for details.
 
 
 
@@ -553,59 +556,77 @@ ScopeSettings.Scope.Save();</code>
 
 
 
-            <h3><a name='storing_password'>Storing password</a></h3>
-            How to store and use passwords:
+
+
+
+<h3><a name=''>Encrypting</a></h3>
+
+            <h4><a name=''>Settings field</a></h4>
+<a href='#settings_field'>A settings field</a> can be serialized as an encrypted string by adding the attribute <code>SettingsFieldAttribute.Crypto</code> to it:
 <pre>
-<code class="language-csharp">public class GeneralSettings : Cliver.Win.UserSettings
+<code class="language-csharp">public class CredentialsSettings : Cliver.UserSettings
 {   	            
-	//password will be stored on disk as an ecrypted string
-	public string _EncryptedPassword = null;
-	
-	//it is internal so not to be serialized; otheriwse if public, use attribute [Newtonsoft.Json.JsonIgnore]
-	internal string Password
+    public string Key = "key";
+    public string Token = "123";
+}
+
+public class Settings
+{       
+	//a Crypto object used by SettingsFieldAttribute.Crypto attribute
+	public static IStringCrypto.Rijndael Crypto { get; } = new IStringCrypto.Rijndael("123");
+	//an alternative by CliverWinRoutines which does not require a key:
+	//public static Win.StringCrypto Crypto { get; } = new Win.StringCrypto();   
+
+	//specify the class and the property that expose a IStringCrypto object which will be used for encryption
+	[SettingsFieldAttribute.Crypto(iStringCryptoGetterHostingType: typeof(Settings), iStringCryptoGetterName: nameof(Crypto))]
+	//Settings field to be serialized as encrypted string
+	internal static CredentialsSettings Credentials;
+}</code>
+</pre>
+
+<p>Now <code>Settings.Credentials</code> will be stored in <a href='#storage_file'>the storage file</a> as a string encrypted by <code>IStringCrypto</code> instance that you provided.
+
+
+
+
+
+
+
+
+            <h4><a name=''>Serializable field</a></h4>
+Also, it is possible to encrypt a <a href='#settings_field'>settings field</a> not as a whole but its certain members (<a href='#serializable_field'>serializable fields</a>) separately. How it is done:
+<pre>
+<code class="language-csharp">class ServerSettings : Cliver.UserSettings//UserSettings based class is serialized in the user directory
+{
+	static ServerSettings()
 	{
-		get
-		{
-			if (string.IsNullOrEmpty(_EncryptedPassword))
-				return null;
-			try
-			{
-				return crypto.Decrypt(_EncryptedPassword);
-			}
-			catch(Exception e)
-			{
-				Cliver.Log.Error("Could not decrypt password.", e);
-				return null;
-			}
-		}
-		set
-		{
-			if (string.IsNullOrEmpty(value))
-				_EncryptedPassword = null;
-			else
-				_EncryptedPassword = crypto.Encrypt(value);
-		}
+		//if you are not on Windows and cannot use CliverWinRoutines, you have to initialize IStringCrypto with a key
+		Cliver.Encrypted<string>.InitializeDefault(new Cliver.IStringCrypto.Rijndael("123"));
 	}
-	//on Widnows
-    Cliver.Win.Crypto.ProtectedData crypto = new Cliver.Win.Crypto.ProtectedData();
-	//cross-platform
-    Cliver.Crypto.Rijndael crypto = new Cliver.Crypto.Rijndael("random key");
+
+	public string Host = "";
+	public int Port = 123;
+	public Cliver.Encrypted<string> Password = new Cliver.Encrypted<string>();
+	//Windows alternative provided by CliverWinRoutines:
+	//public Cliver.Win.Encrypted<string> Password = new Cliver.Win.Encrypted<string>();    
 }
 
 public class Settings
 {
-	public static readonly GeneralSettings General;
+	public static readonly ServerSettings Server;
 }</code>
 </pre>
 
-<p>Now, use it when required:
+<p>Now you can use like this:
 <pre>
-<code class="language-csharp">Settings.General.Password = password;
-Settings.General.Save();
+<code class="language-csharp">Settings.Server.Password.Value = password;
+Settings.Server.Save();
 
 ...
-connect(General.Password);</code>
+connect(Settings.Server.Host, Settings.Server.Password.Value);</code>
 </pre>
+
+<p>With this encryption, the value is kept encrypted almost all the process time, being decrypted only when called explicitly. It is more secure against RAM sniffers.
 
 
 
@@ -643,6 +664,77 @@ GeneralSettings general2 = Cliver.Serialization.Json.Deserialize(generalStr);
 general2.__Info = Settings.General.__Info;
 Settings.General = general2;
 Settings.General.Save();</code>
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+            <h3><a name=''>Upgrading settings type</a></h3>
+Sometimes, when you upgrade an application, a <a href='#settings_class'>settings type</a> in it is changed that way that the new application cannot deserialize properly a <a href='#storage_file'>storage file</a> produced by an older application. To turn on the automatic data version monitoring of a certain <a href='#settings_class'>settings type</a>, add the attribute <code>TypeVersion</code> to it. When the type version of the storage file does not correspond to the version set by the attribute, the engine will call a handler within which you can provide a smooth migration of the old data to the new format. See the example below:
+
+<p>
+<pre>
+<code class="language-csharp">//Example how to check the type version and migrate to the current type if needed.
+//When this attribute is set, Config engine checks if the version set by the attribute corresponds to the version in the storage file.
+[SettingsTypeAttribute.TypeVersion(value: 210601, minSupportedTypeVersion: 210601)]
+class TemplatesSettings : Cliver.UserSettings//UserSettings based class is serialized in the user directory
+{
+	public Dictionary<string, Template> Names2Template = new Dictionary<string, Template>();
+
+	//Here is your chance to upgrade the data to the current format
+	override protected UnsupportedTypeVersionHandlerCommand UnsupportedTypeVersionHandler()
+	{
+		//different approaches are considered below:
+		if (__TypeVersion < 200301)
+		{
+			Newtonsoft.Json.Linq.JObject o = GetJObjectFromStorageFile();
+			//edit the old data as a JObject
+			//...
+			//set the current version
+			o["__TypeVersion"] = __Info.TypeVersion.Value;
+			//save
+			System.IO.File.WriteAllText(__Info.File, o.ToString());
+			return UnsupportedTypeVersionHandlerCommand.Reload;
+		}
+		if (__TypeVersion < 200901)
+		{
+			string s = System.IO.File.ReadAllText(__Info.File);
+			//edit the old data as a serialized string
+			//...
+			//set the current version
+			s = System.Text.RegularExpressions.Regex.Replace(s, @"(?<=\""__TypeVersion\""\:\s*)\d+", __Info.TypeVersion.Value.ToString(), System.Text.RegularExpressions.RegexOptions.Singleline);
+			//save
+			System.IO.File.WriteAllText(__Info.File, s);
+			return UnsupportedTypeVersionHandlerCommand.Reload;
+		}
+		if (__TypeVersion < __Info.TypeVersion.Value)
+		{
+			//alter the data in the object itself
+			//...
+			//save
+			Save();//(!)when saving, the current type version is set
+			return UnsupportedTypeVersionHandlerCommand.Proceed;
+		}
+		//__TypeVersion > __Info.TypeVersion.Value
+		Console.WriteLine("WARNING: The application might not support properly the newer type version " + __TypeVersion + " data stored in " + __Info.File + ".");
+		Console.WriteLine("The expected version is " + __Info.TypeVersion.Value);
+		Console.WriteLine("Consider to update the application.");
+		return UnsupportedTypeVersionHandlerCommand.Proceed;
+	}
+}
+
+public class Template
+{
+	public string Name;
+	public List<string> Words = new List<string>();
+}</code>
 </pre>
 
 

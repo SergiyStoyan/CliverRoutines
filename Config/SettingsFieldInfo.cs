@@ -36,14 +36,19 @@ namespace Cliver
         public readonly string InitFile;
 
         /// <summary>
-        /// Whether serialization to string is to be done with indention.
+        /// Keeps storage features for the Settings field.
         /// </summary>
-        public bool Indented;
+        public readonly SettingsFieldAttribute.StorageAttribute Storage;
 
         /// <summary>
         /// Settings derived type.
         /// </summary>
         public readonly Type Type;
+
+        /// <summary>
+        /// Keeps type version info.
+        /// </summary>
+        public readonly SettingsTypeAttribute.TypeVersionAttribute TypeVersion;
 
         internal Settings GetObject()
         {
@@ -61,24 +66,25 @@ namespace Cliver
             }
         }
 
-        internal readonly SettingsAttribute Attribute;
+        internal readonly IStringCrypto Crypto = null;
+        internal readonly bool Optional = false;
 
 #if !COMPILE_GetObject_SetObject
         abstract protected object getObject();
         abstract protected void setObject(Settings settings);
 
-        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType)
+        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingsType)
         {
 #else
         readonly Func<object> getObject;
         readonly Action<Settings> setObject;
 
-        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingType, Func<object> getObject, Action<Settings> setObject)
+        protected SettingsMemberInfo(MemberInfo settingsTypeMemberInfo, Type settingsType, Func<object> getObject, Action<Settings> setObject)
         {
             this.getObject = getObject;
             this.setObject = setObject;
 #endif
-            Type = settingType;
+            Type = settingsType;
             FullName = settingsTypeMemberInfo.DeclaringType.FullName + "." + settingsTypeMemberInfo.Name;
             /*//version with static __StorageDir
             string storageDir;
@@ -99,8 +105,13 @@ namespace Cliver
             Settings s = (Settings)Activator.CreateInstance(Type); //!!!slightly slowler than calling a static by reflection. Doesn't run slower for a bigger class though.
             File = s.__StorageDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
             InitFile = Log.AppDir + System.IO.Path.DirectorySeparatorChar + FullName + "." + Config.FILE_EXTENSION;
-            Attribute = settingsTypeMemberInfo.GetCustomAttributes<SettingsAttribute>(false).FirstOrDefault();
-            Indented = Attribute == null ? true : Attribute.Indented;
+            SettingsFieldAttribute.StorageAttribute storageAttribute = settingsTypeMemberInfo.GetCustomAttributes<SettingsFieldAttribute.StorageAttribute>(false).FirstOrDefault();
+            Storage = storageAttribute != null ? storageAttribute : new SettingsFieldAttribute.StorageAttribute();
+            Crypto = settingsTypeMemberInfo.GetCustomAttributes<SettingsFieldAttribute.CryptoAttribute>(false).FirstOrDefault()?.Crypto;
+            Optional = settingsTypeMemberInfo.GetCustomAttributes<SettingsFieldAttribute.OptionalAttribute>(false).Any();
+            
+            SettingsTypeAttribute.TypeVersionAttribute typeVersion = settingsType.GetCustomAttributes<SettingsTypeAttribute.TypeVersionAttribute>(false).FirstOrDefault();
+            TypeVersion = typeVersion != null ? typeVersion : new SettingsTypeAttribute.TypeVersionAttribute(0, 0);
         }
     }
 
