@@ -12,7 +12,7 @@ namespace Example
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-
+            
             //(!)mandatory; initialize settings
             Config.Reload();
 
@@ -22,7 +22,7 @@ namespace Example
             //save on disk
             Settings.Server.Save();
             Log.Inform("The settings are saved to: " + Settings.Server.__Info.File);
-            //or, decline changes
+            //or, restore the previously saved values
             Settings.Server.Reload();
             //or, reset to initial values
             Settings.Server.Reset();
@@ -54,6 +54,8 @@ namespace Example
                 //expose server2 in an editing dialog and get new values
                 server2.Host = "ftp.server.com";
                 server2.Port = 30;
+                if (server2.Password == null)
+                    server2.Password = new Encrypted<string>();
                 server2.Password.Value = "test";
 
                 if (!isValid(server2))
