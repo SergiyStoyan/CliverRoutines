@@ -2,17 +2,18 @@
 using System.Threading;
 using Cliver;
 
-namespace Example
+namespace CliverRoutinesTests
 {
     class Program
     {
         static void Main(string[] args)
-        {
+        {            
             try
             {
-                LogExample.Run();
-
-                ConfigExample.Run();
+                DateTimeRoutinesTests t = new DateTimeRoutinesTests();
+                t.TestDate();
+                t.TestDateTime();
+                t.TestTime();
             }
             catch (Exception e)
             {
