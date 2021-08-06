@@ -168,11 +168,13 @@ namespace Cliver
         /// </summary>
         /// <param name="o">JObject presenting Settings field serialized as JSON</param>
         /// <param name="indented">whether the storage file content be indented</param>
-        public void WriteStorageFileAsJObject(Newtonsoft.Json.Linq.JObject o, bool indented = true)
+        public void WriteStorageFileAsJObject(Newtonsoft.Json.Linq.JObject o, bool? indented = null)
         {
             lock (this)
             {
-                string s = o.ToString(Indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None);
+                if (indented == null)
+                    indented = Indented;
+                string s = o.ToString(indented.Value ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None);
                 if (Endec != null)
                     s = Endec.Decrypt(s);
                 System.IO.File.WriteAllText(File, s);
@@ -218,9 +220,9 @@ namespace Cliver
         /// </summary>
         /// <param name="typeVersion">new __TypeVersion</param>
         /// <param name="s">serialized Settings field</param>
-        public void UpdateTypeVersionInStorageFileString(int typeVersion, ref string s)
+        public void UpdateTypeVersionInStorageFileString(uint typeVersion, ref string s)
         {
-            s = Regex.Replace(s, @"(?<=\""__TypeVersion\""\:\s*)\d+", typeVersion.ToString(), RegexOptions.Singleline);
+            s = Regex.Replace(s, @"(?<=\""__TypeVersion\""\:\s*)\d+(?=\s*(,|)})", typeVersion.ToString(), RegexOptions.Singleline);
         }
 
         #endregion
