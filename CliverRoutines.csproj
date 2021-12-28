@@ -3,15 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>6.10.0.0</AssemblyVersion>
+    <!--AssemblyVersion>6.10.1.0</AssemblyVersion-->
     <RepositoryUrl>https://github.com/sergeystoyan/CliverRoutines.git</RepositoryUrl>
-    <FileVersion>6.10.0.0</FileVersion>
+    <!--FileVersion>6.10.1.0</FileVersion-->
     <!--PackageLicenseFile>LICENSE</PackageLicenseFile-->
 	<PackageLicenseExpression></PackageLicenseExpression>
     <Copyright>Sergey Stoyan</Copyright>
     <Authors>Sergey Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.10.0</Version>
+    <Version>6.10.1</Version>
+    <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergeystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in the most applications:
 - settings manager that supersedes .NET ConfigurationManager;
@@ -38,6 +39,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <DefineConstants>TRACE;THREAD_LOG_IS_DEFAULT1</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>c:\Users\serge\Documents\_PROJECTS\CliverRoutines\CliverRoutines.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
