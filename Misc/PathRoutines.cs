@@ -156,6 +156,7 @@ namespace Cliver
         /// Works for any length path unlike Path.GetDir().
         /// </summary>
         /// <param name="file"></param>
+        /// <param name="removeTrailingSeparator"></param>
         /// <returns></returns>        
         public static string GetFileDir(string file, bool removeTrailingSeparator = true)
         {
