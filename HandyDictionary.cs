@@ -26,6 +26,7 @@ namespace Cliver
         /// Create HandyDictionary with auto-generating value function.
         /// </summary>
         /// <param name="getValue">method creating an object for a key</param>
+        /// <param name="disposeValue"></param>
         public HandyDictionary(GetValue getValue, DisposeValue disposeValue = null)
         {
             this.getValue = getValue;
@@ -33,9 +34,18 @@ namespace Cliver
                 this.disposeValue = disposeValue;
         }
 
+        /// <summary>
+        /// Method creating an object for a key.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public delegate VT GetValue(KT key);
         protected GetValue getValue;
 
+        /// <summary>
+        /// Method disposing a value.
+        /// </summary>
+        /// <param name="value"></param>
         public delegate void DisposeValue(VT value);
         protected DisposeValue disposeValue = delegate (VT value)
         {

@@ -4,11 +4,33 @@
         <name>CliverRoutines</name>
     </assembly>
     <members>
+        <member name="T:Cliver.CommandLine">
+            <summary>
+            A helper class to process command line parameters.
+            </summary>
+        </member>
+        <member name="M:Cliver.CommandLine.IsParameterSet(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="parameter"></param>
+            <param name="commandLine"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.CommandLine.ParseParameter(System.String,System.String,System.String)">
+            <summary>
+            Get a command line paramter from the command line.
+            It must be formed as space separated pairs 'parameter name'='parameter value'
+            </summary>
+            <param name="parameter"></param>
+            <param name="defaultValue"></param>
+            <param name="commandLine"></param>
+            <returns></returns>
+        </member>
         <member name="M:Cliver.CommandLine.ToString(System.ValueTuple{System.String,System.String}[])">
             <summary>
             
             </summary>
-            <typeparam name="T"></typeparam>
             <param name="parameters">values are expected to be unescaped</param>
             <returns></returns>
         </member>
@@ -229,6 +251,21 @@
             Here is your chance to amend the data to migrate to the current version.
             </summary>
         </member>
+        <member name="M:Cliver.Settings.Loaded">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.Settings.Saving">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.Settings.Saved">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="P:Cliver.Settings.__StorageDir">
             <summary>
             Storage folder for this Settings derivative.
@@ -243,9 +280,37 @@
             CliverWinRoutines lib contains AppSettings adapted for Windows.
             </summary>
         </member>
+        <member name="P:Cliver.AppSettings.__StorageDir">
+            <summary>
+            Storage folder for this Settings derivative.
+            Each Settings derived class must have it defined. 
+            Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
+            (It is not static because C# does not support static polymorphism.)
+            </summary>
+        </member>
+        <member name="F:Cliver.AppSettings.StorageDir">
+            <summary>
+            Storage folder for this Settings derivative.
+            Each Settings derived class must have it defined. 
+            </summary>
+        </member>
         <member name="T:Cliver.UserSettings">
             <summary>
             Instances of this class are to be stored in LocalApplicationData folder.
+            </summary>
+        </member>
+        <member name="P:Cliver.UserSettings.__StorageDir">
+            <summary>
+            Storage folder for this Settings derivative.
+            Each Settings derived class must have it defined. 
+            Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
+            (It is not static because C# does not support static polymorphism.)
+            </summary>
+        </member>
+        <member name="F:Cliver.UserSettings.StorageDir">
+            <summary>
+            Storage folder for this Settings derivative.
+            Each Settings derived class must have it defined. 
             </summary>
         </member>
         <member name="F:Cliver.SettingsAttributes.ConfigAttribute.Optional">
@@ -407,7 +472,13 @@
             If this file does not exist, it creates an object with the hardcoded values.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Cliver.Crypto.Halojoy.convert_by_halojoy(System.String)" -->
+        <member name="M:Cliver.Crypto.Halojoy.convert_by_halojoy(System.String)">
+            <summary>
+            EnCrypt to/from DeCrypt
+            </summary>
+            <param name="str"></param>
+            <returns></returns>
+        </member>
         <member name="M:Cliver.Extensions.BeginInvoke(System.Delegate,System.Object[])">
             <summary>
             Replacement for BeginInvoke() which is not supported in .NET5
@@ -429,6 +500,20 @@
             Create HandyDictionary with auto-generating value function.
             </summary>
             <param name="getValue">method creating an object for a key</param>
+            <param name="disposeValue"></param>
+        </member>
+        <member name="T:Cliver.HandyDictionary`2.GetValue">
+            <summary>
+            Method creating an object for a key.
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Cliver.HandyDictionary`2.DisposeValue">
+            <summary>
+            Method disposing a value.
+            </summary>
+            <param name="value"></param>
         </member>
         <member name="M:Cliver.HandyDictionary`2.#ctor(`1,Cliver.HandyDictionary{`0,`1}.DisposeValue)">
             <summary>
@@ -496,6 +581,7 @@
             <summary>
             Table works as an ordered HashSet
             </summary>
+            <param name="index"></param>
             <param name="document"></param>
         </member>
         <member name="M:Cliver.ListDb.Table`1.Save(`0)">
@@ -564,9 +650,9 @@
             <param name="name">don't change it</param>
             <returns>name of the calling method</returns>
         </member>
-        <member name="F:Cliver.Log.ProcessName">
+        <member name="F:Cliver.Log.ProgramName">
             <summary>
-            Name of this process.
+            Name of the assembly considered first in the program.
             </summary>
         </member>
         <member name="F:Cliver.Log.CompanyName">
@@ -709,7 +795,7 @@
         </member>
         <member name="P:Cliver.Log.BaseDir">
              <summary>
-            Actual base directory for logging.
+            Actual base directory where RootDir is created.
              </summary>
         </member>
         <member name="M:Cliver.Log.Get(System.String)">
@@ -1488,6 +1574,7 @@
             Works for any length path unlike Path.GetDir().
             </summary>
             <param name="file"></param>
+            <param name="removeTrailingSeparator"></param>
             <returns></returns>        
         </member>
         <member name="M:Cliver.ProcessRoutines.Open(System.String)">

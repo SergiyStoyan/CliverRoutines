@@ -24,7 +24,17 @@ namespace Cliver
         new public static string __StorageDir { get; private set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME; 
         */
 
+        /// <summary>
+        /// Storage folder for this Settings derivative.
+        /// Each Settings derived class must have it defined. 
+        /// Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
+        /// (It is not static because C# does not support static polymorphism.)
+        /// </summary>
         sealed public override string __StorageDir { get; protected set; } = StorageDir;
+        /// <summary>
+        /// Storage folder for this Settings derivative.
+        /// Each Settings derived class must have it defined. 
+        /// </summary>
         public static readonly string StorageDir = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 
@@ -40,7 +50,17 @@ namespace Cliver
         new public static string __StorageDir { get; private set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
         */
 
+        /// <summary>
+        /// Storage folder for this Settings derivative.
+        /// Each Settings derived class must have it defined. 
+        /// Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
+        /// (It is not static because C# does not support static polymorphism.)
+        /// </summary>
         sealed public override string __StorageDir { get; protected set; } = StorageDir;
+        /// <summary>
+        /// Storage folder for this Settings derivative.
+        /// Each Settings derived class must have it defined. 
+        /// </summary>
         public static readonly string StorageDir = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }
