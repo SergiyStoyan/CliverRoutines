@@ -282,16 +282,12 @@
         </member>
         <member name="P:Cliver.AppSettings.__StorageDir">
             <summary>
-            Storage folder for this Settings derivative.
-            Each Settings derived class must have it defined. 
-            Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
-            (It is not static because C# does not support static polymorphism.)
+            Storage folder for this Settings located in CommonApplicationData.
             </summary>
         </member>
         <member name="F:Cliver.AppSettings.StorageDir">
             <summary>
-            Storage folder for this Settings derivative.
-            Each Settings derived class must have it defined. 
+            Storage folder for this Settings located in CommonApplicationData.
             </summary>
         </member>
         <member name="T:Cliver.UserSettings">
@@ -301,16 +297,12 @@
         </member>
         <member name="P:Cliver.UserSettings.__StorageDir">
             <summary>
-            Storage folder for this Settings derivative.
-            Each Settings derived class must have it defined. 
-            Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
-            (It is not static because C# does not support static polymorphism.)
+            Storage folder for this Settings located in LocalApplicationData.
             </summary>
         </member>
         <member name="F:Cliver.UserSettings.StorageDir">
             <summary>
-            Storage folder for this Settings derivative.
-            Each Settings derived class must have it defined. 
+            Storage folder for this Settings located in LocalApplicationData.
             </summary>
         </member>
         <member name="F:Cliver.SettingsAttributes.ConfigAttribute.Optional">
@@ -479,6 +471,62 @@
             <param name="str"></param>
             <returns></returns>
         </member>
+        <member name="T:Cliver.Enum`1">
+            <summary>
+            Base class for Enum implementation.
+            </summary>
+            <typeparam name="V">value type</typeparam>
+        </member>
+        <member name="M:Cliver.Enum`1.#ctor(`0)">
+            <summary>
+            Create a Enum from a value.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="P:Cliver.Enum`1.Value">
+            <summary>
+            Value of this Enum.
+            </summary>
+        </member>
+        <member name="M:Cliver.Enum`1.ToDictionary``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="E"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Enum`1.ToList``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="E"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Enum`1.Parse``1(System.String,System.Boolean)">
+            <summary>
+            Convert a value string into a Enum.
+            </summary>
+            <typeparam name="E"></typeparam>
+            <param name="valueStr"></param>
+            <param name="ignoreCase"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Enum`1.IsAmong``1(``0[])">
+            <summary>
+            Check if this Enum is included in a given collection.
+            </summary>
+            <typeparam name="E"></typeparam>
+            <param name="objects"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Enum`1.IsAmong``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Check if this Enum is included in a given collection.
+            </summary>
+            <typeparam name="E"></typeparam>
+            <param name="objects"></param>
+            <returns></returns>
+        </member>
         <member name="M:Cliver.Extensions.BeginInvoke(System.Delegate,System.Object[])">
             <summary>
             Replacement for BeginInvoke() which is not supported in .NET5
@@ -499,31 +547,48 @@
             <summary>
             Create HandyDictionary with auto-generating value function.
             </summary>
-            <param name="getValue">method creating an object for a key</param>
-            <param name="disposeValue"></param>
+            <param name="getValue">method of creating an object for a key</param>
+            <param name="disposeValue">method of disposing a value</param>
         </member>
         <member name="T:Cliver.HandyDictionary`2.GetValue">
             <summary>
-            Method creating an object for a key.
+            Method of creating an object for a key.
             </summary>
             <param name="key"></param>
             <returns></returns>
         </member>
         <member name="T:Cliver.HandyDictionary`2.DisposeValue">
             <summary>
-            Method disposing a value.
+            Method of disposing a value.
             </summary>
             <param name="value"></param>
+        </member>
+        <member name="F:Cliver.HandyDictionary`2.disposeValue">
+            <summary>
+            Method of disposing a value.
+            </summary>
         </member>
         <member name="M:Cliver.HandyDictionary`2.#ctor(`1,Cliver.HandyDictionary{`0,`1}.DisposeValue)">
             <summary>
             Create HandyDictionary without auto-generating value function.
             </summary>
             <param name="defaultValue">the default value returned for an unset key</param>
+            <param name="disposeValue">method of disposing a value</param>
         </member>
         <member name="M:Cliver.HandyDictionary`2.#ctor(Cliver.HandyDictionary{`0,`1}.DisposeValue)">
             <summary>
             Create HandyDictionary without auto-generating value function.
+            </summary>
+            <param name="disposeValue">method of disposing a value</param>
+        </member>
+        <member name="M:Cliver.HandyDictionary`2.Finalize">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.HandyDictionary`2.Dispose">
+            <summary>
+            
             </summary>
         </member>
         <member name="M:Cliver.HandyDictionary`2.Clear">
@@ -535,6 +600,7 @@
             <summary>
             Remove the element by the key and dispose it if disposable.
             </summary>
+            <param name="key"></param>
         </member>
         <member name="P:Cliver.HandyDictionary`2.Item(`0)">
             <summary>
@@ -544,9 +610,40 @@
             <param name="key"></param>
             <returns></returns>
         </member>
+        <member name="M:Cliver.HandyDictionary`2.GetEnumerator">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Cliver.HandyDictionary`2.Keys">
+            <summary>
+            Actual key collection.
+            </summary>
+        </member>
+        <member name="P:Cliver.HandyDictionary`2.Values">
+            <summary>
+            Actual value collection.
+            </summary>
+        </member>
+        <member name="M:Cliver.HandyDictionary`2.TryGetValue(`0,`1@)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.HandyDictionary`2.Add(`0,`1)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <param name="value"></param>
+        </member>
         <member name="P:Cliver.HandyDictionary`2.Count">
             <summary>
-            (!)Attention: the count can be implicitly changed by the auto-generating value function
+            (!)The count can be implicitly changed by the auto-generating value function.
             </summary>
         </member>
         <member name="T:Cliver.HandyList`1">
@@ -1615,12 +1712,22 @@
             Sleep not freezing the app
             </summary>
         </member>
+        <member name="T:Cliver.Serialization">
+            <summary>
+            Serialization helpers.
+            </summary>
+        </member>
         <member name="M:Cliver.Serialization.Binary.Serialize(System.Object)">
             <summary>
             Serialize object
             </summary>
             <param name="o"></param>
             <returns></returns>
+        </member>
+        <member name="T:Cliver.Serialization.Json">
+            <summary>
+            Serialization to JSON.
+            </summary>
         </member>
         <member name="T:Cliver.Serialization.Json.NoIndentConverter">
             <summary>
@@ -1660,14 +1767,241 @@
             <param name="xml"></param>
             <returns></returns>
         </member>
+        <member name="T:Cliver.Set`2">
+            <summary>
+            Base class for Set implementation.
+            </summary>
+            <typeparam name="V">Cliver.Enum type</typeparam>
+            <typeparam name="T">Cliver.Enum value type</typeparam>
+        </member>
+        <member name="M:Cliver.Set`2.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Create a Set from a collection of values.
+            </summary>
+            <param name="values"></param>
+        </member>
+        <member name="P:Cliver.Set`2.Values">
+            <summary>
+            Collection of Enum's contained by this Set
+            </summary>
+        </member>
+        <member name="M:Cliver.Set`2.Add``1(``0)">
+            <summary>
+            Enhance this Set with another one.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="set"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Add``1(`0[])">
+            <summary>
+            Enhance this Set with a collection of Enum's.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="values"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Subtract``1(``0)">
+            <summary>
+            Diminish this Set by another Set.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="set"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Subtract``1(`0[])">
+            <summary>
+            Diminish this Set by a collection of Enum's.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="values"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.op_Equality(Cliver.Set{`0,`1},Cliver.Set{`0,`1})">
+            <summary>
+            2 Set's comprise of the same Enum's.
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.op_Inequality(Cliver.Set{`0,`1},Cliver.Set{`0,`1})">
+            <summary>
+            2 Set's do not comprise of the same Enum's.
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Parse``1(System.String,System.String,System.Boolean)">
+            <summary>
+            Convert a values string into a Set.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="valuesStr"></param>
+            <param name="separator"></param>
+            <param name="ignoreCase"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Contains``1(`0[])">
+            <summary>
+            Checks if this Set includes all given values.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="values"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Contains``1(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this Set includes all given values.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="values"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Set`2.Contains``1(``0)">
+            <summary>
+            Checks if this Set includes all the values of a given Set.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="set"></param>
+            <returns></returns>
+        </member>
         <member name="T:Cliver.Synchronization">
             <summary>
             Template for synchronizing Settings storage files, any files and application setup files through a cloud service. (The local system is required to have the service synchronizing app running.)  
             </summary>
         </member>
+        <member name="P:Cliver.Synchronization.synchronizedSettingsFieldFullNames">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.Synchronization.onNewerSettingsFile(Cliver.Settings)">
+            <summary>
+            
+            </summary>
+            <param name="settings"></param>
+        </member>
+        <member name="P:Cliver.Synchronization.synchronizedFileDownloadFolder">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="P:Cliver.Synchronization.synchronizedFileNameFilter">
             <summary>
             (!)It will download only those files that already exist in the synchronizedFileDownloadFolder.
+            </summary>
+        </member>
+        <member name="M:Cliver.Synchronization.onNewerFile(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="file"></param>
+        </member>
+        <member name="P:Cliver.Synchronization.appSetupFileFilter">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Cliver.Synchronization.programVersion">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.Synchronization.onNewerAppVersion(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="appSetupFile"></param>
+        </member>
+        <member name="M:Cliver.Synchronization.ErrorHandler(System.Exception)">
+            <summary>
+            
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="T:Cliver.Synchronization.Parameters">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Cliver.Synchronization.Parameters.SynchronizationFolder">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Cliver.Synchronization.Parameters.DownloadFolderName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Cliver.Synchronization.Parameters.UploadFolderName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Cliver.Synchronization.Parameters.Synchronize">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Cliver.Synchronization.Parameters.PollingPeriodMss">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.Synchronization.Switch(Cliver.Synchronization.Parameters)">
+            <summary>
+            Actualize new parameters.
+            </summary>
+            <param name="parameters"></param>
+        </member>
+        <member name="T:Cliver.WebClient">
+            <summary>
+            Enhanced System.Net.WebClient
+            </summary>
+        </member>
+        <member name="M:Cliver.WebClient.GetWebResponse(System.Net.WebRequest,System.IAsyncResult)">
+            <summary>
+            
+            </summary>
+            <param name="request"></param>
+            <param name="asyncResult"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.WebClient.GetWebResponse(System.Net.WebRequest)">
+            <summary>
+            
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Cliver.WebClient.Response">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Cliver.WebClient.Exception">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Cliver.WebClient.GetWebRequest(System.Uri)">
+            <summary>
+            
+            </summary>
+            <param name="address"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Cliver.WebClient.Request">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Cliver.WebClient.CookieContainer">
+            <summary>
+            
             </summary>
         </member>
     </members>

@@ -16,8 +16,14 @@ using System.Collections.Generic;
 
 namespace Cliver
 {
+    /// <summary>
+    /// Serialization helpers.
+    /// </summary>
     public static partial class Serialization
     {
+        /// <summary>
+        /// Serialization to JSON.
+        /// </summary>
         public static class Json
         {
             //public enum Mode
