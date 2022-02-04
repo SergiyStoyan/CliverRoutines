@@ -139,6 +139,17 @@ namespace Cliver
             Reload(settingsFieldHostingType.FullName + "." + settingsFieldName);
         }
 
+        /// <summary>
+        /// Allows to get the Settings field's properties before its value has been created (i.e. before the Settings field has been initialized).
+        /// </summary>
+        /// <param name="settingsFieldHostingType">full type name of the class hosting the Settings field</param>
+        /// <param name="settingsFieldName">name of the Settings field</param>
+        /// <returns>Settings field's properties</returns>
+        public static SettingsFieldInfo GetSettingsFieldInfo(Type settingsFieldHostingType, string settingsFieldName)
+        {
+            return GetSettingsFieldInfo(settingsFieldHostingType.FullName + "." + settingsFieldName);
+        }
+
         //// ???what would it be needed for?
         ///// <summary>
         ///// Returns the Settings object which is set to the field identified by the field's full name.
