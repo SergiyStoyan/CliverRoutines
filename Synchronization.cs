@@ -21,8 +21,8 @@ namespace Cliver
         /// <summary>
         /// 
         /// </summary>
-        abstract protected List<string> synchronizedSettingsFieldFullNames { get; }
-        //abstract protected List<Type> synchronizedSettingsTypes { get; }
+        abstract protected HashSet<string> synchronizedSettingsFieldFullNames { get; }
+        //abstract protected HashSet<Type> synchronizedSettingsTypes { get; }
 
         /// <summary>
         /// 
@@ -123,7 +123,8 @@ namespace Cliver
                     //    throw new Exception("UploadFolderName is not set.");
                     //if (string.IsNullOrWhiteSpace(parameters.DownloadFolderName))
                     //    throw new Exception("DownloadFolderName is not set.");
-                    this.parameters = parameters;
+                    this.parameters = parameters; 
+                    //synchronizedSettingsFieldFullNames= synchronizedSettingsFieldFullNames.Distinct().ToList();
                     downloadFolder = FileSystemRoutines.CreateDirectory(parameters.SynchronizationFolder + "\\" + parameters.DownloadFolderName);
                     uploadFolder = FileSystemRoutines.CreateDirectory(parameters.SynchronizationFolder + "\\" + parameters.UploadFolderName);
                     //if (PathRoutines.IsDirWithinDir(downloadFolder, uploadFolder))
