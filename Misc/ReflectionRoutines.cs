@@ -16,6 +16,15 @@ namespace Cliver
 {
     public static class ReflectionRoutines
     {
+        public static object GetDefault(this Type type)
+        {
+            return typeof(ReflectionRoutines).GetRuntimeMethod(nameof(getDefaultGeneric), new Type[] { }).MakeGenericMethod(type).Invoke(null, null);
+        }
+        static T getDefaultGeneric<T>()
+        {
+            return default(T);
+        }
+
         static public bool IsSubclassOfRawGeneric(Type type, Type genericType)
         {
             for (; type != null && type != typeof(object); type = type.BaseType)

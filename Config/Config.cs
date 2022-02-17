@@ -120,9 +120,7 @@ namespace Cliver
                         assemblies.Add(a);
                 }
             }
-            assemblies.RemoveAll(a => a == null);
-            assemblies.Distinct();
-            foreach (Assembly assembly in assemblies)
+            foreach (Assembly assembly in assemblies.Where(a => a != null).Distinct())
             {
                 Type[] types = assembly.GetTypes();
                 IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings))).Distinct();
