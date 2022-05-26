@@ -236,8 +236,8 @@ namespace Cliver
         static public string GetAssembliesInfo(IEnumerable<string> namespaces)
         {
             StackTrace stackTrace = new StackTrace();
-            Assembly configAssembly = Assembly.GetExecutingAssembly();
-            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != configAssembly).FirstOrDefault();
+            Assembly logAssembly = Assembly.GetExecutingAssembly();
+            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != logAssembly).FirstOrDefault();
             if (callingAssembly == null)
                 callingAssembly = Assembly.GetEntryAssembly();
             return string.Join("\r\n",
