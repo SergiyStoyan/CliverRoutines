@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Cliver
 {
@@ -230,6 +231,19 @@ namespace Cliver
                 s += "(\r\n" + string.Join(",\r\n", ps) + "\r\n)";
             }
             return s;
+        }
+
+        static public string GetAssembliesInfo(IEnumerable<string> namespaces)
+        {
+            StackTrace stackTrace = new StackTrace();
+            Assembly configAssembly = Assembly.GetExecutingAssembly();
+            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != configAssembly).FirstOrDefault();
+            if (callingAssembly == null)
+                callingAssembly = Assembly.GetEntryAssembly();
+            return string.Join("\r\n",
+                AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaces.Select(a => Regex.Escape(a)))))
+                    .Select(a => a.GetName()).Select(a => a.Name + " - " + a.Version)
+                );
         }
     }
 }
