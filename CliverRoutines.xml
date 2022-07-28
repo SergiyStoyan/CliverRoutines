@@ -489,6 +489,30 @@
             <param name="str"></param>
             <returns></returns>
         </member>
+        <member name="P:Cliver.DbConnection.Database">
+            <summary>
+            Current database
+            </summary>
+        </member>
+        <member name="P:Cliver.DbConnection.RefreshedNativeConnection">
+            <summary>
+            Native connection that must be casted.
+            </summary>
+        </member>
+        <member name="P:Cliver.DbConnection.Item(System.String)">
+            <summary>
+            Creates and caches a command.
+            </summary>
+            <param name="sql"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.DbConnection.Get(System.String)">
+            <summary>
+            Creates a not cached command.
+            </summary>
+            <param name="sql"></param>
+            <returns></returns>
+        </member>
         <member name="T:Cliver.Enum`1">
             <summary>
             Base class for Enum implementation.
