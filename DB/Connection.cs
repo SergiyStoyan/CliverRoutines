@@ -12,6 +12,7 @@
 //################################
 
 using System;
+using System.Linq;
 using System.Data;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -29,9 +30,21 @@ namespace Cliver.Db
         {
             lock (this)
             {
-                foreach (Command dc in sqls2command.Values)
-                    dc.Dispose();
+                ClearCachedCommands();
                 connection?.Dispose();
+            }
+        }
+
+        public virtual void ClearCachedCommands()
+        {
+            lock (sqls2command)
+            {
+                while (sqls2command.Count > 0)
+                {
+                    string k = sqls2command.Keys.First();
+                    sqls2command[k].Dispose();
+                    sqls2command.Remove(k);
+                }
             }
         }
 
@@ -151,7 +164,11 @@ namespace Cliver.Db
 
         public void Close()
         {
-            connection.Close();
+            lock (this)
+            {
+                ClearCachedCommands();
+                connection.Close();
+            }
         }
     }
 }
