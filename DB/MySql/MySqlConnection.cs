@@ -18,30 +18,30 @@ namespace Cliver.Db
         public MySqlConnection(string connectionString = null, Log.MessageType logDefaultMessageType = Log.MessageType.DEBUG)
             : base(connectionString, logDefaultMessageType)
         {
-            connection = new MySql.Data.MySqlClient.MySqlConnection(ConnectionString);
+            NativeConnection = new MySql.Data.MySqlClient.MySqlConnection(ConnectionString);
         }
 
-        public MySqlConnection(MySql.Data.MySqlClient.MySqlConnection connection, Log.MessageType logDefaultMessageType = Log.MessageType.DEBUG)
-            : base(connection, logDefaultMessageType)
+        public MySqlConnection(MySql.Data.MySqlClient.MySqlConnection NativeConnection, Log.MessageType logDefaultMessageType = Log.MessageType.DEBUG)
+            : base(NativeConnection, logDefaultMessageType)
         {
         }
 
         override protected System.Data.Common.DbConnection getRefreshedNativeConnection()
         {
-            if (connection.State != ConnectionState.Open)
+            if (NativeConnection.State != ConnectionState.Open)
             {
-                //if (connection.State != ConnectionState.Closed)
+                //if (NativeConnection.State != ConnectionState.Closed)
                 //{
-                //    connection.Dispose();
-                //    connection = new SqlConnection(connection.ConnectionString);
+                //    NativeConnection.Dispose();
+                //    NativeConnection = new SqlConnection(NativeConnection.ConnectionString);
                 //}
-                connection.Open();
+                NativeConnection.Open();
                 Dictionary<string, Command> s2cs = new Dictionary<string, Command>();
                 foreach (string sql in sqls2command.Keys)
                     s2cs[sql] = new MsSqlCommand(sql, this);
                 sqls2command = s2cs;
             }
-            return connection;
+            return NativeConnection;
         }
 
         override protected Command createCommand(string sql, Cliver.Log.MessageType? logMessageType = null)

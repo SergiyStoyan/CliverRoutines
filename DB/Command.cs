@@ -25,7 +25,7 @@ namespace Cliver.Db
 
         public void Dispose()
         {
-            nativeCommand?.Dispose();
+            NativeCommand?.Dispose();
         }
 
         public readonly string Sql;
@@ -38,7 +38,10 @@ namespace Cliver.Db
             this.LogMessageType = logMessageType == null ? connection.LogDefaultMessageType : LogMessageType;
         }
 
-        protected System.Data.Common.DbCommand nativeCommand;
+        /// <summary>
+        /// Use it carefully, only when unavoidable, because it can interfere with the wraper class.
+        /// </summary>
+        public System.Data.Common.DbCommand NativeCommand { get; protected set; }
 
         public int Execute(params object[] keyValuePairs)
         {
@@ -53,11 +56,11 @@ namespace Cliver.Db
             try
             {
                 Set(keyValuePairs);
-                rc = nativeCommand.ExecuteNonQuery();
+                rc = NativeCommand.ExecuteNonQuery();
             }
             finally
             {
-                nativeCommand.Parameters.Clear();
+                NativeCommand.Parameters.Clear();
             }
             return rc;
         }
@@ -75,11 +78,11 @@ namespace Cliver.Db
             try
             {
                 Set(keyValuePairs);
-                o = nativeCommand.ExecuteScalar();
+                o = NativeCommand.ExecuteScalar();
             }
             finally
             {
-                nativeCommand.Parameters.Clear();
+                NativeCommand.Parameters.Clear();
             }
             return o;
         }
@@ -97,11 +100,11 @@ namespace Cliver.Db
             try
             {
                 this.Set(keyValuePairs);
-                r = nativeCommand.ExecuteReader();
+                r = NativeCommand.ExecuteReader();
             }
             finally
             {
-                nativeCommand.Parameters.Clear();
+                NativeCommand.Parameters.Clear();
             }
             return r;
         }
@@ -121,11 +124,11 @@ namespace Cliver.Db
             try
             {
                 Set(keyValuePairs);
-                r = nativeCommand.ExecuteReader();
+                r = NativeCommand.ExecuteReader();
             }
             finally
             {
-                nativeCommand.Parameters.Clear();
+                NativeCommand.Parameters.Clear();
             }
             try
             {
@@ -174,7 +177,7 @@ namespace Cliver.Db
         virtual protected Recordset getRecordset(params object[] keyValuePairs)
         {
             this.Set(keyValuePairs);
-            Recordset rs = new Recordset(nativeCommand.ExecuteReader());
+            Recordset rs = new Recordset(NativeCommand.ExecuteReader());
             return rs;
         }
 
@@ -184,7 +187,7 @@ namespace Cliver.Db
             {
                 lock (connection.RefreshedNativeConnection)
                 {
-                    return nativeCommand.CommandText;
+                    return NativeCommand.CommandText;
                 }
             }
         }
@@ -202,7 +205,7 @@ namespace Cliver.Db
             if (kvs.Count > 0)
                 m += "\r\n" + string.Join("\r\n", kvs);
             Cliver.Log.Write(LogMessageType, m);
-            //Cliver.Log.Inform("[" + connection.Database + "]:\r\n" + nativeCommand.CommandText);
+            //Cliver.Log.Inform("[" + connection.Database + "]:\r\n" + NativeCommand.CommandText);
             //logNext = false;
         }
     }

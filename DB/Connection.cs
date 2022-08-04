@@ -31,7 +31,7 @@ namespace Cliver.Db
             lock (this)
             {
                 ClearCachedCommands();
-                connection?.Dispose();
+                NativeConnection?.Dispose();
             }
         }
 
@@ -88,10 +88,10 @@ namespace Cliver.Db
             LogDefaultMessageType = logDefaultMessageType;
         }
 
-        protected Connection(System.Data.Common.DbConnection connection, Log.MessageType logDefaultMessageType = Log.MessageType.DEBUG)
+        protected Connection(System.Data.Common.DbConnection nativeConnection, Log.MessageType logDefaultMessageType = Log.MessageType.DEBUG)
         {
-            this.connection = connection;
-            ConnectionString = connection.ConnectionString;
+            NativeConnection = nativeConnection;
+            ConnectionString = nativeConnection.ConnectionString;
             LogDefaultMessageType = logDefaultMessageType;
         }
 
@@ -105,7 +105,7 @@ namespace Cliver.Db
         {
             get
             {
-                return connection.Database;
+                return NativeConnection.Database;
             }
         }
 
@@ -123,7 +123,11 @@ namespace Cliver.Db
             }
         }
         protected abstract System.Data.Common.DbConnection getRefreshedNativeConnection();
-        protected System.Data.Common.DbConnection connection;
+
+        /// <summary>
+        /// Use it carefully, only when unavoidable, because it can interfere with the wraper class.
+        /// </summary>
+        public System.Data.Common.DbConnection NativeConnection { get; protected set; }
 
         /// <summary>
         /// Creates and caches/retrieves a command.
@@ -167,7 +171,7 @@ namespace Cliver.Db
             lock (this)
             {
                 ClearCachedCommands();
-                connection.Close();
+                NativeConnection.Close();
             }
         }
     }

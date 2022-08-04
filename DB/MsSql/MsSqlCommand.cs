@@ -19,7 +19,7 @@ namespace Cliver.Db
         {
             command = new SqlCommand(sql, (SqlConnection)connection.RefreshedNativeConnection);
             command.Prepare();
-            nativeCommand = command;
+            NativeCommand = command;
         }
 
         SqlCommand command;

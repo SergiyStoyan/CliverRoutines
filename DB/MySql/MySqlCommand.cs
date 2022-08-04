@@ -18,9 +18,8 @@ namespace Cliver.Db
             : base(sql, connection,  logMessageType)
         {
             command = new MySql.Data.MySqlClient.MySqlCommand(sql, (MySql.Data.MySqlClient.MySqlConnection)connection.RefreshedNativeConnection);
-            nativeCommand = command;
             //command.Prepare();!!!gives error 'Parameter ... was not found during prepare.' when a command contains parameter
-            nativeCommand = command;
+            NativeCommand = command;
         }
 
         MySql.Data.MySqlClient.MySqlCommand command;
