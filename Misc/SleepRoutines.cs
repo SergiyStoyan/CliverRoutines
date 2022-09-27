@@ -74,7 +74,7 @@ namespace Cliver
 
         public T Perform<T>(Func<T> function)
         {
-            for (int tryCount = 0; ; tryCount++)
+            for (int tryCount = 1; ; tryCount++)
                 try
                 {
                     return function();
@@ -82,8 +82,12 @@ namespace Cliver
                 catch (Exception e)
                 {
                     if (ExceptionTypes != null && ExceptionTypes.Find(a => e.GetType() == a) == null)
+                    {
+                        //throw new Exception("Caller stack: " + Log.GetStackString(1, -1), e);
+                        //Log.Warning2("Caller stack for the following error: " + Log.GetStackString(1, -1));
                         throw;
-                    if (tryCount++ >= TryMaxCount)
+                    }
+                    if (tryCount >= TryMaxCount)
                         throw new Exception("Try count exeeded: " + tryCount, e);
                     if (OnRetry != null)
                         OnRetry(e, tryCount);
