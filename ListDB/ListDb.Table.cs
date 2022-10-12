@@ -16,28 +16,6 @@ namespace Cliver
 {
     public partial class ListDb
     {
-        public class testDocument //: ListDb.Document
-        {
-            public string A = DateTime.Now.ToString() + "\r\n" + DateTime.Now.Ticks.ToString();
-            public string B = "test";
-            public long C = DateTime.Now.Ticks;
-            public DateTime DocumentType = DateTime.Now;
-
-            static public void Test()
-            {
-                ListDb.Table<testDocument> t = ListDb.Table<testDocument>.Get();
-                //t.Drop();
-                t.Save(new testDocument());
-                t.Save(new testDocument());
-                t.Insert(0, new testDocument());
-                testDocument d = t.Last();
-                d.A = @"changed";
-                t.Save(d);
-                t.Insert(t.Count - 1, t.First());
-                t.Flush();
-            }
-        }
-
         //public class Document
         //{
         //[Newtonsoft.Json.JsonIgnoreAttribute]
@@ -53,20 +31,23 @@ namespace Cliver
             return Table<DocumentType>.Get(directory);
         }
 
-        public class Table<DocumentType> : List<DocumentType>, IDisposable where DocumentType : new()
+        public class Table<DocumentType> : IDisposable where DocumentType : new()
         {
             public static Table<DocumentType> Get(string directory = null)
             {
                 directory = getNormalizedDirectory(directory);
                 WeakReference wr;
-                string key = directory + System.IO.Path.DirectorySeparatorChar + typeof(DocumentType).Name;
-                if (!tableKeys2table.TryGetValue(key, out wr)
+                string key = directory + Path.DirectorySeparatorChar + typeof(DocumentType).Name;
+                lock (tableKeys2table)
+                {
+                    if (!tableKeys2table.TryGetValue(key, out wr)
                     || !wr.IsAlive
                     )
-                {
-                    Table<DocumentType> t = new Table<DocumentType>(directory, key);
-                    wr = new WeakReference(t);
-                    tableKeys2table[key] = wr;
+                    {
+                        Table<DocumentType> t = new Table<DocumentType>(directory, key);
+                        wr = new WeakReference(t);
+                        tableKeys2table[key] = wr;
+                    }
                 }
                 return (Table<DocumentType>)wr.Target;
             }
@@ -79,28 +60,77 @@ namespace Cliver
                 return PathRoutines.GetNormalizedPath(directory, true);
             }
 
+            ~Table()
+            {
+                Dispose();
+            }
+
+            public void Dispose()
+            {
+                lock (this)
+                {
+                    try
+                    {
+                        if (fileWriter == null)
+                            return;
+
+                        lock (tableKeys2table)
+                        {
+                            if (tableKeys2table.ContainsKey(key))
+                                tableKeys2table.Remove(key);
+                        }
+
+                        if (Mode.HasFlag(Modes.FLUSH_TABLE_ON_CLOSE))
+                            Flush();
+                        if (fileWriter != null)
+                        {
+                            fileWriter.Close();
+                            fileWriter = null;
+                        }
+                        if (logWriter != null)
+                        {
+                            logWriter.Close();
+                            logWriter = null;
+                        }
+                    }
+                    catch
+                    {
+                        //when Dispose is called from finalizer, files may be already closed and so exception thrown
+                    }
+                }
+            }
+
             public readonly string Log = null;
-            protected TextWriter logWriter;
+            TextWriter logWriter;
             public readonly string File = null;
             protected TextWriter fileWriter;
             readonly string newFile;
             public Modes Mode = Modes.FLUSH_TABLE_ON_CLOSE;
             public readonly string Name;
             protected readonly string key;
+            protected readonly List<DocumentType> documents = new List<DocumentType>();
 
             public enum Modes
             {
                 NULL = 0,
-                KEEP_OPEN_TABLE_FOREVER = 1,//requires explicite call Close()
+                //KEEP_TABLE_EVER_OPEN = 1,//requires explicitly calling Close()
                 FLUSH_TABLE_ON_CLOSE = 2,
                 FLUSH_TABLE_ON_START = 4,
             }
 
             public delegate void SavedHandler(DocumentType document, bool asNew);
             public event SavedHandler Saved = null;
+            protected void invokeSaved(DocumentType document, bool asNew)
+            {
+                Saved?.Invoke(document, asNew);
+            }
 
             public delegate void RemovedHandler(DocumentType document, bool sucess);
             public event RemovedHandler Removed = null;
+            protected void invokeRemoved(DocumentType document, bool sucess)
+            {
+                Removed?.Invoke(document, sucess);
+            }
 
             protected Table(string directory, string key)
             {
@@ -130,74 +160,86 @@ namespace Cliver
                         {
                             foreach (string l in System.IO.File.ReadLines(Log))
                             {
-                                Match m = Regex.Match(l, @"flushed:\s+\[(\d+)\]");
-                                if (m.Success)
+                                (Action action, int number) r = readLogLine(l);
+                                DocumentType documentType;
+                                switch (r.action)
                                 {
-                                    int p1 = int.Parse(m.Groups[1].Value);
-                                    for (int i = 0; i < p1; i++)
-                                    {
-                                        DocumentType d = JsonConvert.DeserializeObject<DocumentType>(fr.ReadLine());
-                                        base.Add(d);
-                                    }
-                                    continue;
-                                }
-                                m = Regex.Match(l, @"deleted:\s+(\d+)");
-                                if (m.Success)
-                                {
-                                    base.RemoveAt(int.Parse(m.Groups[1].Value));
-                                    continue;
-                                }
-                                m = Regex.Match(l, @"replaced:\s+(\d+)");
-                                if (m.Success)
-                                {
-                                    DocumentType d = JsonConvert.DeserializeObject<DocumentType>(fr.ReadLine());
-                                    int p1 = int.Parse(m.Groups[1].Value);
-                                    if (p1 >= base.Count)
-                                        throw new Exception("Log file broken.");
-                                    base.RemoveAt(p1);
-                                    base.Insert(p1, d);
-                                    continue;
-                                }
-                                m = Regex.Match(l, @"added:\s+(\d+)");
-                                if (m.Success)
-                                {
-                                    DocumentType d = JsonConvert.DeserializeObject<DocumentType>(fr.ReadLine());
-                                    int p1 = int.Parse(m.Groups[1].Value);
-                                    if (p1 != base.Count)
-                                        throw new Exception("Log file broken.");
-                                    base.Add(d);
-                                    continue;
-                                }
-                                m = Regex.Match(l, @"inserted:\s+(\d+)");
-                                if (m.Success)
-                                {
-                                    DocumentType d = JsonConvert.DeserializeObject<DocumentType>(fr.ReadLine());
-                                    int p1 = int.Parse(m.Groups[1].Value);
-                                    if (p1 >= base.Count)
-                                        throw new Exception("Log file broken.");
-                                    base.Insert(p1, d);
-                                    continue;
+                                    case Action.flushed://it can be only the first line in the log
+                                        for (int i = 0; i < r.number; i++)
+                                        {
+                                            string fl = fr.ReadLine();
+                                            if (fl == null)
+                                                throw new Exception("ListDb log file is broken: there are less documents in the table '" + Name + "' (" + i + ") than were fushed(" + r.number + ")");
+                                            documentType = JsonConvert.DeserializeObject<DocumentType>(fl);
+                                            documents.Add(documentType);
+                                        }
+                                        if (fr.ReadLine() != null)
+                                            throw new Exception("ListDb log file is broken: there are more documents in the table '" + Name + "' than were fushed (" + r.number + ")");
+                                        continue;
+                                    case Action.deleted:
+                                        try
+                                        {
+                                            documents.RemoveAt(r.number);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            throw new Exception("ListDb log file is broken.", e);
+                                        }
+                                        continue;
+                                    case Action.replaced:
+                                        {
+                                            string fl = fr.ReadLine();
+                                            if (fl == null)
+                                                throw new Exception("ListDb log file is broken: there is no document in the table '" + Name + "' for a replaced index (" + r.number + ")");
+                                            documentType = JsonConvert.DeserializeObject<DocumentType>(fl);
+                                            if (r.number >= documents.Count)
+                                                throw new Exception("ListDb log file is broken: there are less documents in the table '" + Name + "' than a replaced index (" + r.number + ")");
+                                            documents.RemoveAt(r.number);
+                                            documents.Insert(r.number, documentType);
+                                        }
+                                        continue;
+                                    case Action.added:
+                                        {
+                                            string fl = fr.ReadLine();
+                                            if (fl == null)
+                                                throw new Exception("ListDb log file is broken: there is no document in the table '" + Name + "' for an added index (" + r.number + ")");
+                                            documentType = JsonConvert.DeserializeObject<DocumentType>(fl);
+                                            if (r.number != documents.Count)
+                                                throw new Exception("ListDb log file is broken: number of documents in the table '" + Name + "' (" + documents.Count + ") is not equal an added index (" + r.number + ")");
+                                            documents.Add(documentType);
+                                        }
+                                        continue;
+                                    case Action.inserted:
+                                        {
+                                            string fl = fr.ReadLine();
+                                            if (fl == null)
+                                                throw new Exception("ListDb log file is broken: there is no document in the table '" + Name + "' for an inserted index (" + r.number + ")");
+                                            documentType = JsonConvert.DeserializeObject<DocumentType>(fl);
+                                            if (r.number >= documents.Count)
+                                                throw new Exception("ListDb log file is broken: there less documents in the table '" + Name + "' (" + documents.Count + ") than an inserted index (" + r.number + ")");
+                                            documents.Insert(r.number, documentType);
+                                        }
+                                        continue;
+                                    case Action.flushing:
+                                        continue;
+                                    default:
+                                        throw new Exception("Unknown action: " + r.action);
                                 }
                             }
-                            if ((Mode & Modes.FLUSH_TABLE_ON_START) == Modes.FLUSH_TABLE_ON_START)
+                            if (fr.ReadLine() != null)
+                                throw new Exception("ListDb log file is broken: there more documents in the table '" + Name + "' than recorded in the log.");
+                            if (Mode.HasFlag(Modes.FLUSH_TABLE_ON_START))
                             {
-                                foreach (string l in System.IO.File.ReadLines(Log))
-                                {
-                                    if (!Regex.IsMatch(l, @"flushed:\s+\[(\d+)\]"))
-                                    {
-                                        Flush();
-                                        break;
-                                    }
-                                }
+                                FileInfo fi = new FileInfo(Log);
+                                if (fi.Exists && fi.Length > 0)
+                                    Flush();
                             }
                         }
                         else
                         {
                             for (string s = fr.ReadLine(); s != null; s = fr.ReadLine())
-                                base.Add(JsonConvert.DeserializeObject<DocumentType>(s));
+                                documents.Add(JsonConvert.DeserializeObject<DocumentType>(s));
                         }
-                        if (fr.ReadLine() != null)
-                            throw new Exception("Log file broken.");
                     }
                 }
 
@@ -207,118 +249,153 @@ namespace Cliver
                 ((StreamWriter)logWriter).AutoFlush = true;
             }
 
-            ~Table()
+            protected enum Action
             {
-                Dispose();
+                added,
+                replaced,
+                inserted,
+                deleted,
+                flushed,
+                flushing
             }
 
-            public void Dispose()
+            protected void writeLogLine(Action action, int number)
             {
                 lock (this)
                 {
-                    try
-                    {
-                        if (disposed)
-                            return;
-                        disposed = true;
+                    logWriter.WriteLine(action.ToString() + ": " + number);
+                }
+            }
 
-                        if (tableKeys2table.ContainsKey(key))
-                            tableKeys2table.Remove(key);
-
-                        if ((Mode & Modes.FLUSH_TABLE_ON_CLOSE) == Modes.FLUSH_TABLE_ON_CLOSE)
-                            Flush();
-                        if (fileWriter != null)
-                            fileWriter.Dispose();
-                        if (logWriter != null)
-                            logWriter.Dispose();
-                    }
-                    catch
+            (Action action, int number) readLogLine(string line)
+            {
+                lock (this)
+                {
+                    Match m = logReadingRegex.Match(line);
+                    if (!Enum.TryParse(m.Groups[1].Value, out Action action))
+                        throw new Exception("Unknown action in the ListDb log: '" + m.Groups[1].Value + "'");
+                    switch (action)
                     {
-                        //when Dispose is called from finalizer, files may be already closed and so exception thrown
+                        case Action.replaced:
+                            return (Action.replaced, int.Parse(m.Groups[2].Value));
+                        case Action.deleted:
+                            return (Action.deleted, int.Parse(m.Groups[2].Value));
+                        case Action.added:
+                            return (Action.added, int.Parse(m.Groups[2].Value));
+                        case Action.flushed:
+                            return (Action.flushed, int.Parse(m.Groups[2].Value));
+                        case Action.inserted:
+                            return (Action.inserted, int.Parse(m.Groups[2].Value));
+                        case Action.flushing:
+                            return (Action.flushing, int.Parse(m.Groups[2].Value));
+                        default:
+                            throw new Exception("Unknown action: " + action);
                     }
                 }
             }
-            protected bool disposed = false;
+            Regex logReadingRegex = new Regex("(" + string.Join("|", Enum.GetNames(typeof(Action))) + @")(?:\:\s*(\d+))?");
 
+            /// <summary>
+            /// Rewrite the data on the disk, cleaning the log.
+            /// </summary>
             public void Flush()
             {
-                logWriter.WriteLine("flushing");
-
-                using (TextWriter newFileWriter = new StreamWriter(newFile, false))
+                lock (this)
                 {
-                    foreach (DocumentType d in this)
-                        newFileWriter.WriteLine(JsonConvert.SerializeObject(d, Formatting.None));
-                    newFileWriter.Flush();
+                    writeLogLine(Action.flushing, -1);
+
+                    using (TextWriter newFileWriter = new StreamWriter(newFile, false))
+                    {
+                        foreach (DocumentType d in documents)
+                            newFileWriter.WriteLine(JsonConvert.SerializeObject(d, Formatting.None));
+                        newFileWriter.Flush();
+                    }
+
+                    if (fileWriter != null)
+                        fileWriter.Close();
+                    if (System.IO.File.Exists(File))
+                        System.IO.File.Delete(File);
+                    System.IO.File.Move(newFile, File);
+                    fileWriter = new StreamWriter(File, true);
+                    ((StreamWriter)fileWriter).AutoFlush = true;
+
+                    if (logWriter != null)
+                        logWriter.Close();
+                    logWriter = new StreamWriter(Log, false);
+                    ((StreamWriter)logWriter).AutoFlush = true;
+
+                    writeLogLine(Action.flushed, documents.Count);
                 }
-
-                if (fileWriter != null)
-                    fileWriter.Dispose();
-                if (System.IO.File.Exists(File))
-                    System.IO.File.Delete(File);
-                System.IO.File.Move(newFile, File);
-                fileWriter = new StreamWriter(File, true);
-                ((StreamWriter)fileWriter).AutoFlush = true;
-
-                if (logWriter != null)
-                    logWriter.Dispose();
-                logWriter = new StreamWriter(Log, false);
-                ((StreamWriter)logWriter).AutoFlush = true;
-                logWriter.WriteLine("flushed: [" + base.Count + "]");
-            }
-
-            public void Drop()
-            {
-                base.Clear();
-
-                if (fileWriter != null)
-                    fileWriter.Dispose();
-                if (System.IO.File.Exists(File))
-                    System.IO.File.Delete(File);
-
-                if (logWriter != null)
-                    logWriter.Dispose();
-                if (System.IO.File.Exists(Log))
-                    System.IO.File.Delete(Log);
-            }
-
-            new public void Clear()
-            {
-                base.Clear();
-
-                if (fileWriter != null)
-                    fileWriter.Dispose();
-                fileWriter = new StreamWriter(File, false);
-
-                if (logWriter != null)
-                    logWriter.Dispose();
-                logWriter = new StreamWriter(Log, false);
             }
 
             /// <summary>
-            /// Table works as an ordered HashSet
+            /// Delete the table.
+            /// </summary>
+            public void Drop()
+            {
+                lock (this)
+                {
+                    documents.Clear();
+
+                    if (fileWriter != null)
+                        fileWriter.Close();
+                    if (System.IO.File.Exists(File))
+                        System.IO.File.Delete(File);
+
+                    if (logWriter != null)
+                        logWriter.Close();
+                    if (System.IO.File.Exists(Log))
+                        System.IO.File.Delete(Log);
+                }
+            }
+
+            /// <summary>
+            /// Remove all the data from the table.
+            /// </summary>
+            public void Clear()
+            {
+                lock (this)
+                {
+                    Drop();
+
+                    fileWriter = new StreamWriter(File, false);
+                    ((StreamWriter)fileWriter).AutoFlush = true;
+
+                    logWriter = new StreamWriter(Log, false);
+                    ((StreamWriter)logWriter).AutoFlush = true;
+                }
+            }
+
+            /// <summary>
+            /// Adds a document to the table if it does not exists. Otherwise, overwrites it.
+            /// Table works as an ordered HashSet.
             /// </summary>
             /// <param name="document"></param>
             /// <returns></returns>
-            virtual public Results Save(DocumentType document)
+            virtual public Result Save(DocumentType document)
             {
-                int i = base.IndexOf(document);
-                if (i >= 0)
+                lock (this)
                 {
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                    logWriter.WriteLine("replaced: " + i);
-                    Saved?.Invoke(document, false);
-                    return Results.UPDATED;
-                }
-                else
-                {
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                    base.Add(document);
-                    logWriter.WriteLine("added: " + (base.Count - 1));
-                    Saved?.Invoke(document, true);
-                    return Results.ADDED;
+                    int i = documents.IndexOf(document);
+                    if (i >= 0)
+                    {
+                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        writeLogLine(Action.replaced, i);
+                        Saved?.Invoke(document, false);
+                        return Result.UPDATED;
+                    }
+                    else
+                    {
+                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        documents.Add(document);
+                        writeLogLine(Action.added, documents.Count - 1);
+                        Saved?.Invoke(document, true);
+                        return Result.ADDED;
+                    }
                 }
             }
-            public enum Results
+
+            public enum Result
             {
                 ADDED,
                 UPDATED,
@@ -328,101 +405,171 @@ namespace Cliver
             }
 
             /// <summary>
-            /// Table works as an ordered HashSet
+            /// Adds a document to the end. If it exists then it is moved to the end. 
+            /// Table works as an ordered HashSet.
             /// </summary>
             /// <param name="document"></param>
-            new virtual public Results Add(DocumentType document)
+            virtual public Result Add(DocumentType document)
             {
-                int i = base.IndexOf(document);
-                if (i >= 0)
+                lock (this)
                 {
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                    base.RemoveAt(i);
-                    base.Add(document);
-                    logWriter.WriteLine("deleted: " + i + "\r\nadded: " + (base.Count - 1));
-                    Saved?.Invoke(document, false);
-                    return Results.MOVED2TOP;
-                }
-                else
-                {
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                    base.Add(document);
-                    logWriter.WriteLine("added: " + (base.Count - 1));
-                    Saved?.Invoke(document, true);
-                    return Results.ADDED;
+                    int i = documents.IndexOf(document);
+                    if (i >= 0)
+                    {
+                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        documents.RemoveAt(i);
+                        documents.Add(document);
+                        writeLogLine(Action.deleted, i);
+                        writeLogLine(Action.added, documents.Count - 1);
+                        Saved?.Invoke(document, false);
+                        return Result.MOVED2TOP;
+                    }
+                    else
+                    {
+                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        documents.Add(document);
+                        writeLogLine(Action.added, documents.Count - 1);
+                        Saved?.Invoke(document, true);
+                        return Result.ADDED;
+                    }
                 }
             }
 
-            new public void AddRange(IEnumerable<DocumentType> documents)
+            public void AddRange(IEnumerable<DocumentType> documents)
             {
-                throw new Exception("TBD");
-                //base.AddRange(documents);
+                lock (this)
+                {
+                    foreach (DocumentType document in documents)
+                        Add(document);
+                }
             }
 
             /// <summary>
             /// Table works as an ordered HashSet
             /// </summary>
             /// <param name="document"></param>
-            new virtual public Results Insert(int index, DocumentType document)
+            virtual public Result Insert(int index, DocumentType document)
             {
-                int i = base.IndexOf(document);
-                if (i >= 0)
+                lock (this)
                 {
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                    base.RemoveAt(i);
-                    base.Insert(index, document);
-                    logWriter.WriteLine("replaced: " + i);
-                    Saved?.Invoke(document, false);
-                    return Results.MOVED;
+                    int i = documents.IndexOf(document);
+                    if (i >= 0)
+                    {
+                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        documents.RemoveAt(i);
+                        documents.Insert(index, document);
+                        writeLogLine(Action.replaced, i);
+                        Saved?.Invoke(document, false);
+                        return Result.MOVED;
+                    }
+                    else
+                    {
+                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        documents.Insert(index, document);
+                        writeLogLine(Action.inserted, index);
+                        Saved?.Invoke(document, true);
+                        return Result.INSERTED;
+                    }
                 }
-                else
+            }
+
+            public IEnumerable<DocumentType> Find(Predicate<DocumentType> match)
+            {
+                lock (this)
                 {
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                    base.Insert(index, document);
-                    logWriter.WriteLine("inserted: " + index);
-                    Saved?.Invoke(document, true);
-                    return Results.INSERTED;
+                    List<DocumentType> matchedDocuments = new List<DocumentType>();
+                    foreach (DocumentType document in documents)
+                        if (match(document))
+                            yield return document;
                 }
             }
 
-            new public void InsertRange(int index, IEnumerable<DocumentType> documents)
+            public void InsertRange(int index, IEnumerable<DocumentType> documents)
             {
-                throw new Exception("TBD");
-                //base.InsertRange(index, documents);
-            }
-
-            new public bool Remove(DocumentType document)
-            {
-                int i = base.IndexOf(document);
-                if (i >= 0)
+                lock (this)
                 {
-                    base.RemoveAt(i);
-                    logWriter.WriteLine("deleted: " + i);
-                    Removed?.Invoke(document, true);
-                    return true;
+                    throw new Exception("TBD");
+                    //base.InsertRange(index, documents);
                 }
-                Removed?.Invoke(document, false);
-                return false;
             }
 
-            new public int RemoveAll(Predicate<DocumentType> match)
+            public bool Remove(DocumentType document)
             {
-                throw new Exception("TBD");
-                //return base.RemoveAll(match);
-            }
-
-            new public void RemoveAt(int index)
-            {
-                base.RemoveAt(index);
-                logWriter.WriteLine("deleted: " + index);
-            }
-
-            new public void RemoveRange(int index, int count)
-            {
-                for (int i = index; i < count; i++)
+                lock (this)
                 {
-                    base.RemoveAt(i);
-                    logWriter.WriteLine("deleted: " + i);
+                    int i = documents.IndexOf(document);
+                    if (i >= 0)
+                    {
+                        documents.RemoveAt(i);
+                        writeLogLine(Action.deleted, i);
+                        Removed?.Invoke(document, true);
+                        return true;
+                    }
+                    Removed?.Invoke(document, false);
+                    return false;
+                }
+            }
+
+            public int RemoveAll(Predicate<DocumentType> match)
+            {
+                lock (this)
+                {
+                    List<DocumentType> documentsToDelete = new List<DocumentType>();
+                    foreach (DocumentType document in documents)
+                        if (match(document))
+                            documentsToDelete.Add(document);
+                    foreach (DocumentType document in documentsToDelete)
+                        Remove(document);
+                    return documentsToDelete.Count;
+                }
+            }
+
+            public void RemoveAt(int index)
+            {
+                lock (this)
+                {
+                    documents.RemoveAt(index);
+                    writeLogLine(Action.deleted, index);
+                }
+            }
+
+            public void RemoveRange(int index, int count)
+            {
+                lock (this)
+                {
+                    for (int i = index; i < count; i++)
+                        RemoveAt(i);
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    lock (this)
+                    {
+                        return documents.Count;
+                    }
+                }
+            }
+
+            public DocumentType First(Predicate<DocumentType> match = null)
+            {
+                lock (this)
+                {
+                    if (match == null)
+                        return documents.First();
+                    return documents.First(new Func<DocumentType, bool>(match));
+                }
+            }
+
+            public DocumentType Last(Predicate<DocumentType> match = null)
+            {
+                lock (this)
+                {
+                    if (match == null)
+                        return documents.Last();
+                    return documents.Last(new Func<DocumentType, bool>(match));
                 }
             }
 
