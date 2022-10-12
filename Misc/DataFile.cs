@@ -18,101 +18,97 @@ namespace Cliver
     /// <summary>
     /// Read/write a document-per-line file. Thread-safe.
     /// </summary>
-    public class DataFile
+    abstract public class DataFile<DocumentT> where DocumentT : new()
     {
-        public DataFile(string file)
+        protected DataFile(string file)
         {
             File = file;
             FileSystemRoutines.CreateDirectory(PathRoutines.GetFileDir(File));
         }
         public readonly string File;
 
-        public IEnumerable<string> ReadLines()
-        {
-            lock (this)
-            {
-                if (System.IO.File.Exists(File))
-                    using (TextReader tr = new StreamReader(File))
-                        for (string l = tr.ReadLine(); l != null; l = tr.ReadLine())
-                            yield return l;
-            }
-        }
+        abstract public void Write(IEnumerable<DocumentT> documents, bool append = true);
 
-        public void WriteLines(IEnumerable<string> lines, bool append = true)
-        {
-            lock (this)
-            {
-                using (TextWriter tw = new StreamWriter(File, append))
-                    foreach (string line in lines)
-                        tw.WriteLine(line);
-            }
-        }
+        abstract public IEnumerable<DocumentT> Read();
 
-        public class Tsv<DocumentT> : DataFile where DocumentT : new()
+        public class Tsv : DataFile<DocumentT>
         {
             public Tsv(string file) : base(file)
             {
             }
-            FieldInfo[] pis = typeof(DocumentT).GetFields();
+            readonly FieldInfo[] pis = typeof(DocumentT).GetFields();
 
-            public void Write(IEnumerable<DocumentT> documents, bool append = true)
+            override public void Write(IEnumerable<DocumentT> documents, bool append = true)
             {
                 lock (this)
                 {
-                    FileInfo fi = new FileInfo(File);
-                    if (!fi.Exists || fi.Length == 0)
+                    using (TextWriter tw = new StreamWriter(File, append))
                     {
-                        List<string> hs = new List<string>();
-                        foreach (FieldInfo pi in pis)
+                        FileInfo fi = new FileInfo(File);
+                        if (!append || !fi.Exists || fi.Length == 0)
                         {
-                            if (pi.GetCustomAttribute<FieldPreparation.IgnoredField>() != null)
-                                continue;
-                            hs.Add(pi.Name);
+                            List<string> hs = new List<string>();
+                            foreach (FieldInfo pi in pis)
+                            {
+                                if (pi.GetCustomAttribute<FieldPreparation.IgnoredField>() != null)
+                                    continue;
+                                hs.Add(pi.Name);
+                            }
+                            if (hs.Count == 0)
+                                throw new Exception("Document type " + typeof(DocumentT).Name + " gives no header.");
+                            tw.WriteLine(FieldPreparation.Tsv.GetLine(hs));
                         }
-                        WriteLines(new List<string> { FieldPreparation.Tsv.GetLine(hs) }, append);
-                    }
 
-                    WriteLines(documents.Select(a => FieldPreparation.Tsv.GetLine(a)), append);
+                        foreach (DocumentT d in documents)
+                            tw.WriteLine(FieldPreparation.Tsv.GetLine(d));
+                    }
                 }
             }
 
-            public IEnumerable<DocumentT> Read()
+            override public IEnumerable<DocumentT> Read()
             {
                 lock (this)
                 {
-                    var ls = ReadLines().GetEnumerator();
-                    ls.MoveNext();
-                    while (ls.MoveNext())
-                    {
-                        string[] vs = ls.Current.Split('\t');
-                        DocumentT d = new DocumentT();
-                        for (int i = 0; i < vs.Length; i++)
-                            pis[i].SetValue(d, vs[i]);
-                        yield return d;
-                    }
+                    if (System.IO.File.Exists(File))
+                        using (TextReader tr = new StreamReader(File))
+                        {
+                            string l = tr.ReadLine();//pass off the header
+                            for (l = tr.ReadLine(); l != null; l = tr.ReadLine())
+                            {
+                                string[] vs = l.Split('\t');
+                                DocumentT d = new DocumentT();
+                                for (int i = 0; i < vs.Length; i++)
+                                    pis[i].SetValue(d, vs[i]);
+                                yield return d;
+                            }
+                        }
                 }
             }
         }
 
-        public class Json<DocumentT> : DataFile where DocumentT : new()
+        public class Json : DataFile<DocumentT> 
         {
             public Json(string file) : base(file)
             { }
 
-            public void Write(IEnumerable<DocumentT> documents, bool append = true)
+            override public void Write(IEnumerable<DocumentT> documents, bool append = true)
             {
                 lock (this)
                 {
-                    WriteLines(documents.Select(a => Serialization.Json.Serialize(a, false)), append);
+                    using (TextWriter tw = new StreamWriter(File, append))
+                        foreach (DocumentT d in documents)
+                            tw.WriteLine(Serialization.Json.Serialize(d, false));
                 }
             }
 
-            public IEnumerable<DocumentT> Read()
+            override public IEnumerable<DocumentT> Read()
             {
                 lock (this)
                 {
-                    foreach (string l in ReadLines())
-                        yield return Serialization.Json.Deserialize<DocumentT>(l);
+                    if (System.IO.File.Exists(File))
+                        using (TextReader tr = new StreamReader(File))
+                            for (string l = tr.ReadLine(); l != null; l = tr.ReadLine())
+                                yield return Serialization.Json.Deserialize<DocumentT>(l);
                 }
             }
         }

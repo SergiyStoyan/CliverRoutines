@@ -16,55 +16,30 @@ namespace Cliver
     {
         public class IndexedDocument
         {
-            public long ID { get; internal set; }
+            public long ID;
         }
 
-        //public static IndexedTable<DocumentType> GetIndexedTable<DocumentType>(string directory = null) where DocumentType : IndexedDocument, new()
-        //{
-        //    return IndexedTable<DocumentType>.Get(directory);
-        //}
-
-        //public static TableType Get<TableType, DocumentType>(string directory = null) where TableType : Table<DocumentType>, IDisposable where DocumentType : IndexedDocument, new()
-        //{
-        //    directory = Table < DocumentType > .getNormalizedDirectory(directory);
-        //    WeakReference wr;
-        //    string key = directory + System.IO.Path.DirectorySeparatorChar + typeof(DocumentType).Name;
-        //    lock (tableKeys2table)
-        //    {
-        //        if (!tableKeys2table.TryGetValue(key, out wr)
-        //            || !wr.IsAlive
-        //            )
-        //        {
-        //            TableType t = new TableType(directory, key);
-        //            wr = new WeakReference(t);
-        //            tableKeys2table[key] = wr;
-        //        }
-        //    }
-        //    return (TableType)wr.Target;
-        //}
-
-        public class IndexedTable<DocumentType> : Table<DocumentType>, IDisposable where DocumentType : IndexedDocument, new()
+        public class IndexedTable<DocumentT> : Table<DocumentT>, IDisposable where DocumentT : IndexedDocument, new()
         {
-            new public static IndexedTable<DocumentType> Get(string directory = null)
+            new public static IndexedTable<DocumentT> Get(string directory, bool ignoreRestoreError = true)
             {
-                directory = getNormalizedDirectory(directory);
                 WeakReference wr;
-                string key = directory + System.IO.Path.DirectorySeparatorChar + typeof(DocumentType).Name;
-                lock (tableKeys2table)
+                string file = getFile<DocumentT>(directory);
+                lock (tableFiles2table)
                 {
-                    if (!tableKeys2table.TryGetValue(key, out wr)
+                    if (!tableFiles2table.TryGetValue(file, out wr)
                         || !wr.IsAlive
                         )
                     {
-                        IndexedTable<DocumentType> t = new IndexedTable<DocumentType>(directory, key);
+                        IndexedTable<DocumentT> t = new IndexedTable<DocumentT>(file, ignoreRestoreError);
                         wr = new WeakReference(t);
-                        tableKeys2table[key] = wr;
+                        tableFiles2table[file] = wr;
                     }
                 }
-                return (IndexedTable<DocumentType>)wr.Target;
+                return (IndexedTable<DocumentT>)wr.Target;
             }
 
-            IndexedTable(string directory, string key) : base(directory, key)
+            IndexedTable(string file, bool ignoreRestoreError) : base(file, ignoreRestoreError)
             {
             }
 
@@ -73,40 +48,39 @@ namespace Cliver
             /// </summary>
             /// <param name="document"></param>
             /// <returns></returns>
-            override public Result Save(DocumentType document)
+            override public Result Save(DocumentT document)
             {
                 lock (this)
                 {
                     int i = documents.IndexOf(document);
                     if (i >= 0)
                     {
-                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                        writeLogLine(Action.replaced, i);
-                       invokeSaved( document, false);
+                        writeAction(Action.replaced, i, document);
+                        //documents.Find(d=>d.ID==);
+                        invokeSaved(document, false);
                         return Result.UPDATED;
                     }
                     else
                     {
                         setNewId(document);
-                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+                        writeAction(Action.added, documents.Count - 1, document);
                         documents.Add(document);
-                        writeLogLine(Action.added, documents.Count - 1);
                         invokeSaved(document, true);
                         return Result.ADDED;
                     }
                 }
             }
 
-            void setNewId(DocumentType document)
+            void setNewId(DocumentT document)
             {
                 lock (this)
                 {
-                    System.Reflection.PropertyInfo pi = typeof(DocumentType).GetProperty("ID");
+                    System.Reflection.PropertyInfo pi = typeof(DocumentT).GetProperty("ID");
                     pi.SetValue(document, DateTime.Now.Ticks);
                 }
             }
 
-            public DocumentType GetById(int documentId)
+            public DocumentT GetById(int documentId)
             {
                 lock (this)
                 {
@@ -118,27 +92,25 @@ namespace Cliver
             /// Table works as an ordered HashSet
             /// </summary>
             /// <param name="document"></param>
-            override public Result Add(DocumentType document)
+            override public Result Add(DocumentT document)
             {
                 lock (this)
                 {
                     int i = documents.IndexOf(document);
                     if (i >= 0)
                     {
-                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
                         documents.RemoveAt(i);
                         documents.Add(document);
-                        writeLogLine(Action.deleted, i);
-                        writeLogLine(Action.added, documents.Count - 1);
+                        writeDeleted(i);
+                        writeAction(Action.added, documents.Count - 1, document);
                         invokeSaved(document, false);
                         return Result.MOVED2TOP;
                     }
                     else
                     {
                         setNewId(document);
-                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
                         documents.Add(document);
-                        writeLogLine(Action.added, documents.Count - 1);
+                        writeAction(Action.added, documents.Count - 1, document);
                         invokeSaved(document, true);
                         return Result.ADDED;
                     }
@@ -150,26 +122,24 @@ namespace Cliver
             /// </summary>
             /// <param name="index"></param>
             /// <param name="document"></param>
-            override public Result Insert(int index, DocumentType document)
+            override public Result Insert(int index, DocumentT document)
             {
                 lock (this)
                 {
                     int i = documents.IndexOf(document);
                     if (i >= 0)
                     {
-                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
                         documents.RemoveAt(i);
                         documents.Insert(index, document);
-                        writeLogLine(Action.replaced, i);
+                        writeAction(Action.replaced, i, document);
                         invokeSaved(document, false);
                         return Result.MOVED;
                     }
                     else
                     {
                         setNewId(document);
-                        fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
                         documents.Insert(index, document);
-                        writeLogLine(Action.inserted, index);
+                        writeAction(Action.inserted, index, document);
                         invokeSaved(document, true);
                         return Result.INSERTED;
                     }

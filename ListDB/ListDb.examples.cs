@@ -25,7 +25,7 @@ namespace Cliver
 
             static public void Test()
             {
-                ListDb.Table<testDocument> t = ListDb.Table<testDocument>.Get();
+                ListDb.Table<testDocument> t = ListDb.Table<testDocument>.Get(Log.AppCompanyUserDataDir);
                 //t.Drop();
                 t.Save(new testDocument());
                 t.Save(new testDocument());
@@ -47,7 +47,7 @@ namespace Cliver
 
             static public void Test()
             {
-                ListDb.IndexedTable<testIndexedDocument> t = ListDb.IndexedTable<testIndexedDocument>.Get();
+                ListDb.IndexedTable<testIndexedDocument> t = ListDb.IndexedTable<testIndexedDocument>.Get(Log.AppCompanyUserDataDir);
                 var d = new testIndexedDocument();
                 t.Save(d);
                 long id = d.ID;
