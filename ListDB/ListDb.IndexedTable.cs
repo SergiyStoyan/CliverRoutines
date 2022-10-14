@@ -21,25 +21,12 @@ namespace Cliver
 
         public class IndexedTable<DocumentT> : Table<DocumentT>, IDisposable where DocumentT : IndexedDocument, new()
         {
-            new public static IndexedTable<DocumentT> Get(string directory, bool ignoreRestoreError = true)
+            new public static IndexedTable<DocumentT> Get(string directory, Modes? mode = null)
             {
-                WeakReference wr;
-                string file = getFile<DocumentT>(directory);
-                lock (tableFiles2table)
-                {
-                    if (!tableFiles2table.TryGetValue(file, out wr)
-                        || !wr.IsAlive
-                        )
-                    {
-                        IndexedTable<DocumentT> t = new IndexedTable<DocumentT>(file, ignoreRestoreError);
-                        wr = new WeakReference(t);
-                        tableFiles2table[file] = wr;
-                    }
-                }
-                return (IndexedTable<DocumentT>)wr.Target;
+                return (IndexedTable<DocumentT>)get(directory, (string file) => { return new IndexedTable<DocumentT>(file, mode); });
             }
 
-            IndexedTable(string file, bool ignoreRestoreError) : base(file, ignoreRestoreError)
+            IndexedTable(string file, Modes? mode = null) : base(file, mode)
             {
             }
 
@@ -55,7 +42,7 @@ namespace Cliver
                     int i = documents.IndexOf(document);
                     if (i >= 0)
                     {
-                        writeAction(Action.replaced, i, document);
+                        writeOperation(Action.replaced, i, document);
                         //documents.Find(d=>d.ID==);
                         invokeSaved(document, false);
                         return Result.UPDATED;
@@ -63,7 +50,7 @@ namespace Cliver
                     else
                     {
                         setNewId(document);
-                        writeAction(Action.added, documents.Count - 1, document);
+                        writeAdded(document);
                         documents.Add(document);
                         invokeSaved(document, true);
                         return Result.ADDED;
@@ -102,7 +89,7 @@ namespace Cliver
                         documents.RemoveAt(i);
                         documents.Add(document);
                         writeDeleted(i);
-                        writeAction(Action.added, documents.Count - 1, document);
+                        writeAdded(document);
                         invokeSaved(document, false);
                         return Result.MOVED2TOP;
                     }
@@ -110,7 +97,7 @@ namespace Cliver
                     {
                         setNewId(document);
                         documents.Add(document);
-                        writeAction(Action.added, documents.Count - 1, document);
+                        writeAdded(document);
                         invokeSaved(document, true);
                         return Result.ADDED;
                     }
@@ -131,7 +118,7 @@ namespace Cliver
                     {
                         documents.RemoveAt(i);
                         documents.Insert(index, document);
-                        writeAction(Action.replaced, i, document);
+                        writeOperation(Action.replaced, i, document);
                         invokeSaved(document, false);
                         return Result.MOVED;
                     }
@@ -139,7 +126,7 @@ namespace Cliver
                     {
                         setNewId(document);
                         documents.Insert(index, document);
-                        writeAction(Action.inserted, index, document);
+                        writeOperation(Action.inserted, index, document);
                         invokeSaved(document, true);
                         return Result.INSERTED;
                     }

@@ -18,29 +18,28 @@ namespace Cliver
     {
         public class Table<DocumentT> : IDisposable where DocumentT : new()
         {
-            public static Table<DocumentT> Get(string directory, bool ignoreRestoreError = true)
+            public static Table<DocumentT> Get(string directory, Modes? mode = null)
             {
-                WeakReference wr;
-                string file = getFile<DocumentT>(directory);
+                return get(directory, (string file) => { return new Table<DocumentT>(file, mode); });
+            }
+            protected delegate Table<DocumentT> NewTable(string file);
+            protected static Table<DocumentT> get(string directory, NewTable newTable)
+            {
+                string file = PathRoutines.GetNormalizedPath(directory, true) + Path.DirectorySeparatorChar + typeof(DocumentT).Name + "s" + ".listdb";
                 lock (tableFiles2table)
                 {
-                    if (!tableFiles2table.TryGetValue(file, out wr)
-                    || !wr.IsAlive
-                    )
+                    if (!tableFiles2table.TryGetValue(file, out Table<DocumentT> table)
+                        || table.Disposed
+                        )
                     {
-                        Table<DocumentT> t = new Table<DocumentT>(file, ignoreRestoreError);
-                        wr = new WeakReference(t);
-                        tableFiles2table[file] = wr;
+                        //table = (Table<DocumentT>)Activator.CreateInstance(typeof(Table<DocumentT>), file, mode);
+                        table = newTable(file);
+                        tableFiles2table[file] = table;
                     }
+                    return table;
                 }
-                return (Table<DocumentT>)wr.Target;
             }
-            protected static Dictionary<string, WeakReference> tableFiles2table = new Dictionary<string, WeakReference>();
-
-            protected static string getFile<DocumentT>(string directory)
-            {
-                return PathRoutines.GetNormalizedPath(directory, true) + Path.DirectorySeparatorChar + typeof(DocumentT).Name + "s" + ".listdb";
-            }
+            static Dictionary<string, Table<DocumentT>> tableFiles2table = new Dictionary<string, Table<DocumentT>>();
 
             ~Table()
             {
@@ -62,8 +61,21 @@ namespace Cliver
                                 tableFiles2table.Remove(File);
                         }
 
-                        if (Mode.HasFlag(Modes.FLUSH_TABLE_ON_CLOSE))
-                            Flush();
+                        if (Mode.HasFlag(Modes.FLUSH_ON_CLOSE))
+                        {
+                            bool flush = false;
+                            using (TextReader tr = new StreamReader(File))
+                            {
+                                for (string l = tr.ReadLine(); l != null; l = tr.ReadLine())
+                                    if (l[0] != '{' && l[0] != '[')
+                                    {
+                                        flush = true;
+                                        break;
+                                    }
+                            }
+                            if (flush)
+                                Flush();
+                        }
                         if (fileWriter != null)
                         {
                             fileWriter.Close();
@@ -77,18 +89,27 @@ namespace Cliver
                 }
             }
 
+            public bool Disposed
+            {
+                get
+                {
+                    lock (this) return fileWriter == null;
+                }
+            }
+
             public readonly string File = null;
             protected TextWriter fileWriter;
-            public Modes Mode = Modes.FLUSH_TABLE_ON_CLOSE;
+            readonly public Modes Mode = Modes.FLUSH_ON_CLOSE | Modes.IGNORE_RESTORING_ERROR;
             public readonly string Name;
             protected readonly List<DocumentT> documents = new List<DocumentT>();
 
             public enum Modes
             {
                 NULL = 0,
-                //KEEP_TABLE_EVER_OPEN = 1,//requires explicitly calling Close()
-                FLUSH_TABLE_ON_CLOSE = 2,
-                FLUSH_TABLE_ON_START = 4,
+                //KEEP_EVER_OPEN = 1,//requires explicitly calling Close()
+                FLUSH_ON_CLOSE = 2,
+                FLUSH_ON_START = 4,
+                IGNORE_RESTORING_ERROR = 8,
             }
 
             public delegate void SavedHandler(DocumentT document, bool asNew);
@@ -101,72 +122,76 @@ namespace Cliver
             public delegate void RemovedHandler(DocumentT document, bool sucess);
             public event RemovedHandler Removed = null;
 
-            protected Table(string file, bool ignoreRestoreError)
+            protected Table(string file, Modes? mode = null)
             {
                 File = file;
                 Name = PathRoutines.GetFileNameWithoutExtention(file);
+                if (mode != null)
+                    Mode = mode.Value;
+                newFile = file + ".new";
 
-                (Action action, int number) operation = (action: Action.added, number: -1);
+                if (System.IO.File.Exists(newFile))
+                {
+                    if (System.IO.File.Exists(File))
+                        System.IO.File.Delete(newFile);
+                    else
+                        System.IO.File.Move(newFile, File);
+                }
+
+                int index = -1;
                 if (System.IO.File.Exists(File))
                 {
-                    using (TextReader fr = new StreamReader(File))
+                    using (TextReader tr = new StreamReader(File))
                     {
                         try
                         {
-                            for (string l = fr.ReadLine(); l != null; l = fr.ReadLine())
+                            for (string l = tr.ReadLine(); l != null; l = tr.ReadLine())
                             {
                                 DocumentT document;
                                 if (l[0] == '{' || l[0] == '[')
-                                {
+                                {//a serialized record
                                     document = JsonConvert.DeserializeObject<DocumentT>(l);
                                     documents.Add(document);
                                 }
                                 else
-                                {
-                                    operation = readActionLine(l);
-                                    switch (operation.action)
+                                {//a record operation which is followed by the record
+                                    Match m = actionReadingRegex.Match(l);
+                                    if (!Enum.TryParse(m.Groups[1].Value, out Action action))
+                                        throw new Exception("Unknown action in the ListDb file: '" + m.Groups[1].Value + "'");
+                                    index = int.Parse(m.Groups[2].Value);
+
+                                    switch (action)
                                     {
                                         case Action.deleted:
-                                            if (documents.Count <= operation.number)
-                                                throw new RestoreException("There are less documents in the table '" + Name + "' than a deleted element index (" + operation.number + ")");
-                                            documents.RemoveAt(operation.number);
+                                            if (documents.Count <= index)
+                                                throw new RestoreException("There are less documents in the table '" + Name + "' than a deleted element index (" + index + ")");
+                                            documents.RemoveAt(index);
                                             continue;
                                         case Action.replaced:
                                             {
-                                                l = fr.ReadLine();
+                                                l = tr.ReadLine();
                                                 if (l == null)
-                                                    throw new RestoreException("There is no document in the table '" + Name + "' for a replaced element index (" + operation.number + ")");
+                                                    throw new RestoreException("There is no document in the table '" + Name + "' for a replaced element index (" + index + ")");
                                                 document = JsonConvert.DeserializeObject<DocumentT>(l);
-                                                if (operation.number >= documents.Count)
-                                                    throw new RestoreException("There are less documents in the table '" + Name + "' than a replaced element index (" + operation.number + ")");
-                                                documents.RemoveAt(operation.number);
-                                                documents.Insert(operation.number, document);
-                                            }
-                                            continue;
-                                        case Action.added:
-                                            {
-                                                l = fr.ReadLine();
-                                                if (l == null)
-                                                    throw new RestoreException("There is no document in the table '" + Name + "' for an added element index (" + operation.number + ")");
-                                                document = JsonConvert.DeserializeObject<DocumentT>(l);
-                                                if (operation.number != documents.Count)
-                                                    throw new RestoreException("Number of documents in the table '" + Name + "' (" + documents.Count + ") is not equal an added element index (" + operation.number + ")");
-                                                documents.Add(document);
+                                                if (index >= documents.Count)
+                                                    throw new RestoreException("There are less documents in the table '" + Name + "' than a replaced element index (" + index + ")");
+                                                documents.RemoveAt(index);
+                                                documents.Insert(index, document);
                                             }
                                             continue;
                                         case Action.inserted:
                                             {
-                                                l = fr.ReadLine();
+                                                l = tr.ReadLine();
                                                 if (l == null)
-                                                    throw new RestoreException("There is no document in the table '" + Name + "' for an inserted element index (" + operation.number + ")");
+                                                    throw new RestoreException("There is no document in the table '" + Name + "' for an inserted element index (" + index + ")");
                                                 document = JsonConvert.DeserializeObject<DocumentT>(l);
-                                                if (operation.number >= documents.Count)
-                                                    throw new RestoreException("There are less documents in the table '" + Name + "' (" + documents.Count + ") than an inserted element index (" + operation.number + ")");
-                                                documents.Insert(operation.number, document);
+                                                if (index >= documents.Count)
+                                                    throw new RestoreException("There are less documents in the table '" + Name + "' (" + documents.Count + ") than an inserted element index (" + index + ")");
+                                                documents.Insert(index, document);
                                             }
                                             continue;
                                         default:
-                                            throw new Exception("Unknown action: " + operation.action);
+                                            throw new Exception("Unknown action: " + action);
                                     }
                                 }
                             }
@@ -174,12 +199,12 @@ namespace Cliver
                         catch (RestoreException e)
                         {
                             FirstRestoreException = e;
-                            if (!ignoreRestoreError)
+                            if (!Mode.HasFlag(Modes.IGNORE_RESTORING_ERROR))
                                 throw;
                         }
                     }
                 }
-                if (Mode.HasFlag(Modes.FLUSH_TABLE_ON_START) && operation.number >= 0)
+                if (Mode.HasFlag(Modes.FLUSH_ON_START) && index >= 0)
                     Flush();
                 else
                 {
@@ -187,6 +212,9 @@ namespace Cliver
                     ((StreamWriter)fileWriter).AutoFlush = true;
                 }
             }
+            readonly Regex actionReadingRegex = new Regex("(" + string.Join("|", Enum.GetNames(typeof(Action))) + @")(?:\:\s*(\d+))?");
+            readonly string newFile;
+
             public readonly RestoreException FirstRestoreException;
 
             public class RestoreException : Exception
@@ -197,51 +225,27 @@ namespace Cliver
 
             protected enum Action
             {
-                added,
                 replaced,
                 inserted,
                 deleted,
             }
 
-            protected void writeAction(Action action, int index, DocumentT document)
+            protected void writeOperation(Action action, int index, DocumentT document)
             {
-                lock (this)
-                {
-                    fileWriter.WriteLine(action.ToString() + ": " + index);
-                    fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
-                }
+                fileWriter.WriteLine(action.ToString() + ": " + index);
+                fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
+            }
+            protected void writeAdded(DocumentT document)
+            {
+                fileWriter.WriteLine(JsonConvert.SerializeObject(document, Formatting.None));
             }
             protected void writeDeleted(int index)
             {
-                lock (this)
-                {
-                    fileWriter.WriteLine(Action.deleted + ": " + index);
-                }
+                fileWriter.WriteLine(Action.deleted + ": " + index);
             }
-
-            (Action action, int number) readActionLine(string line)
-            {
-                Match m = logReadingRegex.Match(line);
-                if (!Enum.TryParse(m.Groups[1].Value, out Action action))
-                    throw new Exception("Unknown action in the ListDb log: '" + m.Groups[1].Value + "'");
-                switch (action)
-                {
-                    case Action.replaced:
-                        return (Action.replaced, int.Parse(m.Groups[2].Value));
-                    case Action.deleted:
-                        return (Action.deleted, int.Parse(m.Groups[2].Value));
-                    case Action.added:
-                        return (Action.added, int.Parse(m.Groups[2].Value));
-                    case Action.inserted:
-                        return (Action.inserted, int.Parse(m.Groups[2].Value));
-                    default:
-                        throw new Exception("Unknown action: " + action);
-                }
-            }
-            Regex logReadingRegex = new Regex("(" + string.Join("|", Enum.GetNames(typeof(Action))) + @")(?:\:\s*(\d+))?");
 
             /// <summary>
-            /// Rewrite the data on the disk, cleaning the log.
+            /// Write data to the file, cleaning opearations if any.
             /// </summary>
             public void Flush()
             {
@@ -250,7 +254,6 @@ namespace Cliver
                     if (fileWriter != null)
                         fileWriter.Close();
 
-                    string newFile = File + ".new";
                     using (TextWriter newFileWriter = new StreamWriter(newFile, false))
                     {
                         foreach (DocumentT d in documents)
@@ -265,6 +268,11 @@ namespace Cliver
                     fileWriter = new StreamWriter(File, true);
                     ((StreamWriter)fileWriter).AutoFlush = true;
                 }
+            }
+
+            public void Close()
+            {
+                Dispose();
             }
 
             /// <summary>
@@ -310,14 +318,14 @@ namespace Cliver
                     int i = documents.IndexOf(document);
                     if (i >= 0)
                     {
-                        writeAction(Action.replaced, i, document);
+                        writeOperation(Action.replaced, i, document);
                         Saved?.Invoke(document, false);
                         return Result.UPDATED;
                     }
                     else
                     {
                         documents.Add(document);
-                        writeAction(Action.added, documents.Count - 1, document);
+                        writeAdded(document);
                         Saved?.Invoke(document, true);
                         return Result.ADDED;
                     }
@@ -348,14 +356,14 @@ namespace Cliver
                         documents.RemoveAt(i);
                         documents.Add(document);
                         writeDeleted(i);
-                        writeAction(Action.added, documents.Count - 1, document);
+                        writeAdded(document);
                         Saved?.Invoke(document, false);
                         return Result.MOVED2TOP;
                     }
                     else
                     {
                         documents.Add(document);
-                        writeAction(Action.added, documents.Count - 1, document);
+                        writeAdded(document);
                         Saved?.Invoke(document, true);
                         return Result.ADDED;
                     }
@@ -384,14 +392,14 @@ namespace Cliver
                     {
                         documents.RemoveAt(i);
                         documents.Insert(index, document);
-                        writeAction(Action.replaced, i, document);
+                        writeOperation(Action.replaced, i, document);
                         Saved?.Invoke(document, false);
                         return Result.MOVED;
                     }
                     else
                     {
                         documents.Insert(index, document);
-                        writeAction(Action.inserted, index, document);
+                        writeOperation(Action.inserted, index, document);
                         Saved?.Invoke(document, true);
                         return Result.INSERTED;
                     }
