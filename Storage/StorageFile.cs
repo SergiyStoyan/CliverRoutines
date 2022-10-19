@@ -75,17 +75,19 @@ namespace Cliver
             }
             string getLine(RecordT record)
             {
-                List<object> os = new List<object>();
-                foreach (FieldInfo fi in fis)
-                    os.Add(fi.GetValue(record));
-                return getLine(os);
+                IEnumerable<object> getValues()
+                {
+                    foreach (FieldInfo fi in fis)
+                        yield return fi.GetValue(record);
+                }
+                return getLine(getValues());
             }
-            string getLine(IEnumerable<object> os)
+            string getLine(IEnumerable<object> values)
             {
                 List<string> ss = new List<string>();
-                foreach (object o in os)
+                foreach (object v in values)
                 {
-                    string s = o == null ? "" : Regex.Replace(o.ToString(), @"\t+", " ");
+                    string s = v == null ? "" : Regex.Replace(v.ToString(), @"\t+", " ");
                     ss.Add(s);
                 }
                 return string.Join("\t", ss);
@@ -102,7 +104,7 @@ namespace Cliver
                             string[] vs = l.Split('\t');
                             //RecordT d = Activator.CreateInstance<RecordT>();
                             RecordT r = new RecordT();
-                            for (int i = 0; i < vs.Length; i++)
+                            for (int i = 0; i < fis.Count; i++)
                                 fis[i].SetValue(r, Convert.ChangeType(vs[i], fis[i].FieldType));
                             yield return r;
                         }
