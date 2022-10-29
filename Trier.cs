@@ -1,5 +1,5 @@
 //********************************************************************************************
-//Author: Sergey Stoyan
+//Author: Sergiy Stoyan
 //        s.y.stoyan@gmail.com
 //        sergiy.stoyan@outlook.com
 //        stoyan@cliversoft.com
