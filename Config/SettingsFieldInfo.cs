@@ -1,8 +1,6 @@
 //********************************************************************************************
 //Author: Sergiy Stoyan
-//        systoyan@gmail.com
-//        sergiy.stoyan@outlook.com
-//        stoyan@cliversoft.com
+//        s.y.stoyan@gmail.com, sergiy.stoyan@outlook.com, stoyan@cliversoft.com
 //        http://www.cliversoft.com
 //********************************************************************************************
 #define COMPILE_GetObject_SetObject1 //!!!Stopwatch shows that compiling is not faster. Probably the reflection was improved.
@@ -168,7 +166,7 @@ namespace Cliver
                     return null;
                 string s = System.IO.File.ReadAllText(file);
                 if (Endec != null)
-                    s = Endec.Decrypt(s);
+                    s = Endec.Decrypt<string>(s);
                 return Newtonsoft.Json.Linq.JObject.Parse(s);
             }
         }
@@ -186,7 +184,7 @@ namespace Cliver
                     indented = Indented;
                 string s = o.ToString(indented.Value ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None);
                 if (Endec != null)
-                    s = Endec.Decrypt(s);
+                    s = Endec.Decrypt<string>(s);
                 System.IO.File.WriteAllText(File, s);
             }
         }
@@ -206,7 +204,7 @@ namespace Cliver
                     return null;
                 string s = System.IO.File.ReadAllText(file);
                 if (Endec != null)
-                    s = Endec.Decrypt(s);
+                    s = Endec.Decrypt<string>(s);
                 return s;
             }
         }
@@ -220,7 +218,7 @@ namespace Cliver
             lock (this)
             {
                 if (Endec != null)
-                    s = Endec.Decrypt(s);
+                    s = Endec.Decrypt<string>(s);
                 System.IO.File.WriteAllText(File, s);
             }
         }

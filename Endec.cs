@@ -1,5 +1,5 @@
 //********************************************************************************************
-//Author: Sergiy Stoyan
+//        Author: Sergiy Stoyan
 //        s.y.stoyan@gmail.com, sergiy.stoyan@outlook.com, stoyan@cliversoft.com
 //        http://www.cliversoft.com
 //********************************************************************************************
@@ -12,46 +12,12 @@ using System.Security.Cryptography;
 
 namespace Cliver
 {
-    /// <summary>
-    /// (!)Deprecated. Replaced with Endec class.
-    /// </summary>
-    public abstract class Crypto
+    public abstract class Endec
     {
         abstract public byte[] Encrypt(byte[] bytes);
         abstract public byte[] Decrypt(byte[] bytes);
 
-        public virtual string Encrypt2String(string s)
-        {
-            return Encrypt2String(Encoding.Unicode.GetBytes(s));
-        }
-
-        public virtual string Decrypt2String(string s)
-        {
-            return Encoding.Unicode.GetString(Decrypt2Bytes(s));
-        }
-
-        public virtual string Encrypt2String(byte[] bytes)
-        {
-            return Convert.ToBase64String(Encrypt(bytes));
-        }
-
-        public virtual byte[] Decrypt2Bytes(string s)
-        {
-            s = s.Replace(" ", "+");
-            return Decrypt(Convert.FromBase64String(s));
-        }
-
-        public virtual string Encrypt2String<T>(T o)
-        {
-            return Encrypt2String(Serialization.Json.Serialize(o, false, true));
-        }
-
-        public virtual T Decrypt2Object<T>(string s)
-        {
-            return Serialization.Json.Deserialize<T>(Decrypt2String(s));
-        }
-
-        public class Rijndael : Crypto
+        public class Rijndael : Endec
         {
             //readonly string key;
             readonly byte[] vector = new byte[] { 0x26, 0xdc, 0xff, 0x00, 0xad, 0xed, 0x7a, 0xee, 0xc5, 0xfe, 0x07, 0xaf, 0x4d, 0x08, 0x22, 0x3c };
@@ -92,7 +58,7 @@ namespace Cliver
             }
         }
 
-        public class Aes : Crypto
+        public class Aes : Endec
         {
             readonly string key = null;
 
@@ -139,61 +105,132 @@ namespace Cliver
                 }
             }
         }
+    }
 
-        public class Halojoy
+    public class StringEndec
+    {
+        public StringEndec(Endec endec)
         {
-            readonly string key;
+            this.endec = endec;
+        }
+        protected readonly Endec endec;
 
-            public Halojoy(string key)
+        virtual public string Encrypt<T>(T o) where T : class
+        {
+            if (o == null)
+                return null;
+
+            byte[] bytes = o as byte[];
+            if (bytes == null)
             {
-                if (key == null)
-                    throw new ArgumentNullException("key");
-                this.key = Regex.Replace(key, @"\s+", "", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
-                if (key.Length < 3)
-                    throw new Exception("Key is too short.");
+                string s = o as string;
+                if (s == null)
+                    s = Serialization.Json.Serialize(o, false, true);
+                bytes = Encoding.Unicode.GetBytes(s);
             }
+            return Convert.ToBase64String(endec.Encrypt(bytes));
+        }
 
-            public string Encrypt(string str)
+        virtual public T Decrypt<T>(string s) where T : class
+        {
+            if (s == null)
+                return null;
+
+            s = s.Replace(" ", "+");
+            byte[] bytes = Convert.FromBase64String(s);
+            bytes = endec.Decrypt(bytes);
+            if (typeof(T) == typeof(byte[]))
+                return bytes as T;
+            s = Encoding.Unicode.GetString(bytes);
+            if (typeof(T) == typeof(string))
+                return s as T;
+            return Serialization.Json.Deserialize<T>(s, true);
+        }
+
+        public class Rijndael : StringEndec
+        {
+            public Rijndael(string key) : base(new Endec.Rijndael(key))
             {
-                if (str == null)
-                    throw new ArgumentNullException("str");
-                return Convert.ToBase64String(Encoding.UTF8.GetBytes(convert_by_halojoy(str)));
-            }
-
-            public string Decrypt(string str)
-            {
-                if (str == null)
-                    throw new ArgumentNullException("str");
-                return convert_by_halojoy(Encoding.UTF8.GetString(Convert.FromBase64String(str)));
-            }
-
-            /// <summary>
-            /// EnCrypt to/from DeCrypt
-            /// </summary>
-            /// <param name="str"></param>
-            /// <returns></returns>
-            string convert_by_halojoy(string str)
-            {
-                int kl = key.Length;
-                if (kl > 32)
-                    kl = 32;
-
-                int[] k = new int[kl];
-
-                for (int i = 0; i < kl; i++)
-                    k[i] = (int)(key[i]) & 0x1F;
-
-                int j = 0;
-                StringBuilder ss = new StringBuilder(str);
-                for (int i = 0; i < str.Length; i++)
-                {
-                    int e = (int)str[i];
-                    ss[i] = (e & 0xE0) != 0 ? (char)(e ^ k[j]) : (char)e;
-                    if (++j == kl)
-                        j = 0;
-                }
-                return ss.ToString();
             }
         }
     }
+
+    //public class StringEndec<T> : StringEndec where T : class
+    //{
+    //    public StringEndec(Endec endec) : base(endec) { }
+
+    //    virtual public string Encrypt(T o)
+    //    {
+    //        return Encrypt<T>(o);
+    //    }
+
+    //    virtual public T Decrypt(string s)
+    //    {
+    //        return Decrypt<T>(s);
+    //    }
+
+    //    public class Rijndael : StringEndec<T>
+    //    {
+    //        public Rijndael(string key) : base(new Endec.Rijndael(key))
+    //        {
+    //        }
+    //    }
+    //}
+
+    //public class EndecBytes2String : StringEndec
+    //{
+    //    public EndecBytes2String(Endec endec) : base(endec)
+    //    { }
+
+    //    public string Encrypt(byte[] bytes)
+    //    {
+    //        return Convert.ToBase64String(endec.Encrypt(bytes));
+    //    }
+
+    //    public byte[] Decrypt(string s)
+    //    {
+    //        s = s.Replace(" ", "+");
+    //        return endec.Decrypt(Convert.FromBase64String(s));
+    //    }
+    //}
+
+    //public class EndecString2String : StringEndec
+    //{
+    //    public EndecString2String(Endec endec) : base(endec)
+    //    { }
+
+    //    public string Encrypt(string s)
+    //    {
+    //        byte[] bytes = Encoding.Unicode.GetBytes(s);
+    //        return Convert.ToBase64String(endec.Encrypt(bytes));
+    //    }
+
+    //    public string Decrypt(string s)
+    //    {
+    //        s = s.Replace(" ", "+");
+    //        byte[] bytes = endec.Decrypt(Convert.FromBase64String(s));
+    //        return Encoding.Unicode.GetString(bytes);
+    //    }
+    //}
+
+    //public class EndecObject2String<T>: StringEndec where T : class
+    //{
+    //    public EndecObject2String(Endec endec) : base(endec)
+    //    { }
+
+    //    public string Encrypt(T o)
+    //    {
+    //        string s = Serialization.Json.Serialize(o, false, true);
+    //        byte[] bytes = Encoding.Unicode.GetBytes(s);
+    //        return Convert.ToBase64String(endec.Encrypt(bytes));
+    //    }
+
+    //    public T Decrypt(string s)
+    //    {
+    //        s = s.Replace(" ", "+");
+    //        byte[] bytes = endec.Decrypt(Convert.FromBase64String(s));
+    //        s = Encoding.Unicode.GetString(bytes);
+    //        return Serialization.Json.Deserialize<T>(s);
+    //    }
+    //}
 }
