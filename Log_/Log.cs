@@ -44,7 +44,7 @@ namespace Cliver
         /// <summary>
         /// Log level which is passed to each log as default.
         /// </summary>
-        public static Level DefaultLevel = Level.ALL;
+        public static Level DefaultLevel = Level.INFORM;
 
         /// <summary>
         /// Maximum log file length in bytes which is passed to each log as default.
