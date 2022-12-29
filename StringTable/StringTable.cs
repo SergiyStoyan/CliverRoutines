@@ -16,21 +16,24 @@ namespace Cliver
 {
     public abstract partial class StringTable
     {
-        public enum Modes
+        public enum ReadingMode
         {
-            AppendDefaultHeaderIfNeeded = 1,
-            AppendEmptyCellIfNeeded = 2,
+            NULL = 0,
+            HeadersNumberEqualsColumnsNumber = 1,
+            CellsNumberEqualsColumnsNumber = 2,
+            //AppendDefaultHeaderIfNeeded = 1,
+            //AppendEmptyCellIfNeeded = 2,
             IgnoreEmptyRows = 4,
         }
 
         protected abstract List<string> getRowValues(string line);
 
-        public void Read(StreamReader streamReader, Modes mode)
+        public void Read(StreamReader streamReader, ReadingMode mode = ReadingMode.IgnoreEmptyRows)
         {
             read(mode, () => { return getRowValues(streamReader.ReadLine()); });
         }
 
-        void read(Modes mode, Func<List<string>> getRowValues)
+        void read(ReadingMode mode, Func<List<string>> getRowValues)
         {
             Headers = getRowValues();
             if (Headers == null)
@@ -41,34 +44,31 @@ namespace Cliver
             for (List<string> vs = getRowValues(); vs != null; vs = getRowValues())
             {
                 lineNumber++;
-                if (vs.Count == 1 && string.IsNullOrEmpty(vs[0]) && Headers.Count > 1)
-                {
-                    if (mode.HasFlag(Modes.IgnoreEmptyRows))
-                        continue;
-                    //throw new Exception("The line " + lineNumber + " is empty.");
-                }
+                //if (vs.Count == 1 && string.IsNullOrEmpty(vs[0]) && Headers.Count > 1)
+                if (mode.HasFlag(ReadingMode.IgnoreEmptyRows) && null == vs.Find(a => !string.IsNullOrEmpty(a)))
+                    continue;
                 if (vs.Count > Headers.Count)
                 {
-                    if (!mode.HasFlag(Modes.AppendDefaultHeaderIfNeeded))
+                    if (mode.HasFlag(ReadingMode.HeadersNumberEqualsColumnsNumber))
                         throw new Exception("The line " + lineNumber + " has more columns than headers: " + vs.Count + " > " + Headers.Count);
                 }
                 else if (vs.Count < Headers.Count)
                 {
-                    if (!mode.HasFlag(Modes.AppendEmptyCellIfNeeded))
+                    if (mode.HasFlag(ReadingMode.CellsNumberEqualsColumnsNumber))
                         throw new Exception("The line " + lineNumber + " has less columns than headers: " + vs.Count + " < " + Headers.Count);
                 }
                 Rows.Add(new Row(vs, Rows.Count + 1, this));
             }
-            ColumnNumber = Rows.Select(a => a.Values.Count).Max();
+            ColumnCount = Rows.Select(a => a.Values.Count).Max();
         }
 
         public List<string> Headers { get; private set; }
 
         public List<Row> Rows { get; private set; }
 
-        public int ColumnNumber { get; private set; } = 0;
+        public int ColumnCount { get; private set; } = 0;
 
-        public int RowNumber { get { return Rows.Count; } }
+        public int RowCount { get { return Rows.Count; } }
 
         public string this[int y, string header]
         {
@@ -102,8 +102,8 @@ namespace Cliver
                 {
                     if (x > Values.Count)
                     {
-                        if (x > table.ColumnNumber)
-                            throw new Exception("X is out of the column number: " + x + " > " + table.ColumnNumber);
+                        if (x > table.ColumnCount)
+                            throw new Exception("X is out of the column number: " + x + " > " + table.ColumnCount);
                         return null;
                     }
                     return Values[x - 1];
