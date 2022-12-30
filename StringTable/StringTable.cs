@@ -57,7 +57,7 @@ namespace Cliver
                     if (mode.HasFlag(ReadingMode.CellsNumberEqualsColumnsNumber))
                         throw new Exception("The line " + lineNumber + " has less columns than headers: " + vs.Count + " < " + Headers.Count);
                 }
-                Rows.Add(new Row(vs, Rows.Count + 1, this));
+                Rows.Add(new Row(lineNumber, vs, Rows.Count + 1, this));
             }
             ColumnCount = Rows.Select(a => a.Values.Count).Max();
         }
@@ -125,8 +125,11 @@ namespace Cliver
 
             public int Y { get; }
 
-            internal Row(List<string> values, int y, StringTable table)
+            public int LineNumber { get; }
+
+            internal Row(int lineNumber, List<string> values, int y, StringTable table)
             {
+                LineNumber = lineNumber;
                 Values = values;
                 Y = y;
                 this.table = table;
@@ -138,7 +141,7 @@ namespace Cliver
 
         public void Write(StreamWriter streamWriter)
         {
-            streamWriter.WriteLine(getLine(new Row(Headers, 0, this)));
+            streamWriter.WriteLine(getLine(new Row(0, Headers, 0, this)));
             foreach (Row row in Rows)
                 streamWriter.WriteLine(getLine(row));
             streamWriter.Flush();
