@@ -3,6 +3,9 @@
 //        systoyan@gmail.com
 //        http://www.cliversoft.com
 //********************************************************************************************
+
+//#define USE_HEADER_HASH
+
 using System;
 using System.Linq;
 using System.IO;
@@ -19,11 +22,9 @@ namespace Cliver
         public enum ReadingMode
         {
             NULL = 0,
-            HeadersNumberEqualsColumnsNumber = 1,
-            CellsNumberEqualsColumnsNumber = 2,
-            //AppendDefaultHeaderIfNeeded = 1,
-            //AppendEmptyCellIfNeeded = 2,
-            IgnoreEmptyRows = 4,
+            IgnoreEmptyRows = 1,
+            HeadersNumberEqualsColumnsNumber = 2,
+            CellsNumberEqualsColumnsNumber = 4,
         }
 
         protected abstract List<string> getRowValues(string line);
@@ -38,6 +39,10 @@ namespace Cliver
             Headers = getRowValues();
             if (Headers == null)
                 throw new Exception("There is no header.");
+#if USE_HEADER_HASH
+            for (int i = 0; i < Headers.Count; i++)
+                Headers2I[Headers[i]] = i;
+#endif
 
             Rows = new List<Row>();
             int lineNumber = 1;
@@ -63,6 +68,10 @@ namespace Cliver
         }
 
         public List<string> Headers { get; private set; }
+
+#if USE_HEADER_HASH
+        readonly internal Dictionary<string, int> Headers2I = new Dictionary<string, int>();
+#endif
 
         public List<Row> Rows { get; private set; }
 
@@ -103,7 +112,7 @@ namespace Cliver
                     if (x > Values.Count)
                     {
                         if (x > table.ColumnCount)
-                            throw new Exception("X is out of the column number: " + x + " > " + table.ColumnCount);
+                            throw new Exception("X is out of the column count: " + x + " > " + table.ColumnCount);
                         return null;
                     }
                     return Values[x - 1];
@@ -114,17 +123,28 @@ namespace Cliver
             {
                 get
                 {
+#if USE_HEADER_HASH
+                    if (!table.Headers2I.TryGetValue(header, out int x0))
+                        throw new Exception("No such header: '" + header + "'");
+#else
                     int x0 = table.Headers.IndexOf(header);
                     if (x0 < 0)
                         throw new Exception("No such header: '" + header + "'");
+#endif
                     return this[x0 + 1];
                 }
             }
 
             public List<string> Values { get; private set; }
 
+            /// <summary>
+            /// 1-based number of the row in rows.
+            /// </summary>
             public int Y { get; }
 
+            /// <summary>
+            /// 1-based number of line in the input stream.
+            /// </summary>
             public int LineNumber { get; }
 
             internal Row(int lineNumber, List<string> values, int y, StringTable table)

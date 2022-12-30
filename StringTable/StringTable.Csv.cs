@@ -16,13 +16,13 @@ namespace Cliver
 {
     public abstract partial class StringTable
     {
-        public class Tsv : StringTable
+        public class Csv : StringTable
         {
             protected override List<string> getRowValues(string line)
             {
                 if (line == null)
                     return null;
-                return Regex.Split(line, @"\t").ToList();
+                return Regex.Split(line, @"\,").ToList();
             }
 
             protected override string getLine(Row row)
@@ -30,10 +30,10 @@ namespace Cliver
                 List<string> svs = new List<string>();
                 foreach (string v in row.Values)
                 {
-                    string s = Regex.Replace(v, @"[\n\t]", @" ");
+                    string s = Regex.Replace(v, @"[\n\,]", @" ");
                     svs.Add(s);
                 }
-                return string.Join("\t", svs);
+                return string.Join(",", svs);
             }
         }
     }

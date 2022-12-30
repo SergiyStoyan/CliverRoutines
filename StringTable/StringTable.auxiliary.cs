@@ -22,6 +22,14 @@ namespace Cliver
             read(mode, () => { return y < valuess.Count ? valuess[y++].Select(a => a.ToString()).ToList() : null; });
         }
 
+        public void Read(string file, ReadingMode mode = ReadingMode.IgnoreEmptyRows)
+        {
+            using (var sr = new StreamReader(file))
+            {
+                Read(sr, mode);
+            }
+        }
+
         public void Write(string file)
         {
             using (var sw = new StreamWriter(file))
@@ -30,12 +38,13 @@ namespace Cliver
             }
         }
 
-        public void Read(string file, ReadingMode modes = ReadingMode.IgnoreEmptyRows)
+        public List<List<string>> Write()
         {
-            using (var sr = new StreamReader(file))
-            {
-                Read(sr, modes);
-            }
+            List<List<string>> valuess = new List<List<string>>();
+            valuess.Add(Headers.CreateCloneByJson());
+            foreach (Row row in Rows)
+                valuess.Add(row.Values.CreateCloneByJson());
+            return valuess;
         }
     }
 }
