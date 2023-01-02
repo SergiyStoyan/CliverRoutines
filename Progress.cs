@@ -12,70 +12,158 @@ using Newtonsoft.Json.Linq;
 namespace Cliver
 {
     /// <summary>
+    /// Usage example
+    /// </summary>
+    class ProgressExample : Progress
+    {
+        readonly public Stage _LoadingPOs = new Stage { Step = 100, AsymptoticDelta = 1000 };
+        readonly public Stage _LoadingInvoices = new Stage { Step = 10 };
+        readonly public Stage _Recording = new Stage { };
+
+        void exampleCode()
+        {
+            ProgressExample progress = new ProgressExample() { MaxProgress = 1000 };
+            progress.OnProgress += delegate (Progress.Stage stage)
+            {
+                //MainForm.This.SetProgress(progress.GetProgress1(), stage.Maximum, stage.Value);
+            };
+            //...
+            progress._LoadingPOs.Maximum = 100;
+            for (int i = 1; i <= 100; i++)
+                progress._LoadingPOs.Value = i;
+        }
+    }
+
+    /// <summary>
     /// Used to display progress bar with multiple tasks.
     /// </summary>
     public class Progress
     {
         public class Stage
         {
-            public string Name { get; }
-            public float Weight { get; set; } = 1;
-            public int MaxProgress { get; set; }
-            public int Progress
+            public string Name { get; internal set; }
+
+            public float Weight
             {
                 get
                 {
-                    return progress;
+                    return weight;
+                }
+                set
+                {
+                    if (value <= 0)
+                        throw new Exception("Weight cannot be a non-positive number.");
+                    weight = value;
+                }
+            }
+            float weight = 1;
+
+            public int Maximum
+            {
+                get
+                {
+                    return maximum;
+                }
+                set
+                {
+                    if (AsymptoticDelta != null)
+                        throw new Exception("Maximum cannot be set when AsymptoticFactor is on.");
+                    maximum = value;
+                }
+            }
+            int maximum = defaultMaximum;
+
+            const int defaultMaximum = 1000;
+
+            public int Value
+            {
+                get
+                {
+                    return value;
                 }
                 set
                 {
                     lock (this)
                     {
-                        if (value > MaxProgress)
-                            value = MaxProgress;
-                        progress = value;
-                        if (progress % Step == 0)
-                            _progress.OnProgress?.BeginInvoke();
+                        if (value <= 0)
+                            throw new Exception("Value cannot be a negative number.");
+                        if (AsymptoticDelta == null)
+                        {
+                            if (value > Maximum)
+                                value = Maximum;
+                            this.value = value;
+                        }
+                        else
+                        {
+                            this.value = value;
+                            maximum = (int)(this.value + AsymptoticDelta.Value);
+                        }
+                        if (value % Step == 0 && progress.OnProgress != null)
+                            progress.OnProgress(this);
                     }
                 }
             }
-            int progress;
+            int value;
+
+            /// <summary>
+            /// Used when Maximum cannot be determined at the beginning.
+            /// </summary>
+            public float? AsymptoticDelta { get; set; } = null;
+
 
             public int Step = 1;
 
-            internal Progress _progress;
 
-            public Stage(string name, float weight)
+            internal Progress progress;
+
+            public Stage(string name = null)
             {
                 Name = name;
-                Weight = weight;
-                //MaxProgress = maxProgress;
             }
         }
 
         public Progress(params Stage[] stages)
         {
-            Stages = stages.ToList();
-            Stages.ForEach(a => a._progress = this);
+            this.stages = stages.ToList();
+            this.stages.ForEach(a => a.progress = this);
         }
 
-        List<Stage> Stages;//{ get; private set; }
+        /// <summary>
+        /// Auto-collects Stages from the child class
+        /// </summary>
+        public Progress()
+        {
+            stages = GetType()
+                .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                .Where(a => typeof(Stage).IsAssignableFrom(a.FieldType))
+                .Select(a =>
+                {                    
+                    Stage s = (Stage)a.GetValue(this);
+                    if (s.Name == null)
+                        s.Name = a.Name;
+                    s.progress = this;
+                    return s;
+                })
+                .ToList();
+        }
+
+        List<Stage> stages;//{ get; private set; }
 
         public Stage this[string stageName]
         {
             get
             {
-                return Stages.FirstOrDefault(a => a.Name == stageName);
+                return stages.FirstOrDefault(a => a.Name == stageName);
             }
         }
 
         public int MaxProgress = 1;
 
-        public event Action OnProgress;
+        public event Action<Stage> OnProgress;
 
         public void Reset()
         {
-            Stages.ForEach(a => a.Progress = 0);
+            stages.ForEach(a => a.Value = 0);
         }
 
         /// <summary>
@@ -86,7 +174,7 @@ namespace Cliver
         {
             lock (this)
             {
-                return Stages.Sum(a => a.Weight * a.Progress / a.MaxProgress) / Stages.Sum(a => a.Weight);
+                return stages.Sum(a => a.Weight * a.Value / a.Maximum) / stages.Sum(a => a.Weight);
             }
         }
 
