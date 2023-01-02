@@ -71,9 +71,7 @@ namespace Cliver
                     maximum = value;
                 }
             }
-            int maximum = defaultMaximum;
-
-            const int defaultMaximum = 1000;
+            int maximum = 100;
 
             public int Value
             {
@@ -122,14 +120,22 @@ namespace Cliver
             }
         }
 
-        public Progress(params Stage[] stages)
-        {
-            this.stages = stages.ToList();
-            this.stages.ForEach(a => a.progress = this);
-        }
+        //public Progress(params Stage[] stages)
+        //{
+        //    this.stages = stages.ToList();
+        //    this.stages.ForEach(a => a.progress = this);
+        //}   
+        
+        //public Stage this[string stageName]
+        //{
+        //    get
+        //    {
+        //        return stages.FirstOrDefault(a => a.Name == stageName);
+        //    }
+        //}
 
         /// <summary>
-        /// Auto-collects Stages from the child class
+        /// Auto-detects Stages in the deriving custom class
         /// </summary>
         public Progress()
         {
@@ -147,17 +153,9 @@ namespace Cliver
                 .ToList();
         }
 
-        List<Stage> stages;//{ get; private set; }
+        List<Stage> stages;
 
-        public Stage this[string stageName]
-        {
-            get
-            {
-                return stages.FirstOrDefault(a => a.Name == stageName);
-            }
-        }
-
-        public int MaxProgress = 1;
+        public int MaxProgress = 100;
 
         public event Action<Stage> OnProgress;
 
