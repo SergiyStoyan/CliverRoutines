@@ -17,7 +17,7 @@ namespace Cliver
     class ProgressExample : Progress
     {
         readonly public Stage _LoadingPOs = new Stage { Step = 100, AsymptoticDelta = 1000 };
-        readonly public Stage _LoadingInvoices = new Stage { Step = 10 };
+        readonly public Stage _LoadingInvoices = new Stage { Step = 10, Weight = 2 };
         readonly public Stage _Recording = new Stage { };
 
         void exampleCode()
@@ -43,6 +43,9 @@ namespace Cliver
         {
             public string Name { get; internal set; }
 
+            /// <summary>
+            /// Can be any. Important is the ratio between all the weights.
+            /// </summary>
             public float Weight
             {
                 get
@@ -52,7 +55,7 @@ namespace Cliver
                 set
                 {
                     if (value <= 0)
-                        throw new Exception("Weight cannot be a non-positive number.");
+                        throw new Exception("Weight cannot be <= 0");
                     weight = value;
                 }
             }
@@ -66,6 +69,8 @@ namespace Cliver
                 }
                 set
                 {
+                    if (value < 0)
+                        throw new Exception("Maximum cannot be < 0");
                     if (AsymptoticDelta != null)
                         throw new Exception("Maximum cannot be set when AsymptoticFactor is on.");
                     maximum = value;
@@ -83,8 +88,8 @@ namespace Cliver
                 {
                     lock (this)
                     {
-                        if (value <= 0)
-                            throw new Exception("Value cannot be a negative number.");
+                        if (value < 0)
+                            throw new Exception("Value cannot be < 0");
                         if (AsymptoticDelta == null)
                         {
                             if (value > Maximum)
@@ -118,6 +123,11 @@ namespace Cliver
             {
                 Name = name;
             }
+
+            public void Complete()
+            {
+                Value = Maximum;
+            }
         }
 
         //public Progress(params Stage[] stages)
@@ -125,7 +135,7 @@ namespace Cliver
         //    this.stages = stages.ToList();
         //    this.stages.ForEach(a => a.progress = this);
         //}   
-        
+
         //public Stage this[string stageName]
         //{
         //    get
@@ -143,7 +153,7 @@ namespace Cliver
                 .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
                 .Where(a => typeof(Stage).IsAssignableFrom(a.FieldType))
                 .Select(a =>
-                {                    
+                {
                     Stage s = (Stage)a.GetValue(this);
                     if (s.Name == null)
                         s.Name = a.Name;
@@ -172,7 +182,7 @@ namespace Cliver
         {
             lock (this)
             {
-                return stages.Sum(a => a.Weight * a.Value / a.Maximum) / stages.Sum(a => a.Weight);
+                return stages.Sum(a => a.Maximum == 0 && a.Value == 0 ? a.Weight : a.Weight * a.Value / a.Maximum) / stages.Sum(a => a.Weight);
             }
         }
 
