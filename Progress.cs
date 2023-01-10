@@ -186,7 +186,7 @@ namespace Cliver
         /// </summary>
         public Progress()
         {
-            stages = GetType()
+            Stages = GetType()
                 .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
                 .Where(a => typeof(Stage).IsAssignableFrom(a.FieldType))
                 .Select(a =>
@@ -197,24 +197,17 @@ namespace Cliver
                     s.progress = this;
                     return s;
                 })
-                .ToList();
+                .ToList().AsReadOnly();
         }
 
-        readonly List<Stage> stages;
-
-        public IEnumerable<Stage> Stages
-        {
-            get
-            {
-                return stages;
-            }
-        }
+        readonly public System.Collections.ObjectModel.ReadOnlyCollection<Stage> Stages;
 
         public event Action<Stage> OnProgress;
 
         public void Reset()
         {
-            stages.ForEach(a => a.Value = 0);
+            foreach (Stage s in Stages)
+                s.Reset();
         }
 
         /// <summary>
@@ -225,7 +218,7 @@ namespace Cliver
         {
             lock (this)
             {
-                return stages.Sum(a => a.Weight * a.GetValue1()) / stages.Sum(a => a.Weight);
+                return Stages.Sum(a => a.Weight * a.GetValue1()) / Stages.Sum(a => a.Weight);
             }
         }
 
