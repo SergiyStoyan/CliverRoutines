@@ -76,7 +76,7 @@ namespace Cliver
                     maximum = value;
                 }
             }
-            int maximum = 100;
+            int maximum = -1;
 
             public int Value
             {
@@ -88,8 +88,8 @@ namespace Cliver
                 {
                     lock (this)
                     {
-                        if (value == Value)
-                            return;
+                        //if (value == Value)
+                        //    return;
                         if (value < 0)
                             throw new Exception("Value cannot be < 0");
                         if (AsymptoticDelta == null)
@@ -142,7 +142,27 @@ namespace Cliver
             {
                 lock (this)
                 {
-                    return Maximum == 0 && Value == 0 ? 1 : (float)Value / Maximum;
+                    if (!Started)
+                        return 0;
+                    if (Maximum == 0 && Value == 0)
+                        return 1;
+                    return (float)Value / Maximum;
+                }
+            }
+
+            public bool Started
+            {
+                get
+                {
+                    return Maximum >= 0;
+                }
+            }
+
+            public bool Finished
+            {
+                get
+                {
+                    return Value == Maximum;
                 }
             }
         }
@@ -182,6 +202,14 @@ namespace Cliver
 
         readonly List<Stage> stages;
 
+        public IEnumerable<Stage> Stages
+        {
+            get
+            {
+                return stages;
+            }
+        }
+
         public event Action<Stage> OnProgress;
 
         public void Reset()
@@ -214,7 +242,7 @@ namespace Cliver
                 maximum = value;
             }
         }
-        int maximum = 100;
+        int maximum = 0;
 
         /// <summary>
         /// [0:Maximum]
