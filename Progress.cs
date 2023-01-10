@@ -22,10 +22,10 @@ namespace Cliver
 
         void exampleCode()
         {
-            ProgressExample progress = new ProgressExample() { MaxProgress = 1000 };
+            ProgressExample progress = new ProgressExample() { Maximum = 1000 };
             progress.OnProgress += delegate (Progress.Stage stage)
             {
-                //MainForm.This.SetProgress(progress.GetProgress1(), stage.Maximum, stage.Value);
+                //MainForm.This.SetProgress(progress.GetProgress(), ((CustomStage)stage).ItemName, stage.Maximum, stage.Value);
             };
             //...
             progress._LoadingPOs.Maximum = 100;
@@ -88,6 +88,8 @@ namespace Cliver
                 {
                     lock (this)
                     {
+                        if (value == Value)
+                            return;
                         if (value < 0)
                             throw new Exception("Value cannot be < 0");
                         if (AsymptoticDelta == null)
@@ -101,12 +103,14 @@ namespace Cliver
                             this.value = value;
                             maximum = (int)(this.value + AsymptoticDelta.Value);
                         }
-                        if (value % Step == 0 && progress.OnProgress != null)
+                        if ((value % Step == 0 /*|| value == 0*/ || value == Maximum)
+                            && progress.OnProgress != null
+                            )
                             progress.OnProgress(this);
                     }
                 }
             }
-            int value;
+            int value = 0;
 
             /// <summary>
             /// Used when Maximum cannot be determined at the beginning.
@@ -114,7 +118,7 @@ namespace Cliver
             public float? AsymptoticDelta { get; set; } = null;
 
 
-            public int Step = 1;
+            public uint Step = 1;
 
 
             internal Progress progress;
@@ -127,6 +131,19 @@ namespace Cliver
             public void Complete()
             {
                 Value = Maximum;
+            }
+
+            public void Reset()
+            {
+                Value = 0;
+            }
+
+            public float GetValue1()
+            {
+                lock (this)
+                {
+                    return Maximum == 0 && Value == 0 ? 1 : (float)Value / Maximum;
+                }
             }
         }
 
@@ -163,9 +180,7 @@ namespace Cliver
                 .ToList();
         }
 
-        List<Stage> stages;
-
-        public int MaxProgress = 100;
+        readonly List<Stage> stages;
 
         public event Action<Stage> OnProgress;
 
@@ -177,22 +192,37 @@ namespace Cliver
         /// <summary>
         /// [0:1]
         /// </summary>
-        /// <returns></returns>
-        public float GetProgress1()
+        /// <returns>[0:1]</returns>
+        public float GetValue1()
         {
             lock (this)
             {
-                return stages.Sum(a => a.Maximum == 0 && a.Value == 0 ? a.Weight : a.Weight * a.Value / a.Maximum) / stages.Sum(a => a.Weight);
+                return stages.Sum(a => a.Weight * a.GetValue1()) / stages.Sum(a => a.Weight);
             }
         }
 
-        /// <summary>
-        /// [0:MaxProgress]
-        /// </summary>
-        /// <returns></returns>
-        public int GetProgress()
+        public int Maximum
         {
-            return (int)(MaxProgress * GetProgress1());
+            get
+            {
+                return maximum;
+            }
+            set
+            {
+                if (value < 0)
+                    throw new Exception("Maximum cannot be < 0");
+                maximum = value;
+            }
+        }
+        int maximum = 100;
+
+        /// <summary>
+        /// [0:Maximum]
+        /// </summary>
+        /// <returns>[0:Maximum]</returns>
+        public int GetValue()
+        {
+            return (int)(Maximum * GetValue1());
         }
     }
 }
