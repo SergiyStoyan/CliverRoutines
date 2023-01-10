@@ -16,14 +16,14 @@ namespace Cliver
     /// </summary>
     class ProgressExample : Progress
     {
-        readonly public Stage _LoadingPOs = new Stage { Step = 100, AsymptoticDelta = 1000 };
-        readonly public Stage _LoadingInvoices = new Stage { Step = 10, Weight = 2 };
-        readonly public Stage _Recording = new Stage { };
+        readonly public AsymptoticStage _LoadingPOs = new AsymptoticStage { Step = 100, Weight = 1, Delta = 1000 };
+        readonly public Stage _LoadingInvoices = new Stage { Step = 10, Weight = 2, Maximum = 12345 };
+        readonly public Stage _Recording = new Stage { Step = 5, Weight = 4, Maximum = 5000 };
 
         void exampleCode()
         {
             ProgressExample progress = new ProgressExample() { Maximum = 1000 };
-            progress.OnProgress += delegate (Progress.Stage stage)
+            progress.OnProgress += delegate (Stage stage)
             {
                 //MainForm.This.SetProgress(progress.GetProgress(), ((CustomStage)stage).ItemName, stage.Maximum, stage.Value);
             };
@@ -61,7 +61,7 @@ namespace Cliver
             }
             float weight = 1;
 
-            public int Maximum
+            virtual public int Maximum
             {
                 get
                 {
@@ -70,15 +70,13 @@ namespace Cliver
                 set
                 {
                     if (value < 0)
-                        throw new Exception("Maximum cannot be < 0");
-                    if (AsymptoticDelta != null)
-                        throw new Exception("Maximum cannot be set when AsymptoticFactor is on.");
+                        throw new Exception("Maximum cannot be set < 0");
                     maximum = value;
                 }
             }
             int maximum = -1;
 
-            public int Value
+            virtual public int Value
             {
                 get
                 {
@@ -91,18 +89,10 @@ namespace Cliver
                         //if (value == Value)
                         //    return;
                         if (value < 0)
-                            throw new Exception("Value cannot be < 0");
-                        if (AsymptoticDelta == null)
-                        {
-                            if (value > Maximum)
-                                value = Maximum;
-                            this.value = value;
-                        }
-                        else
-                        {
-                            this.value = value;
-                            maximum = (int)(this.value + AsymptoticDelta.Value);
-                        }
+                            throw new Exception("Value cannot be set < 0");
+                        if (value > Maximum)
+                            throw new Exception("Value cannot be > Maximum: " + value + " > " + Maximum);
+                        this.value = value;
                         if ((value % Step == 0 /*|| value == 0*/ || value == Maximum)
                             && progress.OnProgress != null
                             )
@@ -110,16 +100,9 @@ namespace Cliver
                     }
                 }
             }
-            int value = 0;
-
-            /// <summary>
-            /// Used when Maximum cannot be determined at the beginning.
-            /// </summary>
-            public float? AsymptoticDelta { get; set; } = null;
-
+            int value = -1;
 
             public uint Step = 1;
-
 
             internal Progress progress;
 
@@ -130,19 +113,29 @@ namespace Cliver
 
             public void Complete()
             {
+                if (Maximum < 0)
+                    Maximum = 0;
                 Value = Maximum;
             }
 
-            public void Reset()
+            /// <summary>
+            /// Makes this Stage not touched yet.
+            /// </summary>
+            virtual public void Reset()
             {
-                Value = 0;
+                maximum = -1;//makes this Stage not initialized
+                value = -1;
             }
 
-            public float GetValue1()
+            /// <summary>
+            /// [0:1]
+            /// </summary>
+            /// <returns>[0:1]</returns>
+            virtual public float GetValue1()
             {
                 lock (this)
                 {
-                    if (!Started)
+                    if (Maximum < 0 || Value < 0)
                         return 0;
                     if (Maximum == 0 && Value == 0)
                         return 1;
@@ -150,19 +143,96 @@ namespace Cliver
                 }
             }
 
-            public bool Started
+            public enum States
+            {
+                Unset,
+                Set,
+                Started,
+                Completed,
+            }
+
+            virtual public States State
             {
                 get
                 {
-                    return Maximum >= 0;
+                    if (Maximum < 0)
+                        return States.Unset;
+                    if (Value < 0)
+                        return States.Set;
+                    if (Value != Maximum)
+                        return States.Started;
+                    return States.Completed;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Used when Maximum cannot be determined at the beginning.
+        /// </summary>
+        public class AsymptoticStage : Stage
+        {
+            override public int Maximum
+            {
+                set
+                {
+                    throw new Exception("Maximum must not be set in this type.");
                 }
             }
 
-            public bool Finished
+            override public int Value
+            {
+                set
+                {
+                    lock (this)
+                    {
+                        Maximum = (int)(value + Delta);
+                        base.Value = value;
+                    }
+                }
+            }
+
+            public float Delta
             {
                 get
                 {
-                    return Value == Maximum;
+                    return delta;
+                }
+                set
+                {
+                    lock (this)
+                    {
+                        if (value < 0)
+                            throw new Exception("Delta cannot be set < 0");
+                        delta = value;
+                    }
+                }
+            }
+            protected float delta = -1;
+
+            public AsymptoticStage(string name = null) : base(name)
+            {
+            }
+
+            /// <summary>
+            /// Makes this Stage not touched yet.
+            /// </summary>
+            override public void Reset()
+            {
+                delta = -1;//makes this Stage not initialized
+                base.Reset();
+            }
+
+            override public States State
+            {
+                get
+                {
+                    if (Delta < 0)
+                        return States.Unset;
+                    if (Value < 0)
+                        return States.Set;
+                    if (Value != Maximum)
+                        return States.Started;
+                    return States.Completed;
                 }
             }
         }
