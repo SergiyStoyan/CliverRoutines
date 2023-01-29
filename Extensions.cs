@@ -10,11 +10,18 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 namespace Cliver
 {
     public static class Extensions
     {
+        public static void ForEach<T>(this IEnumerable<T> enumeration, Action<T> action)
+        {
+            foreach (T item in enumeration)
+                action(item);
+        }
+
         /// <summary>
         /// Copy the list of ranges into an output array. A range can be reversed.
         /// </summary>
