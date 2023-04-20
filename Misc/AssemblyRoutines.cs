@@ -206,17 +206,17 @@ namespace Cliver
                 foreach (Assembly aa in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, afns))
                     yield return aa;
         }
-        static IEnumerable<Assembly> getAssemblyBranchByNamespace(AssemblyName assemblyName, System.Text.RegularExpressions.Regex assemblyNamespaceFilter, HashSet<string> assemblyFuleNames)
+        static IEnumerable<Assembly> getAssemblyBranchByNamespace(AssemblyName assemblyName, System.Text.RegularExpressions.Regex assemblyNamespaceFilter, HashSet<string> assemblyFullNames)
         {
-            if (assemblyFuleNames.Contains(assemblyName.FullName))
+            if (assemblyFullNames.Contains(assemblyName.FullName))
                 yield break;
             Assembly assembly = Assembly.Load(assemblyName);
             if (assembly.GetTypes().FirstOrDefault(a => assemblyNamespaceFilter.IsMatch(a.FullName)) == null)
                 yield break;
-            assemblyFuleNames.Add(assembly.FullName);
+            assemblyFullNames.Add(assembly.FullName);
             yield return assembly;
             foreach (AssemblyName an in assembly.GetReferencedAssemblies())
-                foreach (Assembly a in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, assemblyFuleNames))
+                foreach (Assembly a in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, assemblyFullNames))
                     yield return a;
         }
 

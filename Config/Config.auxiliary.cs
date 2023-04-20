@@ -18,7 +18,7 @@ namespace Cliver
         /// Creates a new instance of the given Settings field initiated with default values.
         /// Tries to load values from the initial file located in the app's directory. 
         /// If this file does not exist, it creates an object with the hardcoded values.
-        /// The new instance shares the same __Info object with the original instance.
+        /// (!)The new instance shares the same __Info object with the original instance.
         /// </summary>
         /// <typeparam name="S"></typeparam>
         /// <param name="settings"></param>
@@ -35,7 +35,7 @@ namespace Cliver
         /// Tries to load values from the storage file.
         /// If this file does not exist, it tries to load values from the initial file located in the app's directory. 
         /// If this file does not exist, it creates an object with the hardcoded values.
-        /// The new instance shares the same __Info object with the original instance.
+        /// (!)The new instance shares the same __Info object with the original instance.
         /// </summary>
         /// <typeparam name="S"></typeparam>
         /// <param name="settings"></param>
@@ -49,7 +49,7 @@ namespace Cliver
 
         /// <summary>
         /// Creates a new instance of the given Settings field with cloned values.
-        /// The new instance shares the same __Info object with the original instance.
+        /// (!)The new instance shares the same __Info object with the original instance.
         /// </summary>
         /// <typeparam name="S"></typeparam>
         /// <param name="settings"></param>

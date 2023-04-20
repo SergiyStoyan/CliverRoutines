@@ -231,6 +231,11 @@ namespace Cliver
             return s;
         }
 
+        /// <summary>
+        /// (!)It is slow because it loads assemblies.
+        /// </summary>
+        /// <param name="namespaces"></param>
+        /// <returns></returns>
         static public string GetAssembliesInfo(params string[] namespaces)
         {
             StackTrace stackTrace = new StackTrace();
@@ -240,9 +245,28 @@ namespace Cliver
                 callingAssembly = Assembly.GetEntryAssembly();
             return string.Join("\r\n",
                 AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaces.Select(a => Regex.Escape(a)))))
-                    .Select(a => a.GetName()).Select(a => a.Name + " - " + a.Version)
                     .Distinct()
+                    .Select(a => a.GetName()).Select(a => a.Name + " - " + a.Version)
                 );
+        }
+
+        /// <summary>
+        /// Checks only references assemblies.
+        /// It is fast because does not load assemblies.
+        /// </summary>
+        /// <param name="names"></param>
+        /// <returns></returns>
+        static public string GetReferencedAssembliesInfo(params string[] names)
+        {
+            StackTrace stackTrace = new StackTrace();
+            Assembly logAssembly = Assembly.GetExecutingAssembly();
+            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != logAssembly).FirstOrDefault();
+            if (callingAssembly == null)
+                callingAssembly = Assembly.GetEntryAssembly();
+            Regex filter = new Regex(string.Join("|", names.Select(a => Regex.Escape(a))));
+            IList<AssemblyName> @as = new List<AssemblyName>(callingAssembly.GetReferencedAssemblies().Where(a => filter.IsMatch(a.Name)));
+            @as.Insert(0, callingAssembly.GetName());
+            return string.Join("\r\n", @as.Select(a => a.Name + " - " + a.Version));
         }
     }
 }

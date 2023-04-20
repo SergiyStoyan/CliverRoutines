@@ -10,6 +10,8 @@ namespace Example
         {
             try
             {
+                Log.Inform("\r\n" + Log.GetAssembliesInfo(nameof(Cliver)));
+
                 LogExample.Run();
 
                 ConfigExample.Run();

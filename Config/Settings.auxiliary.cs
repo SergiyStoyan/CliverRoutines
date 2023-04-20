@@ -25,11 +25,18 @@ namespace Cliver
         //    return fi?.GetValue(this);
         //}
 
-        //public S CreateClone<S>(Newtonsoft.Json.JsonSerializerSettings jsonSerializerSettings = null) where S : Settings, new()
+        ///// <summary>
+        ///// Creates a new instance of the given Settings field with cloned values.
+        ///// (!)The new instance shares the same __Info object with the original instance.
+        ///// </summary>
+        ///// <typeparam name="S"></typeparam>
+        ///// <param name="jsonSerializerSettings">allows to customize cloning</param>
+        ///// <returns></returns>
+        //virtual public S Clone<S>(Newtonsoft.Json.JsonSerializerSettings jsonSerializerSettings = null) where S : Settings, new()
         //{
-        //    S s = (S)Serialization.Json.Clone(this.GetType(), this, jsonSerializerSettings);
-        //    if (this.__Info != null)
-        //        s.__Info = this.__Info;
+        //    S s = Serialization.Json.Clone((S)this, jsonSerializerSettings);
+        //    if (__Info != null)
+        //        s.__Info = __Info;
         //    return s;
         //}
     }
