@@ -73,19 +73,8 @@ namespace Cliver
             {
                 List<string> ss = new List<string>();
                 foreach (System.Reflection.PropertyInfo pi in o.GetType().GetProperties())
-                {
-                    if (pi.GetCustomAttribute<FieldPreparation.IgnoredField>() != null)
-                        continue;
-                    string s;
-                    object p = pi.GetValue(o);
-                    if (pi.PropertyType == typeof(string))
-                        s = (string)p;
-                    else if (p != null)
-                        s = p.ToString();
-                    else
-                        s = null;
-                    ss.Add(GetCsvField(s, normalize));
-                }
+                    if (pi.GetCustomAttribute<FieldPreparation.IgnoredField>() == null)
+                        ss.Add(GetCsvField(pi.GetValue(o)?.ToString(), normalize));
                 return string.Join(Csv.FieldSeparator, ss);
             }
 
@@ -93,16 +82,8 @@ namespace Cliver
             {
                 List<string> ss = new List<string>();
                 foreach (object v in values)
-                {
-                    string s;
-                    if (v is string)
-                        s = (string)v;
-                    else if (v != null)
-                        s = v.ToString();
-                    else
-                        s = null;
-                    ss.Add(GetCsvField(s, normalize));
-                }
+                    ss.Add(GetCsvField(v?.ToString(), normalize));
+
                 return string.Join(Csv.FieldSeparator, ss);
             }
 
