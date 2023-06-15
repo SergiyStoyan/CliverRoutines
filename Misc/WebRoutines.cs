@@ -7,6 +7,7 @@
 using System.Net;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 
 namespace Cliver
@@ -21,6 +22,11 @@ namespace Cliver
         static public string GetUrlEncoded(string value)
         {
             return WebUtility.UrlEncode(value);
+        }
+
+        public static bool IsHttp(string path)
+        {
+            return path != null && Regex.IsMatch(path, @"^https?\:\/\/", RegexOptions.IgnoreCase);
         }
     }
 }
