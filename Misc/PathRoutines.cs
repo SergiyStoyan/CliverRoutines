@@ -56,16 +56,16 @@ namespace Cliver
         /// </summary>
         /// <param name="path"></param>
         /// <param name="webDecode"></param>
-        /// <param name="illegalCharReplacement"></param>
+        /// <param name="illegalCharSubstitute"></param>
         /// <returns></returns>
-        public static string GetLegalizedPath(string path, bool webDecode = false, string illegalCharReplacement = "")
+        public static string GetLegalizedPath(string path, bool webDecode = false, string illegalCharSubstitute = "")
         {
             if (webDecode)
             {
                 path = HttpUtility.HtmlDecode(path);
                 path = HttpUtility.UrlDecode(path);
             }
-            return Regex.Replace(path, invalidPathChars, illegalCharReplacement);
+            return Regex.Replace(path, invalidPathChars, illegalCharSubstitute);
         }
         static string invalidPathChars = "[" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]";
 
@@ -74,10 +74,10 @@ namespace Cliver
         /// </summary>
         /// <param name="file"></param>
         /// <param name="webDecode"></param>
-        /// <param name="illegalCharReplacement"></param>
+        /// <param name="illegalCharSubstitute"></param>
         /// <param name="treatFileAsName">DirectorySeparatorChar will be considered an InvalidFileNameChar and replaced</param>
         /// <returns></returns>
-        public static string GetLegalizedFileName(string file, bool webDecode = false, string illegalCharReplacement = "", bool treatFileAsName = false)
+        public static string GetLegalizedFileName(string file, bool webDecode = false, string illegalCharSubstitute = "", bool treatFileAsName = false)
         {
             if (webDecode)
             {
@@ -85,8 +85,8 @@ namespace Cliver
                 file = HttpUtility.UrlDecode(file);
             }
             if (treatFileAsName)
-                file = Regex.Replace(file, Regex.Escape(Path.DirectorySeparatorChar.ToString()), illegalCharReplacement);
-            return Regex.Replace(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar) + 1), invalidFileNameChars, illegalCharReplacement);
+                file = Regex.Replace(file, Regex.Escape(Path.DirectorySeparatorChar.ToString()), illegalCharSubstitute);
+            return Regex.Replace(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar) + 1), invalidFileNameChars, illegalCharSubstitute);
         }
         static string invalidFileNameChars = "[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]";
 
@@ -95,9 +95,9 @@ namespace Cliver
         /// </summary>
         /// <param name="file"></param>
         /// <param name="webDecode"></param>
-        /// <param name="illegalCharReplacement"></param>
+        /// <param name="illegalCharSubstitute"></param>
         /// <returns></returns>
-        public static string GetLegalizedFile(string file, bool webDecode = false, string illegalCharReplacement = "")
+        public static string GetLegalizedFile(string file, bool webDecode = false, string illegalCharSubstitute = "")
         {
             if (webDecode)
             {
@@ -105,7 +105,10 @@ namespace Cliver
                 file = HttpUtility.UrlDecode(file);
             }
             int p = file.LastIndexOf(Path.DirectorySeparatorChar) + 1;
-            return Regex.Replace(file.Substring(0, p), invalidPathChars, illegalCharReplacement) + Regex.Replace(file.Substring(p), invalidFileNameChars, illegalCharReplacement);
+            string path = file.Substring(0, p);
+            string fileName = file.Substring(p);
+            fileName = Regex.Replace(fileName, Regex.Escape(Path.DirectorySeparatorChar.ToString()), illegalCharSubstitute);
+            return Regex.Replace(path, invalidPathChars, illegalCharSubstitute) + Regex.Replace(fileName, invalidFileNameChars, illegalCharSubstitute);
         }
 
         /// <summary>
