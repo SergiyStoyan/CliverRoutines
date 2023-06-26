@@ -75,14 +75,17 @@ namespace Cliver
         /// <param name="file"></param>
         /// <param name="webDecode"></param>
         /// <param name="illegalCharReplacement"></param>
+        /// <param name="treatFileAsName">DirectorySeparatorChar will be considered an InvalidFileNameChar and replaced</param>
         /// <returns></returns>
-        public static string GetLegalizedFileName(string file, bool webDecode = false, string illegalCharReplacement = "")
+        public static string GetLegalizedFileName(string file, bool webDecode = false, string illegalCharReplacement = "", bool treatFileAsName = false)
         {
             if (webDecode)
             {
                 file = HttpUtility.HtmlDecode(file);
                 file = HttpUtility.UrlDecode(file);
             }
+            if (treatFileAsName)
+                file = Regex.Replace(file, Regex.Escape(Path.DirectorySeparatorChar.ToString()), illegalCharReplacement);
             return Regex.Replace(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar) + 1), invalidFileNameChars, illegalCharReplacement);
         }
         static string invalidFileNameChars = "[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]";
@@ -112,7 +115,7 @@ namespace Cliver
         /// <returns></returns>
         public static string GetFileName(string file)
         {
-            return Regex.Replace(file, @".*"+ Regex.Escape(Path.DirectorySeparatorChar.ToString()), "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            return Regex.Replace(file, @".*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()), "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
 
         public static string GetFileNameWithoutExtention(string file)
