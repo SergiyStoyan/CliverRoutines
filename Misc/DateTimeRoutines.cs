@@ -29,7 +29,7 @@ namespace Cliver
 
         #endregion
 
-        #region parsing definitions
+        #region definitions
 
         /// <summary>
         /// Defines a substring where date-time was found and result of conversion
@@ -77,45 +77,48 @@ namespace Cliver
             /// </summary>
             public DateTime UtcDateTime;
 
-            internal ParsedDateTime(int index_of_date, int length_of_date, int index_of_time, int length_of_time, DateTime date_time)
+            internal ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime, DateTime dateTime)
             {
-                IndexOfDate = index_of_date;
-                LengthOfDate = length_of_date;
-                IndexOfTime = index_of_time;
-                LengthOfTime = length_of_time;
-                DateTime = date_time;
-                IsDateFound = index_of_date > -1;
-                IsTimeFound = index_of_time > -1;
+                IndexOfDate = indexOfDate;
+                LengthOfDate = lengthOfDate;
+                IndexOfTime = indexOfTime;
+                LengthOfTime = lengthOfTime;
+                DateTime = dateTime;
+                IsDateFound = indexOfDate > -1;
+                IsTimeFound = indexOfTime > -1;
                 UtcOffset = new TimeSpan(25, 0, 0);
                 IsUtcOffsetFound = false;
                 UtcDateTime = new DateTime(1, 1, 1);
             }
 
-            internal ParsedDateTime(int index_of_date, int length_of_date, int index_of_time, int length_of_time, DateTime date_time, TimeSpan utc_offset)
+            internal ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime, DateTime dateTime, TimeSpan utcOffset)
             {
-                IndexOfDate = index_of_date;
-                LengthOfDate = length_of_date;
-                IndexOfTime = index_of_time;
-                LengthOfTime = length_of_time;
-                DateTime = date_time;
-                IsDateFound = index_of_date > -1;
-                IsTimeFound = index_of_time > -1;
-                UtcOffset = utc_offset;
-                IsUtcOffsetFound = Math.Abs(utc_offset.TotalHours) < 12;
+                IndexOfDate = indexOfDate;
+                LengthOfDate = lengthOfDate;
+                IndexOfTime = indexOfTime;
+                LengthOfTime = lengthOfTime;
+                IsDateFound = indexOfDate > -1;
+                IsTimeFound = indexOfTime > -1;
+                UtcOffset = utcOffset;
+                IsUtcOffsetFound = Math.Abs(utcOffset.TotalHours) < 12;
                 if (!IsUtcOffsetFound)
+                {
+                    DateTime = dateTime;
                     UtcDateTime = new DateTime(1, 1, 1);
+                }
                 else
                 {
-                    if (index_of_date < 0)//to avoid negative date exception when date is undefined
+                    DateTime = new DateTime(dateTime.Ticks, DateTimeKind.Utc);
+                    if (indexOfDate < 0)//to avoid negative date exception when date is undefined
                     {
-                        TimeSpan ts = date_time.TimeOfDay + utc_offset;
+                        TimeSpan ts = dateTime.TimeOfDay + utcOffset;
                         if (ts < new TimeSpan(0))
                             UtcDateTime = new DateTime(1, 1, 2) + ts;
                         else
                             UtcDateTime = new DateTime(1, 1, 1) + ts;
                     }
                     else
-                        UtcDateTime = date_time + utc_offset;
+                        UtcDateTime = dateTime + utcOffset;
                 }
             }
         }
@@ -170,24 +173,24 @@ namespace Cliver
 
         #endregion
 
-        #region parsing derived methods for DateTime output
+        #region derived methods for DateTime
 
         /// <summary>
         /// Tries to find date and time within the passed string and return it as DateTime structure. 
         /// </summary>
         /// <param name="str">string that contains date and/or time</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="date_time">parsed date-time output</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="dateTime">parsed date-time output</param>
         /// <returns>true if both date and time were found, else false</returns>
-        static public bool TryParseDateTime(this string str, DateTimeFormat default_format, out DateTime date_time)
+        static public bool TryParseDateTime(this string str, DateTimeFormat defaultFormat, out DateTime dateTime)
         {
-            ParsedDateTime parsed_date_time;
-            if (!TryParseDateTime(str, default_format, out parsed_date_time))
+            ParsedDateTime parsedDateTime;
+            if (!TryParseDateTime(str, defaultFormat, out parsedDateTime))
             {
-                date_time = new DateTime(1, 1, 1);
+                dateTime = new DateTime(1, 1, 1);
                 return false;
             }
-            date_time = parsed_date_time.DateTime;
+            dateTime = parsedDateTime.DateTime;
             return true;
         }
 
@@ -197,18 +200,18 @@ namespace Cliver
         /// If only time was found, date in the returned DateTime is DefaultDate.
         /// </summary>
         /// <param name="str">string that contains date and(or) time</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="date_time">parsed date-time output</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="dateTime">parsed date-time output</param>
         /// <returns>true if date and/or time was found, else false</returns>
-        static public bool TryParseDateOrTime(this string str, DateTimeFormat default_format, out DateTime date_time)
+        static public bool TryParseDateOrTime(this string str, DateTimeFormat defaultFormat, out DateTime dateTime)
         {
-            ParsedDateTime parsed_date_time;
-            if (!TryParseDateOrTime(str, default_format, out parsed_date_time))
+            ParsedDateTime parsedDateTime;
+            if (!TryParseDateOrTime(str, defaultFormat, out parsedDateTime))
             {
-                date_time = new DateTime(1, 1, 1);
+                dateTime = new DateTime(1, 1, 1);
                 return false;
             }
-            date_time = parsed_date_time.DateTime;
+            dateTime = parsedDateTime.DateTime;
             return true;
         }
 
@@ -217,18 +220,18 @@ namespace Cliver
         /// It recognizes only time while ignoring date, so date in the returned DateTime is always 1/1/1.
         /// </summary>
         /// <param name="str">string that contains time</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
         /// <param name="time">parsed time output</param>
         /// <returns>true if time was found, else false</returns>
-        public static bool TryParseTime(this string str, DateTimeFormat default_format, out DateTime time)
+        public static bool TryParseTime(this string str, DateTimeFormat defaultFormat, out DateTime time)
         {
-            ParsedDateTime parsed_time;
-            if (!TryParseTime(str, default_format, out parsed_time, null))
+            ParsedDateTime parsedTime;
+            if (!TryParseTime(str, defaultFormat, out parsedTime, null))
             {
                 time = new DateTime(1, 1, 1);
                 return false;
             }
-            time = parsed_time.DateTime;
+            time = parsedTime.DateTime;
             return true;
         }
 
@@ -238,41 +241,41 @@ namespace Cliver
         /// If year of the date was not found then it accepts the current year. 
         /// </summary>
         /// <param name="str">string that contains date</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
         /// <param name="date">parsed date output</param>
         /// <returns>true if date was found, else false</returns>
-        static public bool TryParseDate(this string str, DateTimeFormat default_format, out DateTime date)
+        static public bool TryParseDate(this string str, DateTimeFormat defaultFormat, out DateTime date)
         {
-            ParsedDateTime parsed_date;
-            if (!TryParseDate(str, default_format, out parsed_date))
+            ParsedDateTime parsedDate;
+            if (!TryParseDate(str, defaultFormat, out parsedDate))
             {
                 date = new DateTime(1, 1, 1);
                 return false;
             }
-            date = parsed_date.DateTime;
+            date = parsedDate.DateTime;
             return true;
         }
 
         #endregion
 
-        #region parsing derived methods for ParsedDateTime output
+        #region derived methods for ParsedDateTime
 
         /// <summary>
         /// Tries to find date and time within the passed string and return it as ParsedDateTime object. 
         /// </summary>
         /// <param name="str">string that contains date-time</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="parsed_date_time">parsed date-time output</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="parsedDateTime">parsed date-time output</param>
         /// <returns>true if both date and time were found, else false</returns>
-        static public bool TryParseDateTime(this string str, DateTimeFormat default_format, out ParsedDateTime parsed_date_time)
+        static public bool TryParseDateTime(this string str, DateTimeFormat defaultFormat, out ParsedDateTime parsedDateTime)
         {
-            if (DateTimeRoutines.TryParseDateOrTime(str, default_format, out parsed_date_time)
-                && parsed_date_time.IsDateFound
-                && parsed_date_time.IsTimeFound
+            if (DateTimeRoutines.TryParseDateOrTime(str, defaultFormat, out parsedDateTime)
+                && parsedDateTime.IsDateFound
+                && parsedDateTime.IsTimeFound
                 )
                 return true;
 
-            parsed_date_time = null;
+            parsedDateTime = null;
             return false;
         }
 
@@ -281,12 +284,12 @@ namespace Cliver
         /// It recognizes only time while ignoring date, so date in the returned ParsedDateTime is always 1/1/1
         /// </summary>
         /// <param name="str">string that contains date-time</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="parsed_time">parsed date-time output</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="parsedTime">parsed date-time output</param>
         /// <returns>true if time was found, else false</returns>
-        static public bool TryParseTime(this string str, DateTimeFormat default_format, out ParsedDateTime parsed_time)
+        static public bool TryParseTime(this string str, DateTimeFormat defaultFormat, out ParsedDateTime parsedTime)
         {
-            return TryParseTime(str, default_format, out parsed_time, null);
+            return TryParseTime(str, defaultFormat, out parsedTime, null);
         }
 
         /// <summary>
@@ -295,34 +298,34 @@ namespace Cliver
         /// If only time was found, date in the returned ParsedDateTime is DefaultDate.
         /// </summary>
         /// <param name="str">string that contains date-time</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="parsed_date_time">parsed date-time output</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="parsedDateTime">parsed date-time output</param>
         /// <returns>true if date or time was found, else false</returns>
-        static public bool TryParseDateOrTime(this string str, DateTimeFormat default_format, out ParsedDateTime parsed_date_time)
+        static public bool TryParseDateOrTime(this string str, DateTimeFormat defaultFormat, out ParsedDateTime parsedDateTime)
         {
-            parsed_date_time = null;
+            parsedDateTime = null;
 
-            ParsedDateTime parsed_date;
-            ParsedDateTime parsed_time;
-            if (!TryParseDate(str, default_format, out parsed_date))
+            ParsedDateTime parsedDate;
+            ParsedDateTime parsedTime;
+            if (!TryParseDate(str, defaultFormat, out parsedDate))
             {
-                if (!TryParseTime(str, default_format, out parsed_time, null))
+                if (!TryParseTime(str, defaultFormat, out parsedTime, null))
                     return false;
 
-                DateTime date_time = new DateTime(DefaultDate.Year, DefaultDate.Month, DefaultDate.Day, parsed_time.DateTime.Hour, parsed_time.DateTime.Minute, parsed_time.DateTime.Second);
-                parsed_date_time = new ParsedDateTime(-1, -1, parsed_time.IndexOfTime, parsed_time.LengthOfTime, date_time, parsed_time.UtcOffset);
+                DateTime dateTime = new DateTime(DefaultDate.Year, DefaultDate.Month, DefaultDate.Day, parsedTime.DateTime.Hour, parsedTime.DateTime.Minute, parsedTime.DateTime.Second);
+                parsedDateTime = new ParsedDateTime(-1, -1, parsedTime.IndexOfTime, parsedTime.LengthOfTime, dateTime, parsedTime.UtcOffset);
             }
             else
             {
-                if (!TryParseTime(str, default_format, out parsed_time, parsed_date))
+                if (!TryParseTime(str, defaultFormat, out parsedTime, parsedDate))
                 {
-                    DateTime date_time = new DateTime(parsed_date.DateTime.Year, parsed_date.DateTime.Month, parsed_date.DateTime.Day, 0, 0, 0);
-                    parsed_date_time = new ParsedDateTime(parsed_date.IndexOfDate, parsed_date.LengthOfDate, -1, -1, date_time);
+                    DateTime dateTime = new DateTime(parsedDate.DateTime.Year, parsedDate.DateTime.Month, parsedDate.DateTime.Day, 0, 0, 0);
+                    parsedDateTime = new ParsedDateTime(parsedDate.IndexOfDate, parsedDate.LengthOfDate, -1, -1, dateTime);
                 }
                 else
                 {
-                    DateTime date_time = new DateTime(parsed_date.DateTime.Year, parsed_date.DateTime.Month, parsed_date.DateTime.Day, parsed_time.DateTime.Hour, parsed_time.DateTime.Minute, parsed_time.DateTime.Second);
-                    parsed_date_time = new ParsedDateTime(parsed_date.IndexOfDate, parsed_date.LengthOfDate, parsed_time.IndexOfTime, parsed_time.LengthOfTime, date_time, parsed_time.UtcOffset);
+                    DateTime dateTime = new DateTime(parsedDate.DateTime.Year, parsedDate.DateTime.Month, parsedDate.DateTime.Day, parsedTime.DateTime.Hour, parsedTime.DateTime.Minute, parsedTime.DateTime.Second);
+                    parsedDateTime = new ParsedDateTime(parsedDate.IndexOfDate, parsedDate.LengthOfDate, parsedTime.IndexOfTime, parsedTime.LengthOfTime, dateTime, parsedTime.UtcOffset);
                 }
             }
 
@@ -334,40 +337,40 @@ namespace Cliver
         #region parsing base methods
 
         /// <summary>
-        /// Tries to find time within the passed string (relatively to the passed parsed_date if any) and return it as ParsedDateTime object.
+        /// Tries to find time within the passed string (relatively to the passed parsedDate if any) and return it as ParsedDateTime object.
         /// It recognizes only time while ignoring date, so date in the returned ParsedDateTime is always 1/1/1
         /// </summary>
         /// <param name="str">string that contains date</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="parsed_time">parsed date-time output</param>
-        /// <param name="parsed_date">ParsedDateTime object if the date was found within this string, else NULL</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="parsedTime">parsed date-time output</param>
+        /// <param name="parsedDate">ParsedDateTime object if the date was found within this string, else NULL</param>
         /// <returns>true if time was found, else false</returns>
-        public static bool TryParseTime(this string str, DateTimeFormat default_format, out ParsedDateTime parsed_time, ParsedDateTime parsed_date)
+        public static bool TryParseTime(this string str, DateTimeFormat defaultFormat, out ParsedDateTime parsedTime, ParsedDateTime parsedDate)
         {
-            parsed_time = null;
+            parsedTime = null;
 
             string time_zone_r;
-            if (default_format == DateTimeFormat.USA_DATE)
+            if (defaultFormat == DateTimeFormat.USA_DATE)
                 time_zone_r = @"(?:\s*(?'time_zone'UTC|GMT|CST|EST))?";
             else
                 time_zone_r = @"(?:\s*(?'time_zone'UTC|GMT))?";
 
             Match m;
-            if (parsed_date != null && parsed_date.IndexOfDate > -1)
+            if (parsedDate != null && parsedDate.IndexOfDate > -1)
             {//look around the found date
                 //look for <date> hh:mm:ss <UTC offset> 
-                m = Regex.Match(str.Substring(parsed_date.IndexOfDate + parsed_date.LengthOfDate), @"(?<=^\s*,?\s+|^\s*at\s*|^\s*[T\-]\s*)(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})(?=$|[^\d\w])", RegexOptions.Compiled);
+                m = Regex.Match(str.Substring(parsedDate.IndexOfDate + parsedDate.LengthOfDate), @"(?<=^\s*,?\s+|^\s*at\s*|^\s*[T\-]\s*)(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})(?=$|[^\d\w])", RegexOptions.Compiled);
                 if (!m.Success)
                 {
                     //look for <date> [h]h:mm[:ss] [PM/AM] [UTC/GMT] 
-                    m = Regex.Match(str.Substring(parsed_date.IndexOfDate + parsed_date.LengthOfDate), @"(?<=^\s*,?\s+|^\s*at\s*|^\s*[T\-]\s*)(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
+                    m = Regex.Match(str.Substring(parsedDate.IndexOfDate + parsedDate.LengthOfDate), @"(?<=^\s*,?\s+|^\s*at\s*|^\s*[T\-]\s*)(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
                     if (!m.Success)
                     {
                         //look for [h]h:mm:ss [PM/AM] [UTC/GMT] <date>
-                        m = Regex.Match(str.Substring(0, parsed_date.IndexOfDate), @"(?<=^|[^\d])(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[\s,]+)", RegexOptions.Compiled);
+                        m = Regex.Match(str.Substring(0, parsedDate.IndexOfDate), @"(?<=^|[^\d])(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[\s,]+)", RegexOptions.Compiled);
                         if (!m.Success)
                             //look for [h]h:mm:ss [PM/AM] [UTC/GMT] within <date>
-                            m = Regex.Match(str.Substring(parsed_date.IndexOfDate, parsed_date.LengthOfDate), @"(?<=^|[^\d])(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[\s,]+)", RegexOptions.Compiled);
+                            m = Regex.Match(str.Substring(parsedDate.IndexOfDate, parsedDate.LengthOfDate), @"(?<=^|[^\d])(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[\s,]+)", RegexOptions.Compiled);
                     }
                 }
             }
@@ -406,7 +409,7 @@ namespace Cliver
             else if (string.Compare(m.Groups["ampm"].Value, "AM", true) == 0 && hour == 12)
                 hour -= 12;
 
-            DateTime date_time = new DateTime(1, 1, 1, hour, minute, second);
+            DateTime dateTime = new DateTime(1, 1, 1, hour, minute, second);
 
             if (m.Groups["offset_hh"].Success)
             {
@@ -414,36 +417,36 @@ namespace Cliver
                 int offset_mm = 0;
                 if (m.Groups["offset_mm"].Success)
                     offset_mm = int.Parse(m.Groups["offset_mm"].Value);
-                TimeSpan utc_offset = new TimeSpan(offset_hh, offset_mm, 0);
+                TimeSpan utcOffset = new TimeSpan(offset_hh, offset_mm, 0);
                 if (m.Groups["offset_sign"].Value == "-")
-                    utc_offset = -utc_offset;
-                parsed_time = new ParsedDateTime(-1, -1, m.Index, m.Length, date_time, utc_offset);
+                    utcOffset = -utcOffset;
+                parsedTime = new ParsedDateTime(-1, -1, m.Index, m.Length, dateTime, utcOffset);
                 return true;
             }
 
             if (m.Groups["time_zone"].Success)
             {
-                TimeSpan utc_offset;
+                TimeSpan utcOffset;
                 switch (m.Groups["time_zone"].Value)
                 {
                     case "UTC":
                     case "GMT":
-                        utc_offset = new TimeSpan(0, 0, 0);
+                        utcOffset = new TimeSpan(0, 0, 0);
                         break;
                     case "CST":
-                        utc_offset = new TimeSpan(-6, 0, 0);
+                        utcOffset = new TimeSpan(-6, 0, 0);
                         break;
                     case "EST":
-                        utc_offset = new TimeSpan(-5, 0, 0);
+                        utcOffset = new TimeSpan(-5, 0, 0);
                         break;
                     default:
                         throw new Exception("Time zone: " + m.Groups["time_zone"].Value + " is not defined.");
                 }
-                parsed_time = new ParsedDateTime(-1, -1, m.Index, m.Length, date_time, utc_offset);
+                parsedTime = new ParsedDateTime(-1, -1, m.Index, m.Length, dateTime, utcOffset);
                 return true;
             }
 
-            parsed_time = new ParsedDateTime(-1, -1, m.Index, m.Length, date_time);
+            parsedTime = new ParsedDateTime(-1, -1, m.Index, m.Length, dateTime);
             //}
             //catch(Exception e)
             //{
@@ -458,31 +461,31 @@ namespace Cliver
         /// If year of the date was not found then it accepts the current year. 
         /// </summary>
         /// <param name="str">string that contains date</param>
-        /// <param name="default_format">format to be used preferably in ambivalent instances</param>
-        /// <param name="parsed_date">parsed date output</param>
+        /// <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+        /// <param name="parsedDate">parsed date output</param>
         /// <returns>true if date was found, else false</returns>
-        static public bool TryParseDate(this string str, DateTimeFormat default_format, out ParsedDateTime parsed_date)
+        static public bool TryParseDate(this string str, DateTimeFormat defaultFormat, out ParsedDateTime parsedDate)
         {
             if (string.IsNullOrEmpty(str))
             {
-                parsed_date = null;
+                parsedDate = null;
                 return false;
             }
 
             Match m;
 
-            if (default_format.HasFlag(DateTimeFormat.USA_DATE))
+            if (defaultFormat.HasFlag(DateTimeFormat.USA_DATE))
             {
                 //look for mm/dd/yy[yy]
                 m = Regex.Match(str, @"(?<=^|[^\d])(?'month'\d{1,2})\s*(?'separator'[\\/\.])+\s*(?'day'\d{1,2})\s*\'separator'+\s*(?'year'\d{2}|\d{4})(?=$|[^\d])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
-                    if (!convert_to_date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
+                    if (!convert2Date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
                     {
-                        parsed_date = null;
+                        parsedDate = null;
                         return false;
                     }
-                    parsed_date = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
+                    parsedDate = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
                     return true;
                 }
 
@@ -490,12 +493,12 @@ namespace Cliver
                 m = Regex.Match(str, @"(?<=^|[^\d])(?'month'\d{1,2})\s*(?'separator'[\-])\s*(?'day'\d{1,2})\s*\'separator'+\s*(?'year'\d{2}|\d{4})(?=$|[^\d])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
-                    if (!convert_to_date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
+                    if (!convert2Date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
                     {
-                        parsed_date = null;
+                        parsedDate = null;
                         return false;
                     }
-                    parsed_date = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
+                    parsedDate = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
                     return true;
                 }
             }
@@ -505,12 +508,12 @@ namespace Cliver
                 m = Regex.Match(str, @"(?<=^|[^\d])(?'day'\d{1,2})\s*(?'separator'[\\/\.])+\s*(?'month'\d{1,2})\s*\'separator'+\s*(?'year'\d{2}|\d{4})(?=$|[^\d])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
-                    if (!convert_to_date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
+                    if (!convert2Date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
                     {
-                        parsed_date = null;
+                        parsedDate = null;
                         return false;
                     }
-                    parsed_date = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
+                    parsedDate = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
                     return true;
                 }
 
@@ -518,12 +521,12 @@ namespace Cliver
                 m = Regex.Match(str, @"(?<=^|[^\d])(?'year'\d{2})\s*(?'separator'[\-])\s*(?'month'\d{1,2})\s*\'separator'+\s*(?'day'\d{1,2})(?=$|[^\d])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
-                    if (!convert_to_date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
+                    if (!convert2Date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out DateTime date))
                     {
-                        parsed_date = null;
+                        parsedDate = null;
                         return false;
                     }
-                    parsed_date = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
+                    parsedDate = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
                     return true;
                 }
             }
@@ -533,12 +536,12 @@ namespace Cliver
             if (m.Success)
             {
                 DateTime date;
-                if (!convert_to_date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out date))
+                if (!convert2Date(int.Parse(m.Groups["year"].Value), int.Parse(m.Groups["month"].Value), int.Parse(m.Groups["day"].Value), out date))
                 {
-                    parsed_date = null;
+                    parsedDate = null;
                     return false;
                 }
-                parsed_date = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
+                parsedDate = new ParsedDateTime(m.Index, m.Length, -1, -1, date);
                 return true;
             }
 
@@ -565,8 +568,8 @@ namespace Cliver
             if (m.Success)
             {
                 int month = -1;
-                int index_of_date = m.Index;
-                int length_of_date = m.Length;
+                int indexOfDate = m.Index;
+                int lengthOfDate = m.Length;
 
                 switch (m.Groups["month"].Value)
                 {
@@ -627,20 +630,20 @@ namespace Cliver
                     year = DefaultDate.Year;
 
                 DateTime date;
-                if (!convert_to_date(year, month, int.Parse(m.Groups["day"].Value), out date))
+                if (!convert2Date(year, month, int.Parse(m.Groups["day"].Value), out date))
                 {
-                    parsed_date = null;
+                    parsedDate = null;
                     return false;
                 }
-                parsed_date = new ParsedDateTime(index_of_date, length_of_date, -1, -1, date);
+                parsedDate = new ParsedDateTime(indexOfDate, lengthOfDate, -1, -1, date);
                 return true;
             }
 
-            parsed_date = null;
+            parsedDate = null;
             return false;
         }
 
-        static bool convert_to_date(int year, int month, int day, out DateTime date)
+        static bool convert2Date(int year, int month, int day, out DateTime date)
         {
             if (year < 100)
                 year += (int)Math.Floor((decimal)DefaultDate.Year / 100) * 100;
