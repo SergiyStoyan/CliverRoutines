@@ -215,18 +215,25 @@ namespace Cliver
         static string rootDir = null;
         static Thread deletingOldLogsThread = null;
         public static Func<string, bool> DeleteOldLogsDialog = null;
+        /// <summary>
+        /// Used to prevent creating a dir when the log is not actually in use yet.
+        /// </summary>
+        public static bool IsRootDirSet
+        {
+            get
+            {
+                return rootDir != null;
+            }
+        }
 
         static void setRootDir(bool create)
         {
             lock (lockObject)
             {
                 if (rootDir != null)
-                {
-                    if (!create)
+                    if (!create || Directory.Exists(rootDir))
                         return;
-                    if (Directory.Exists(rootDir))
-                        return;
-                }
+
                 List<string> baseDirs = new List<string> {
                                 CompanyUserDataDir,
                                 CompanyCommonDataDir,

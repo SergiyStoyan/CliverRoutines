@@ -82,8 +82,7 @@ namespace Cliver
                             {
                                 if (askYesNo == null)
                                     Log.Main.Inform("Deleting logs older than " + firstLogTime.ToString());
-                                else
-                                if (!askYesNo(alert))
+                                else if (!askYesNo(alert))
                                     return;
                                 alert = null;
                             }
