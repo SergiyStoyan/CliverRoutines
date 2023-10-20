@@ -21,24 +21,45 @@ namespace Cliver
         /// Shuts down the log engine and re-initializes it. Optional.
         /// </summary>
         /// <param name="mode">log configuration</param>
-        /// <param name="baseDir">directory for logging. When NULL, the default directory is used.</param>
+        /// <param name="baseDirs">directories for logging, ordered by preference. When NULL or not usable, the built-in directory list is used.</param>
         /// <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted. When negative, no clean-up is performed.</param>
         /// <param name="rootDirName">RootDir folder name</param>
-        public static void Initialize(Mode? mode = null, string baseDir = null, int deleteLogsOlderThanDays = 10, string rootDirName = null)
+        public static void Initialize(Mode? mode = null, List<string> baseDirs = null, int deleteLogsOlderThanDays = 10, string rootDirName = null)
+        {
+            initialize(mode, baseDirs, true, deleteLogsOlderThanDays, rootDirName);
+        }
+        static void initialize(Mode? mode, List<string> baseDirs, bool useDefaultBaseDirs, int deleteLogsOlderThanDays, string rootDirName)
         {
             lock (lockObject)
             {
                 Log.CloseAll();
                 if (mode != null)
                     Log.mode = (Mode)mode;
-                BaseDir = baseDir;
+                Log.baseDirs = baseDirs;
+                Log.useDefaultBaseDirs = useDefaultBaseDirs;
                 Log.deleteLogsOlderThanDays = deleteLogsOlderThanDays;
                 Log.rootDirName = rootDirName != null ? rootDirName : Log.ProgramName;
             }
         }
+        static List<string> baseDirs = null;
+        static bool useDefaultBaseDirs = true;
         static int deleteLogsOlderThanDays = 10;
         static Mode mode = Mode.ONE_FOLDER | Mode.DEFAULT_NAMED_LOG;
         static string rootDirName;// { get; private set; }
+
+        /// <summary>
+        /// Shuts down the log engine and re-initializes it. Optional.
+        /// </summary>
+        /// <param name="baseDir">the definite directory for logging. NULL triggers exception.</param>
+        /// <param name="mode">log configuration</param>
+        /// <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted. When negative, no clean-up is performed.</param>
+        /// <param name="rootDirName">RootDir folder name</param>
+        public static void Initialize(string baseDir, Mode? mode = null, int deleteLogsOlderThanDays = 10, string rootDirName = null)
+        {
+            if (baseDir == null)
+                throw new Exception("Log base dir must be specified.");
+            initialize(mode, new List<string> { baseDir }, false, deleteLogsOlderThanDays, rootDirName);
+        }
 
         /// <summary>
         /// Log level which is passed to each log as default.
@@ -145,6 +166,14 @@ namespace Cliver
         }
 
         ///// <summary>
+        ///// Close Head session.
+        ///// </summary>
+        //static public void Close(bool reuse)
+        //{
+        //    Head.Close(reuse);
+        //}
+
+        ///// <summary>
         ///// The head session's directory.
         ///// </summary>
         //public static string Dir
@@ -195,6 +224,7 @@ namespace Cliver
                 Session.CloseAll();
                 NamedWriter.CloseAll();
                 rootDir = null;
+                BaseDir = null;
                 headSession = null;
             }
         }
@@ -213,28 +243,68 @@ namespace Cliver
         }
         static string rootDir = null;
         static Thread deletingOldLogsThread = null;
+        /// <summary>
+        /// Optional handler used to ask user for the permission to delete old logs.
+        /// </summary>
         public static Func<string, bool> DeleteOldLogsDialog = null;
-
+        /// <summary>
+        /// Used to prevent creating a dir when no log is actually in use yet.
+        /// </summary>
+        public static bool IsRootDirSet
+        {
+            get
+            {
+                return rootDir != null;
+            }
+        }
         static void setRootDir()
         {
             lock (lockObject)
             {
-                if (BaseDir == null)
-                    BaseDir = CompanyUserDataDir;
-                rootDir = BaseDir + Path.DirectorySeparatorChar + rootDirName + RootDirNameSuffix;
-
+                bool setBaseDir(string baseDir)
+                {
+                    BaseDir = baseDir;
+                    rootDir = BaseDir + Path.DirectorySeparatorChar + rootDirName + RootDirNameSuffix;
+                    try
+                    {
+                        FileSystemRoutines.CreateDirectory(rootDir);
+                        string testFile = rootDir + Path.DirectorySeparatorChar + "test";
+                        File.WriteAllText(testFile, "test");
+                        File.Delete(testFile);
+                        return true;
+                    }
+                    catch //(Exception e)
+                    {
+                        rootDir = null;
+                        BaseDir = null;
+                        return false;
+                    }
+                }
+                if (Log.baseDirs != null)
+                    foreach (string baseDir in Log.baseDirs)
+                        if (setBaseDir(baseDir))
+                            break;
                 if (rootDir == null)
-                    throw new Exception("Could not access any log directory.");
+                    if (!useDefaultBaseDirs
+                        || !setBaseDir(CompanyUserDataDir)
+                        || !setBaseDir(CompanyCommonDataDir)
+                        || !setBaseDir(Log.AppDir)
+                        || !setBaseDir(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory))
+                        || !setBaseDir(Path.GetTempPath() + Path.DirectorySeparatorChar + CompanyName + Path.DirectorySeparatorChar)
+                        )
+                        throw new Exception("Could not write to any of the log base directories.");
+
                 rootDir = PathRoutines.GetNormalizedPath(rootDir, false);
                 if (Directory.Exists(rootDir) && deleteLogsOlderThanDays >= 0 && deletingOldLogsThread?.IsAlive != true)
                     deletingOldLogsThread = ThreadRoutines.Start(() => { Log.DeleteOldLogs(deleteLogsOlderThanDays, DeleteOldLogsDialog); });//to avoid a concurrent loop while accessing the log file from the same thread 
             }
         }
 
+
         /// <summary>
         ///Actual base directory where RootDir is created.
         /// </summary>
-        public static string BaseDir { get; private set; }
+        public static string BaseDir { get; private set; } = null;
 
         /// <summary>
         /// Creates or retrieves a session-less log writer which allows continuous writing to the same log file in Log.RootDir. 

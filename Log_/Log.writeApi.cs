@@ -246,6 +246,6 @@ namespace Cliver
         //static public void Write(string message, Exception e)
         //{
         //    Head.Write(message, e);
-        //}
+        //}       
     }
 }

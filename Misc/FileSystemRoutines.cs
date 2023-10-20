@@ -52,6 +52,12 @@ namespace Cliver
             return fs;
         }
 
+        /// <summary>
+        /// Create if does not exists.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="unique"></param>
+        /// <returns></returns>
         public static string CreateDirectory(string directory, bool unique = false)
         {
             DirectoryInfo di = new DirectoryInfo(directory);

@@ -96,7 +96,6 @@ namespace Cliver
                                 Log.Error(e);
                             }
                         }
-
                     }
                 }
                 finally
