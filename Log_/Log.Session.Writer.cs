@@ -41,14 +41,7 @@ namespace Cliver
                     set
                     {
                         lock (this)
-                        {
-                            if (level == Level.NONE && value > Level.NONE)
-                            {
-                                setRootDir(true);
-                                Directory.CreateDirectory(Session.Dir);
-                            }
                             level = value;
-                        }
                     }
                 }
 

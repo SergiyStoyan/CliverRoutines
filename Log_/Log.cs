@@ -21,22 +21,21 @@ namespace Cliver
         /// Shuts down the log engine and re-initializes it. Optional.
         /// </summary>
         /// <param name="mode">log configuration</param>
-        /// <param name="baseDirs">directories for logging, ordered by preference. When NULL, the built-in directory list is used.</param>
+        /// <param name="baseDir">directory for logging. When NULL, the default directory is used.</param>
         /// <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted. When negative, no clean-up is performed.</param>
         /// <param name="rootDirName">RootDir folder name</param>
-        public static void Initialize(Mode? mode = null, List<string> baseDirs = null, int deleteLogsOlderThanDays = 10, string rootDirName = null)
+        public static void Initialize(Mode? mode = null, string baseDir = null, int deleteLogsOlderThanDays = 10, string rootDirName = null)
         {
             lock (lockObject)
             {
                 Log.CloseAll();
                 if (mode != null)
                     Log.mode = (Mode)mode;
-                Log.baseDirs = baseDirs;
+                BaseDir = baseDir;
                 Log.deleteLogsOlderThanDays = deleteLogsOlderThanDays;
                 Log.rootDirName = rootDirName != null ? rootDirName : Log.ProgramName;
             }
         }
-        static List<string> baseDirs = null;
         static int deleteLogsOlderThanDays = 10;
         static Mode mode = Mode.ONE_FOLDER | Mode.DEFAULT_NAMED_LOG;
         static string rootDirName;// { get; private set; }
@@ -208,7 +207,7 @@ namespace Cliver
             get
             {
                 if (rootDir == null)
-                    setRootDir(DefaultLevel > Level.NONE);
+                    setRootDir();
                 return rootDir;
             }
         }
@@ -216,45 +215,14 @@ namespace Cliver
         static Thread deletingOldLogsThread = null;
         public static Func<string, bool> DeleteOldLogsDialog = null;
 
-        static void setRootDir(bool create)
+        static void setRootDir()
         {
             lock (lockObject)
             {
-                if (rootDir != null)
-                {
-                    if (!create)
-                        return;
-                    if (Directory.Exists(rootDir))
-                        return;
-                }
-                List<string> baseDirs = new List<string> {
-                                CompanyUserDataDir,
-                                CompanyCommonDataDir,
-                                Log.AppDir,
-                                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-                                Path.GetTempPath() + Path.DirectorySeparatorChar + CompanyName + Path.DirectorySeparatorChar,
-                                };
-                if (Log.baseDirs != null)
-                    baseDirs.InsertRange(0, Log.baseDirs);
-                foreach (string baseDir in baseDirs)
-                {
-                    BaseDir = baseDir;
-                    rootDir = BaseDir + Path.DirectorySeparatorChar + rootDirName + RootDirNameSuffix;
-                    if (create)
-                        try
-                        {
-                            if (!Directory.Exists(rootDir))
-                                FileSystemRoutines.CreateDirectory(rootDir);
-                            string testFile = rootDir + Path.DirectorySeparatorChar + "test";
-                            File.WriteAllText(testFile, "test");
-                            File.Delete(testFile);
-                            break;
-                        }
-                        catch //(Exception e)
-                        {
-                            rootDir = null;
-                        }
-                }
+                if (BaseDir == null)
+                    BaseDir = CompanyUserDataDir;
+                rootDir = BaseDir + Path.DirectorySeparatorChar + rootDirName + RootDirNameSuffix;
+
                 if (rootDir == null)
                     throw new Exception("Could not access any log directory.");
                 rootDir = PathRoutines.GetNormalizedPath(rootDir, false);
