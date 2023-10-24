@@ -48,7 +48,7 @@ namespace Cliver
         static string rootDirName;// { get; private set; }
 
         /// <summary>
-        /// Shuts down the log engine and re-initializes it. Optional.
+        /// Shuts down the log engine and re-initializes it. Optional. Must be used when only 1 explicite baseDir must be set.
         /// </summary>
         /// <param name="baseDir">the definite directory for logging. NULL triggers exception.</param>
         /// <param name="mode">log configuration</param>
@@ -248,7 +248,8 @@ namespace Cliver
         /// </summary>
         public static Func<string, bool> DeleteOldLogsDialog = null;
         /// <summary>
-        /// Used to prevent creating a dir when no log is actually in use yet.
+        /// Can be checked in the custom code before accessing auto-created objects like Log.Head, Log.Head.Main to prevent creating a root dir when no log is actually in use yet.
+        /// It is usually needed before Initialize() or any writing method.
         /// </summary>
         public static bool IsRootDirSet
         {
