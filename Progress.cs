@@ -100,7 +100,7 @@ namespace Cliver
                     }
                 }
             }
-            int value = -1;
+            int value = 0;
 
             public uint Step = 1;
 
@@ -124,7 +124,7 @@ namespace Cliver
             virtual public void Reset()
             {
                 maximum = -1;//makes this Stage not initialized
-                value = -1;
+                value = 0;
             }
 
             /// <summary>
@@ -135,9 +135,9 @@ namespace Cliver
             {
                 lock (this)
                 {
-                    if (Maximum < 0 || Value < 0)
+                    if (Maximum < 0)
                         return 0;
-                    if (Maximum == 0 && Value == 0)
+                    if (Maximum == 0)
                         return 1;
                     return (float)Value / Maximum;
                 }

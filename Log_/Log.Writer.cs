@@ -30,8 +30,12 @@ namespace Cliver
             /// <summary>
             /// Message importance level.
             /// </summary>
-            abstract public Level Level { get; set; }
-            protected Level level = Log.DefaultLevel;
+            public Level Level { get; set; } = Log.DefaultLevel;
+
+            ///// <summary>
+            ///// Message handler (optional).
+            ///// </summary>
+            //public Event<WritingHandlerArguments> WritingEvent { get; set; } = Log.DefaultWritingEvent;
 
             /// <summary>
             /// Log file path.
@@ -84,6 +88,7 @@ namespace Cliver
             {
                 lock (this)
                 {
+                    //WritingEvent.__Subscription?.Invoke(new WritingHandlerArguments { LogWriterName = Name, MessageType = messageType, Message = message, Details = details });
                     Writing?.Invoke(Name, messageType, message, details);
 
                     if (!Is2BeLogged(messageType))
@@ -150,6 +155,16 @@ namespace Cliver
             /// Triggered before writing message.
             /// </summary>
             static public event OnWrite Writing = null;
+
+            /// <summary>
+            /// Remove all subscriptions for the Writing event.
+            /// </summary>
+            static public void ClearWritingSubscriptions()
+            {
+                Writing = null;
+                //foreach (Delegate d in Writing.GetInvocationList())
+                //    Writing -= (OnWrite)d;
+            }
         }
     }
 }

@@ -66,6 +66,24 @@ namespace Cliver
         /// </summary>
         public static Level DefaultLevel = Level.INFORM;
 
+
+        //public static Event<WritingHandlerArguments> DefaultWritingEvent = null;
+        //public class WritingHandlerArguments
+        //{
+        //    public string LogWriterName;
+        //    public Log.MessageType MessageType;
+        //    public string Message;
+        //    public string Details;
+        //}
+        //public static void ClearWritingEventHandlersAll()
+        //{
+        //    lock (lockObject)
+        //    {
+        //        Session.ClearWritingEventHandlersAll();
+        //        NamedWriter.ClearWritingEventHandlersAll();
+        //    }
+        //}
+
         /// <summary>
         /// Maximum log file length in bytes which is passed to each log as default.
         /// If negative than no effect.
@@ -201,11 +219,17 @@ namespace Cliver
         /// </summary>
         public enum MessageType
         {
+            /// <summary>
+            /// Message with no label.
+            /// </summary>
             LOG,
             DEBUG,
             INFORM,
             WARNING,
             ERROR,
+            /// <summary>
+            /// (!)The app exits right after logging this message.
+            /// </summary>
             EXIT,
             TRACE,
             //INFORM2 = 11,

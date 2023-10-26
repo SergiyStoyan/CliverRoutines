@@ -29,22 +29,6 @@ namespace Cliver
                 /// </summary>
                 public readonly Session Session;
 
-                /// <summary>
-                /// Message importance level.
-                /// </summary>
-                override public Level Level
-                {
-                    get
-                    {
-                        return level;
-                    }
-                    set
-                    {
-                        lock (this)
-                            level = value;
-                    }
-                }
-
                 override internal void SetFile()
                 {
                     lock (this)

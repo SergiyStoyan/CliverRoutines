@@ -179,6 +179,19 @@ namespace Cliver
             File.Move(file1, file2);
         }
 
+        public static void DeleteFile(string file, bool exceptionIfDirectoryDoesNotExist = false)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch(System.IO.DirectoryNotFoundException)
+            {
+                if (exceptionIfDirectoryDoesNotExist)
+                    throw;
+            }
+        }
+
         //public static void Copy(string path1, string path2, bool overwrite = false)
         //{
         //    if (Directory.Exists(path1))
