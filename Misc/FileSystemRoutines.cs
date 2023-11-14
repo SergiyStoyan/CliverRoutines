@@ -48,7 +48,7 @@ namespace Cliver
             var fs = Directory.EnumerateFiles(directory);
             if (includeSubfolders)
                 foreach (string d in Directory.EnumerateDirectories(directory))
-                    fs.Concat(GetFiles(d));
+                    fs = fs.Concat(GetFiles(d));
             return fs;
         }
 
@@ -185,7 +185,7 @@ namespace Cliver
             {
                 File.Delete(file);
             }
-            catch(System.IO.DirectoryNotFoundException)
+            catch (System.IO.DirectoryNotFoundException)
             {
                 if (exceptionIfDirectoryDoesNotExist)
                     throw;

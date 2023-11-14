@@ -30,6 +30,35 @@ namespace Cliver
             }
         }
 
+        /// <summary>
+        /// (!)When rememberRows=FALSE, calling the class members that depend on Rows will cause an exception.
+        /// </summary>
+        /// <param name="valuess"></param>
+        /// <param name="rememberRows"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public IEnumerable<Row> Enumerate(IList<IList<object>> valuess, bool rememberRows, ReadingMode mode = ReadingMode.IgnoreEmptyRows)
+        {
+            int y = 0;
+            return enumerate(rememberRows, mode, () => { return y < valuess.Count ? valuess[y++].Select(a => a.ToString()).ToList() : null; });
+        }
+
+        /// <summary>
+        /// (!)When rememberRows=FALSE, calling the class members that depend on Rows will cause an exception.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="rememberRows"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public IEnumerable<Row> Enumerate(string file, bool rememberRows, ReadingMode mode = ReadingMode.IgnoreEmptyRows)
+        {
+            using (var sr = new StreamReader(file))
+            {
+                foreach(Row r in Enumerate(rememberRows, sr, mode))
+                    yield return r;
+            }
+        }
+
         public void Write(string file)
         {
             using (var sw = new StreamWriter(file))

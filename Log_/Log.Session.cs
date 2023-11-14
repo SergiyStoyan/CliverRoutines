@@ -224,6 +224,23 @@ namespace Cliver
                     }
                 }
             }
+
+            //public void ClearWritingEventHandlers()
+            //{
+            //    lock (names2NamedWriter)
+            //    {
+            //        lock (threadIds2TreadWriter)
+            //        {
+            //            Log.Write("Clearing all the writing event handlers in the session logs...");
+
+            //            foreach (NamedWriter nw in names2NamedWriter.Values)
+            //                nw.WritingEvent = null;
+
+            //            foreach (ThreadWriter tw in threadIds2TreadWriter.Values)
+            //                tw.WritingEvent = null;
+            //        }
+            //    }
+            //}
         }
     }
 }

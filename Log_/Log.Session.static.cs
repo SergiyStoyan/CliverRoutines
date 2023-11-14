@@ -58,6 +58,15 @@ namespace Cliver
                     return names2Session.Values.ToList();
                 }
             }
+
+            //public static void ClearWritingEventHandlersAll()
+            //{
+            //    lock (names2Session)
+            //    {
+            //        foreach (Session s in names2Session.Values)
+            //            s.ClearWritingEventHandlers();
+            //    }
+            //}
         }
 
         //public static readonly sessions Sessions = new sessions();

@@ -24,6 +24,11 @@ namespace Cliver
             return WebUtility.UrlEncode(value);
         }
 
+        static public string GetUrlDecoded(string value)
+        {
+            return WebUtility.UrlDecode(value);
+        }
+
         public static bool IsHttp(string path)
         {
             return path != null && Regex.IsMatch(path, @"^https?\:\/\/", RegexOptions.IgnoreCase);

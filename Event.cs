@@ -91,11 +91,21 @@ namespace Cliver
             }
         }
 
+        public Event<ArgumentT> CreateCopy()
+        {
+            lock (this)
+            {
+                var e = new Event<ArgumentT>();
+                Handlers.ForEach(a => { e.Handlers.Add(a); });
+                return e;
+            }
+        }
+
         public Action<ArgumentT> __Subscription
         {
             get
             {
-                return Handlers.Count > 0? __Trigger: (Action<ArgumentT>)null;
+                return Handlers.Count > 0 ? __Trigger : (Action<ArgumentT>)null;
             }
         }
 

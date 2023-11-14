@@ -72,6 +72,17 @@ namespace Cliver
                     File = file2;
                 }
             }
+
+            //internal static void ClearWritingEventHandlersAll()
+            //{
+            //    lock (names2NamedWriter)
+            //    {
+            //        Log.Write("Clearing the writing event handlers in all the session-less logs...");
+
+            //        foreach (NamedWriter nw in names2NamedWriter.Values)
+            //            nw.WritingEvent = null;
+            //    }
+            //}
         }
     }
 }

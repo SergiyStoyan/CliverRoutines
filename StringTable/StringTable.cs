@@ -36,6 +36,9 @@ namespace Cliver
 
         void read(ReadingMode mode, Func<List<string>> getRowValues)
         {
+            ColumnCount = 0;
+            Rows = new List<Row>();
+
             Headers = getRowValues();
             if (Headers == null)
                 throw new Exception("There is no header.");
@@ -44,13 +47,12 @@ namespace Cliver
                 Headers2I[Headers[i]] = i;
 #endif
 
-            Rows = new List<Row>();
             int lineNumber = 1;
             for (List<string> vs = getRowValues(); vs != null; vs = getRowValues())
             {
                 lineNumber++;
                 //if (vs.Count == 1 && string.IsNullOrEmpty(vs[0]) && Headers.Count > 1)
-                if (mode.HasFlag(ReadingMode.IgnoreEmptyRows) && null == vs.Find(a => !string.IsNullOrEmpty(a)))
+                if (mode.HasFlag(ReadingMode.IgnoreEmptyRows) && !vs.Any(a => !string.IsNullOrEmpty(a)))
                     continue;
                 if (vs.Count > Headers.Count)
                 {
@@ -67,13 +69,66 @@ namespace Cliver
             ColumnCount = Rows.Select(a => a.Values.Count).Max();
         }
 
+        /// <summary>
+        /// (!)When rememberRows=FALSE, calling the class members that depend on Rows will cause an exception.
+        /// </summary>
+        /// <param name="rememberRows"></param>
+        /// <param name="streamReader"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public IEnumerable<Row> Enumerate(bool rememberRows, StreamReader streamReader, ReadingMode mode = ReadingMode.IgnoreEmptyRows)
+        {
+            return enumerate(rememberRows, mode, () => { return getRowValues(streamReader.ReadLine()); });
+        }
+
+        IEnumerable<Row> enumerate(bool rememberRows, ReadingMode mode, Func<List<string>> getRowValues)
+        {
+            ColumnCount = 0;
+            Rows = rememberRows ? new List<Row>() : null;
+
+            Headers = getRowValues();
+            if (Headers == null)
+                throw new Exception("There is no header.");
+#if USE_HEADER_HASH
+            for (int i = 0; i < Headers.Count; i++)
+                Headers2I[Headers[i]] = i;
+#endif
+
+            int lineNumber = 1;
+            int index = 1;
+            for (List<string> vs = getRowValues(); vs != null; vs = getRowValues())
+            {
+                lineNumber++;
+                //if (vs.Count == 1 && string.IsNullOrEmpty(vs[0]) && Headers.Count > 1)
+                if (mode.HasFlag(ReadingMode.IgnoreEmptyRows) && !vs.Any(a => !string.IsNullOrEmpty(a)))
+                    continue;
+                index++;
+                if (vs.Count > Headers.Count)
+                {
+                    if (mode.HasFlag(ReadingMode.HeadersNumberEqualsColumnsNumber))
+                        throw new Exception("The line " + lineNumber + " has more columns than headers: " + vs.Count + " > " + Headers.Count);
+                }
+                else if (vs.Count < Headers.Count)
+                {
+                    if (mode.HasFlag(ReadingMode.CellsNumberEqualsColumnsNumber))
+                        throw new Exception("The line " + lineNumber + " has less columns than headers: " + vs.Count + " < " + Headers.Count);
+                }
+                Row row = new Row(lineNumber, vs, index, this);
+                if (rememberRows)
+                    Rows.Add(row);
+                if (ColumnCount < row.Values.Count)
+                    ColumnCount = row.Values.Count;
+                yield return row;
+            }
+        }
+
         public List<string> Headers { get; private set; }
 
 #if USE_HEADER_HASH
         readonly internal Dictionary<string, int> Headers2I = new Dictionary<string, int>();
 #endif
 
-        public List<Row> Rows { get; private set; }
+        public List<Row> Rows { get; private set; } = null;
 
         public int ColumnCount { get; private set; } = 0;
 
@@ -138,7 +193,7 @@ namespace Cliver
             public List<string> Values { get; private set; }
 
             /// <summary>
-            /// 1-based number of the row in rows.
+            /// 1-based number of the row in Rows.
             /// </summary>
             public int Y { get; }
 

@@ -12,6 +12,21 @@ namespace Cliver
 {
     public static class MathRoutines
     {
+        public static bool IsNumber(object value)
+        {
+            return value is sbyte
+                    || value is byte
+                    || value is short
+                    || value is ushort
+                    || value is int
+                    || value is uint
+                    || value is long
+                    || value is ulong
+                    || value is float
+                    || value is double
+                    || value is decimal;
+        }
+
         public static T Min<T>(params T[] values) where T : IComparable
         {
             if (values.Length < 1)
