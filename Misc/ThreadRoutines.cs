@@ -27,36 +27,35 @@ namespace Cliver
 
         public static Thread StartTry(Action code, ErrorHandler onError = null, Action finallyCode = null, bool background = true, ApartmentState state = ApartmentState.Unknown)
         {
-            Thread t = new Thread(
-                () =>
+            void start()
+            {
+                try
+                {
+                    code.Invoke();
+                }
+                catch (ThreadAbortException)
+                {
+                    Thread.ResetAbort();
+                }
+                catch (Exception e)
                 {
                     try
                     {
-                        code.Invoke();
+                        if (onError == null)
+                            throw;
+                        onError.Invoke(e);
                     }
                     catch (ThreadAbortException)
                     {
                         Thread.ResetAbort();
                     }
-                    catch (Exception e)
-                    {
-                        try
-                        {
-                            if (onError == null)
-                                throw;
-                            onError.Invoke(e);
-                        }
-                        catch (ThreadAbortException)
-                        {
-                            Thread.ResetAbort();
-                        }
-                    }
-                    finally
-                    {
-                        finallyCode?.Invoke();
-                    }
                 }
-            );
+                finally
+                {
+                    finallyCode?.Invoke();
+                }
+            }
+            Thread t = new Thread(start);
             if (state != ApartmentState.Unknown)
                 t.SetApartmentState(state);
             t.IsBackground = background;
