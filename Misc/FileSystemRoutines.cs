@@ -160,19 +160,19 @@ namespace Cliver
         /// </summary>
         /// <param name="file1"></param>
         /// <param name="file2"></param>
-        /// <param name="overwrite"></param>
-        public static void CopyFile(string file1, string file2, bool overwrite = false)
+        /// <param name="overwriteElseException"></param>
+        public static void CopyFile(string file1, string file2, bool overwriteElseException = false)
         {
             CreateDirectory(PathRoutines.GetFileDir(file2), false);
-            File.Copy(file1, file2, overwrite);//(!)it throws an exception when the destination file exists and !overwrite
+            File.Copy(file1, file2, overwriteElseException);//(!)it throws an exception when the destination file exists and !overwrite
         }
 
-        public static void MoveFile(string file1, string file2, bool overwrite = true)
+        public static void MoveFile(string file1, string file2, bool overwriteElseException = true)
         {
             CreateDirectory(PathRoutines.GetFileDir(file2), false);
             if (File.Exists(file2))
             {
-                if (!overwrite)
+                if (!overwriteElseException)
                     throw new System.Exception("File " + file2 + " already exists.");
                 File.Delete(file2);
             }
