@@ -12,41 +12,36 @@ namespace Cliver
 {
     public static class SleepRoutines
     {
-        public static T WaitForObject<T>(Func<T> get_object, int mss, int spin_sleep_in_mss = 10) where T : class
+        public static bool WaitForCondition(Func<bool> condition, int timeoutMss, int pollSpanMss = 10)
         {
-            T o = null;
-            DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, mss);
-            while (dt > DateTime.Now)
-            {
-                o = get_object();
-                if (o != null)
-                    break;
-                //Application.DoEvents();
-                Thread.Sleep(spin_sleep_in_mss);
-            }
-            return o;
-        }
-
-        public static bool WaitForCondition(Func<bool> condition, int timeoutMss, int pollTimeSpanMss = 10)
-        {
-            for (DateTime timeout = DateTime.Now.AddMilliseconds(timeoutMss); DateTime.Now < timeout; Thread.Sleep(pollTimeSpanMss))
+            DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, timeoutMss);
+            for (; ; )
             {
                 if (condition())
                     return true;
-                //Application.DoEvents();
+                if (DateTime.Now > dt)
+                    return false;
+                Thread.Sleep(pollSpanMss);
             }
-            return false;
         }
 
-        public static void Wait(int mss, int spin_sleep_in_mss = 10)
+        public static T WaitForObject<T>(Func<T> getObject, int timeoutMss, int pollSpanMss = 10) where T : class
         {
-            DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, mss);
-            while (dt > DateTime.Now)
+            T o = null;
+            WaitForCondition(() =>
             {
-                //Application.DoEvents();
-                Thread.Sleep(spin_sleep_in_mss);
-            }
+                o = getObject();
+                return o != null;
+            }, timeoutMss, pollSpanMss);
+            return o;
         }
+
+        //public static void Wait(int mss, int pollSpanMss = 10)
+        //{
+        //    DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, mss);
+        //    while (DateTime.Now > dt)
+        //        Thread.Sleep(pollSpanMss);
+        //}
     }
 }
 

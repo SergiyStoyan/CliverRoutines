@@ -1,0 +1,2 @@
+﻿- add __ to all methods in Settings;
+- move SleepRoutines to ThreadRoutines;
