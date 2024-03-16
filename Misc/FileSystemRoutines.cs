@@ -161,13 +161,14 @@ namespace Cliver
         /// <param name="file1"></param>
         /// <param name="file2"></param>
         /// <param name="overwriteElseException"></param>
-        public static void CopyFile(string file1, string file2, bool overwriteElseException = false)
+        public static string CopyFile(string file1, string file2, bool overwriteElseException = false)
         {
             CreateDirectory(PathRoutines.GetFileDir(file2), false);
             File.Copy(file1, file2, overwriteElseException);//(!)it throws an exception when the destination file exists and !overwrite
+            return file2;
         }
 
-        public static void MoveFile(string file1, string file2, bool overwriteElseException = true)
+        public static string MoveFile(string file1, string file2, bool overwriteElseException = true)
         {
             CreateDirectory(PathRoutines.GetFileDir(file2), false);
             if (File.Exists(file2))
@@ -177,6 +178,7 @@ namespace Cliver
                 File.Delete(file2);
             }
             File.Move(file1, file2);
+            return file2;
         }
 
         public static void DeleteFile(string file, bool exceptionIfDirectoryDoesNotExist = false)
