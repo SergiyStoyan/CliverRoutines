@@ -121,10 +121,22 @@ namespace Cliver
             return Regex.Replace(file, @".*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()), "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
 
-        public static string GetFileNameWithoutExtention(string file)
+        public static string GetFileNameWithoutExtension(string file)
         {
             string n = GetFileName(file);
             return Regex.Replace(n, @"\.[^\.]*$", "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        }
+
+        public static (string Dir, string FileName, string FileExtension) GetFileParts(string file, bool fileNameEndsAtFirstDotElseLastDot = true)
+        {
+            Match m;
+            if (fileNameEndsAtFirstDotElseLastDot)
+                m = Regex.Match(file, @"(.*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + @")?([^\.]*)(.*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            else
+                m = Regex.Match(file, @"(.*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + @")?(.*)(\.[^\.]*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (m.Success)
+                return (m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value);
+            throw new Exception("Could not parse: " + file);
         }
 
         /// <summary>
@@ -137,12 +149,36 @@ namespace Cliver
             return Regex.Replace(dir.TrimEnd(Path.DirectorySeparatorChar), @".*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()), "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
 
-        public static string InsertSuffixBeforeFileExtension(string file, string suffix)
+        public static string InsertSuffixBeforeFileExtension(string file, string suffix, bool beforeFirstDotElseLastDot = true)
         {
-            Match m = Regex.Match(file, @"(.*)(\.[^" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + "]*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            Match m;
+            if (beforeFirstDotElseLastDot)
+                m = Regex.Match(file, @"(.*)(\.[^" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + "]*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            else
+                m = Regex.Match(file, @"(.*)(\.[^\.]*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
             if (m.Success)
                 return m.Groups[1].Value + suffix + m.Groups[2].Value;
             return file + suffix;
+        }
+
+        public static string AddPrefix2FileName(string file, string prefix)
+        {
+            Match m = Regex.Match(file, @"(.*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + ")(.*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (m.Success)
+                return m.Groups[1].Value + prefix + m.Groups[2].Value;
+            return prefix + file;
+        }
+
+        public static string AddPrefixSuffix2FileName(string file, string prefix, string suffix, bool fileNameEndsAtFirstDotElseLastDot = true)
+        {
+            Match m;
+            if (fileNameEndsAtFirstDotElseLastDot)
+                m = Regex.Match(file, @"(.*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + @")([^\.]*)(.*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            else
+                m = Regex.Match(file, @"(.*" + Regex.Escape(Path.DirectorySeparatorChar.ToString()) + @")(.*)(\.[^\.]*)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (m.Success)
+                return m.Groups[1].Value + prefix + m.Groups[2].Value + suffix + m.Groups[3].Value;
+            return prefix + file + suffix;
         }
 
         /// <summary>
@@ -170,9 +206,9 @@ namespace Cliver
             return fd;
         }
 
-        public static string ReplaceFileExtention(string file, string extention)
+        public static string ReplaceFileExtension(string file, string extension)
         {
-            return Regex.Replace(file, @"\.[^\.]+$", "." + extention, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            return Regex.Replace(file, @"\.[^\.]+$", "." + extension, RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
 
         public static string GetPathMirroredInDir(string path, string rootDir, string mirrorDir)

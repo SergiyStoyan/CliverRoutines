@@ -104,7 +104,7 @@ namespace Cliver
         /// <summary>
         /// Can be used to initialize an optional Settings field.
         /// </summary>
-        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extension</param>
         public static void Reset(string settingsFieldFullName)
         {
             GetSettingsFieldInfo(settingsFieldFullName).ResetObject();
@@ -123,7 +123,7 @@ namespace Cliver
         /// <summary>
         /// Can be used to initialize an optional Settings field.
         /// </summary>
-        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extension</param>
         public static void Reload(string settingsFieldFullName)
         {
             GetSettingsFieldInfo(settingsFieldFullName).ReloadObject();
@@ -154,7 +154,7 @@ namespace Cliver
         ///// <summary>
         ///// Returns the Settings object which is set to the field identified by the field's full name.
         ///// </summary>
-        ///// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its file without extention</param>
+        ///// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its file without extension</param>
         ///// <returns>The Settings object which is set to the field</returns>
         //static public Settings GetSettings(string settingsFieldFullName)
         //{

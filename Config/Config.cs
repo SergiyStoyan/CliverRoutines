@@ -348,7 +348,7 @@ namespace Cliver
         /// <summary>
         /// Allows to get the Settings field's properties before its value has been created (i.e. before the Settings field has been initialized).
         /// </summary>
-        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+        /// <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extension</param>
         /// <returns>Settings field's properties</returns>
         public static SettingsFieldInfo GetSettingsFieldInfo(string settingsFieldFullName)
         {//!!! before altering this method, pay attention that it is used by the engine !!!

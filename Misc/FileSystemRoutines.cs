@@ -86,14 +86,15 @@ namespace Cliver
                 CopyDirectory(d, directory2 + Path.DirectorySeparatorChar + PathRoutines.GetDirName(d), overwrite);
         }
 
-        public static void ClearDirectory(string directory, bool recursive = true, bool throwException = true)
+        public static List<Exception> ClearDirectory(string directory, bool recursive = true, bool throwException = true)
         {
+            List<Exception> errors = new List<Exception>();
             try
             {
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
-                    return;
+                    return null;
                 }
 
                 foreach (string file in Directory.GetFiles(directory))
@@ -103,55 +104,53 @@ namespace Cliver
                 }
                 if (recursive)
                     foreach (string d in Directory.GetDirectories(directory))
-                        DeleteDirectory(d, recursive);
+                        errors.AddRange(DeleteDirectory(d, recursive, throwException));
             }
             catch (Exception e)
             {
                 if (throwException)
                     throw;
+                errors.Add(e);
             }
+            return errors;
         }
 
-        public static void DeleteDirectory(string directory, bool recursive = true)
+        public static List<Exception> DeleteDirectory(string directory, bool recursive = true, bool throwException = true)
         {
-            foreach (string file in Directory.GetFiles(directory))
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-            if (recursive)
-                foreach (string d in Directory.GetDirectories(directory))
-                    DeleteDirectory(d, recursive);
-            Directory.Delete(directory, false);
-        }
+            List<Exception> errors = new List<Exception>();
+            deleteDirectory(directory);
+            return errors;
 
-        public static bool DeleteDirectorySteadfastly(string directory, bool recursive = true)
-        {
-            bool error = false;
-            foreach (string file in Directory.GetFiles(directory))
+            void deleteDirectory(string dir)
             {
+                foreach (string file in Directory.GetFiles(directory))
+                {
+                    try
+                    {
+                        File.SetAttributes(file, FileAttributes.Normal);
+                        File.Delete(file);
+                    }
+                    catch (Exception e)
+                    {
+                        if (throwException)
+                            throw;
+                        errors.Add(e);
+                    }
+                }
+                if (recursive)
+                    foreach (string d in Directory.GetDirectories(directory))
+                        deleteDirectory(d);
                 try
                 {
-                    File.SetAttributes(file, FileAttributes.Normal);
-                    File.Delete(file);
+                    Directory.Delete(directory, false);
                 }
-                catch
+                catch (Exception e)
                 {
-                    error = true;
+                    if (throwException)
+                        throw;
+                    errors.Add(e);
                 }
             }
-            if (recursive)
-                foreach (string d in Directory.GetDirectories(directory))
-                    DeleteDirectorySteadfastly(d, recursive);
-            try
-            {
-                Directory.Delete(directory, false);
-            }
-            catch
-            {
-                error = true;
-            }
-            return !error;
         }
 
         /// <summary>

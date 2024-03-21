@@ -86,7 +86,7 @@
             <summary>
             Can be used to initialize an optional Settings field.
             </summary>
-            <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+            <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extension</param>
         </member>
         <member name="M:Cliver.Config.Reset(System.Type,System.String)">
             <summary>
@@ -99,7 +99,7 @@
             <summary>
             Can be used to initialize an optional Settings field.
             </summary>
-            <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+            <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extension</param>
         </member>
         <member name="M:Cliver.Config.Reload(System.Type,System.String)">
             <summary>
@@ -177,7 +177,7 @@
             <summary>
             Allows to get the Settings field's properties before its value has been created (i.e. before the Settings field has been initialized).
             </summary>
-            <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extention</param>
+            <param name="settingsFieldFullName">full name of Settings field; it equals to the name of its storage file without extension</param>
             <returns>Settings field's properties</returns>
         </member>
         <member name="T:Cliver.Encrypted`1">

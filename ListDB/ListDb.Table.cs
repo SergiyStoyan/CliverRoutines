@@ -123,7 +123,7 @@ namespace Cliver
             protected Table(string file, Modes? mode = null)
             {
                 File = file;
-                Name = PathRoutines.GetFileNameWithoutExtention(file);
+                Name = PathRoutines.GetFileNameWithoutExtension(file);
                 if (mode != null)
                     Mode = mode.Value;
                 newFile = file + ".new";
