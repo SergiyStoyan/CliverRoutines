@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Cliver
 {
@@ -286,6 +287,7 @@ namespace Cliver
         {
             lock (lockObject)
             {
+                List<Exception> es = new List<Exception>();
                 bool setBaseDir(string baseDir)
                 {
                     BaseDir = baseDir;
@@ -298,8 +300,9 @@ namespace Cliver
                         File.Delete(testFile);
                         return true;
                     }
-                    catch //(Exception e)
+                    catch (Exception e)
                     {
+                        es.Add(new Exception("No access to " + rootDir, e));
                         rootDir = null;
                         BaseDir = null;
                         return false;
@@ -310,14 +313,15 @@ namespace Cliver
                         if (setBaseDir(baseDir))
                             break;
                 if (rootDir == null)
-                    if (!useDefaultBaseDirs
-                        || !setBaseDir(CompanyUserDataDir)
-                        || !setBaseDir(CompanyCommonDataDir)
-                        || !setBaseDir(Log.AppDir)
-                        || !setBaseDir(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory))
-                        || !setBaseDir(Path.GetTempPath() + Path.DirectorySeparatorChar + CompanyName + Path.DirectorySeparatorChar)
+                    if (!useDefaultBaseDirs || (
+                        !setBaseDir(CompanyUserDataDir)
+                        && !setBaseDir(CompanyCommonDataDir)
+                        && !setBaseDir(Log.AppDir)
+                        && !setBaseDir(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory))
+                        && !setBaseDir(Path.GetTempPath() + Path.DirectorySeparatorChar + CompanyName + Path.DirectorySeparatorChar)
                         )
-                        throw new Exception("Could not write to any of the log base directories.");
+                        )
+                        throw new Exception("Could not write to any of the log base directories.\r\nExceptions:\r\n" + string.Join("\r\n", es.Select(a => GetExceptionMessage2(a))));
 
                 rootDir = PathRoutines.GetNormalizedPath(rootDir, false);
                 if (Directory.Exists(rootDir) && deleteLogsOlderThanDays >= 0 && deletingOldLogsThread?.IsAlive != true)
