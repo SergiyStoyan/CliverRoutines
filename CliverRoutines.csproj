@@ -11,7 +11,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.44.1</Version>
+    <Version>6.45.0</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in most desktop applications and not only them:
@@ -43,7 +43,10 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.44.0 =&gt; 6.44.1
+    <PackageReleaseNotes>6.44.1 =&gt; 6.45.0
+- SleepRoutines upgraded;
+
+6.44.0 =&gt; 6.44.1
 - setBaseDir() fixed;
 
 6.43 =&gt; 6.44

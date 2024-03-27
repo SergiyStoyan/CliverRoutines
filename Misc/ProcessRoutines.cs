@@ -180,7 +180,8 @@ namespace Cliver
                 process.WaitForExit(pollTimeSpanMss);
                 return !process.IsRunning();
             },
-                timeoutMss
+                timeoutMss,
+                0
                 );
         }
 

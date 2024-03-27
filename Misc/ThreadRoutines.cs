@@ -72,7 +72,7 @@ namespace Cliver
         {
             if (thread == null || !thread.IsAlive)
                 return true;
-            return SleepRoutines.WaitForCondition(() => { thread.Abort(); thread.Join(pollTimeSpanMss); return !thread.IsAlive; }, timeoutMss);
+            return SleepRoutines.WaitForCondition(() => { thread.Abort(); thread.Join(pollTimeSpanMss); return !thread.IsAlive; }, timeoutMss, 0);
         }
 
         //static HashSet<Thread> threads = new HashSet<Thread>();
