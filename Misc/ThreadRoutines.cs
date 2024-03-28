@@ -68,11 +68,11 @@ namespace Cliver
             return StartTry(code, onError, finallyCode, background, ApartmentState.STA);
         }
 
-        public static bool TryAbort(this Thread thread, int timeoutMss, int pollTimeSpanMss = 300)
+        public static bool TryAbort(this Thread thread, int timeoutMss, int pollTimeSpanMss = 300, int pollMinNumber = -1)
         {
             if (thread == null || !thread.IsAlive)
                 return true;
-            return SleepRoutines.WaitForCondition(() => { thread.Abort(); thread.Join(pollTimeSpanMss); return !thread.IsAlive; }, timeoutMss, 0);
+            return SleepRoutines.WaitForCondition(() => { thread.Abort(); thread.Join(pollTimeSpanMss); return !thread.IsAlive; }, timeoutMss, pollTimeSpanMss, true, pollMinNumber);
         }
 
         //static HashSet<Thread> threads = new HashSet<Thread>();
