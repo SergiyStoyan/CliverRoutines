@@ -10,7 +10,7 @@ namespace Example
         {
             try
             {
-                //SleepRoutines.WaitForCondition2(()=> { return false; }, 2, 1000, true);
+                //SleepRoutines.WaitForCondition(()=> { return false; }, 2000, 1000, true,3);
 
 
                 Log.Inform("\r\n" + Log.GetAssembliesInfo(nameof(Cliver)));
