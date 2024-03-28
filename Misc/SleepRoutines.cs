@@ -12,19 +12,14 @@ namespace Cliver
 {
     public static class SleepRoutines
     {
-        //public static bool WaitForCondition(Func<bool> condition, int timeoutMss, int pollSpanMss = 10)
-        //{
-        //    DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, timeoutMss);
-        //    for (; ; )
-        //    {
-        //        if (condition())
-        //            return true;
-        //        if (DateTime.Now > dt)
-        //            return false;
-        //        Thread.Sleep(pollSpanMss);
-        //    }
-        //}
-
+        /// <summary>
+        /// Always polls at least 1 time.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="timeoutMss"></param>
+        /// <param name="pollSpanMss"></param>
+        /// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        /// <returns></returns>
         public static bool WaitForCondition(Func<bool> condition, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false)
         {
             if (pollSpanStartsBeforeConditionCheck)
@@ -33,7 +28,7 @@ namespace Cliver
                     DateTime nextPollTime = DateTime.Now.AddMilliseconds(pollSpanMss);
                     if (condition())
                         return true;
-                    if (DateTime.Now > lastDt)
+                    if (DateTime.Now > lastDt || nextPollTime > lastDt)
                         return false;
                     int mss = (int)(nextPollTime - DateTime.Now).TotalMilliseconds;
                     if (mss > 0)
@@ -44,12 +39,56 @@ namespace Cliver
                 {
                     if (condition())
                         return true;
-                    if (DateTime.Now > lastDt)
+                    if (DateTime.Now.AddMilliseconds(pollSpanMss) > lastDt)
                         return false;
                     Thread.Sleep(pollSpanMss);
                 }
         }
 
+        /// <summary>        
+        /// Always polls at least 1 time.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="pollNumber"></param>
+        /// <param name="pollSpanMss"></param>
+        /// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        /// <returns></returns>
+        public static bool WaitForCondition2(Func<bool> condition, int pollNumber, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false)
+        {
+            //if (pollNumber < 1)
+            //    throw new Exception(nameof(pollNumber) + " cannot be < 1.");
+            if (pollSpanStartsBeforeConditionCheck)
+                for (int i = 0; ;)
+                {
+                    DateTime nextPollTime = DateTime.Now.AddMilliseconds(pollSpanMss);
+                    if (condition())
+                        return true;
+                    if (++i >= pollNumber)
+                        return false;
+                    int mss = (int)(nextPollTime - DateTime.Now).TotalMilliseconds;
+                    if (mss > 0)
+                        Thread.Sleep(mss);
+                }
+            else
+                for (int i = 0; ;)
+                {
+                    if (condition())
+                        return true;
+                    if (++i >= pollNumber)
+                        return false;
+                    Thread.Sleep(pollSpanMss);
+                }
+        }
+
+        /// <summary>
+        /// Always polls at least 1 time.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="getObject"></param>
+        /// <param name="timeoutMss"></param>
+        /// <param name="pollSpanMss"></param>
+        /// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        /// <returns></returns>
         public static T WaitForObject<T>(Func<T> getObject, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false) where T : class
         {
             T o = null;
@@ -61,12 +100,25 @@ namespace Cliver
             return o;
         }
 
-        //public static void Wait(int mss, int pollSpanMss = 10)
-        //{
-        //    DateTime dt = DateTime.Now + new TimeSpan(0, 0, 0, 0, mss);
-        //    while (DateTime.Now > dt)
-        //        Thread.Sleep(pollSpanMss);
-        //}
+        /// <summary>
+        /// Always polls at least 1 time.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="getObject"></param>
+        /// <param name="pollNumber"></param>
+        /// <param name="pollSpanMss"></param>
+        /// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        /// <returns></returns>
+        public static T WaitForObject2<T>(Func<T> getObject, int pollNumber, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false) where T : class
+        {
+            T o = null;
+            WaitForCondition2(() =>
+            {
+                o = getObject();
+                return o != null;
+            }, pollNumber, pollSpanMss, pollSpanStartsBeforeConditionCheck);
+            return o;
+        }
     }
 }
 
