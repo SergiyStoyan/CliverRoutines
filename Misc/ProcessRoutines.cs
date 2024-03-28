@@ -164,24 +164,21 @@ namespace Cliver
             return p.TryKill(timeoutMss, pollTimeSpanMss);
         }
 
-        public static bool TryKill(this Process process, int timeoutMss = 1000, int pollTimeSpanMss = 300)
+        public static bool TryKill(this Process process, int timeoutMss = 1000, int pollTimeSpanMss = 300, int pollMinNumber = -1)
         {
             return SleepRoutines.WaitForCondition(() =>
-            {
-                try
                 {
-                    process.Kill();
-                }
-                catch
-                {
-                    // Process already exited.
-                    return true;
-                }
-                process.WaitForExit(pollTimeSpanMss);
-                return !process.IsRunning();
-            },
-                timeoutMss,
-                0
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch
+                    {
+                        return true;// Process already exited.
+                    }
+                    return !process.IsRunning();
+                },
+                timeoutMss, pollTimeSpanMss, true, pollMinNumber
                 );
         }
 

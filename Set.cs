@@ -21,6 +21,11 @@ namespace Cliver
             return string.Join(",", Values.Select(a => a.ToString()));
         }
 
+        public string ToString(string separator)
+        {
+            return string.Join(separator, Values.Select(a => a.ToString()));
+        }
+
         /// <summary>
         /// Create a Set from a collection of values.
         /// </summary>
@@ -84,6 +89,26 @@ namespace Cliver
             foreach (V v in values)
                 Values.Remove(v);
             return (S)this;
+        }
+
+        /// <summary>
+        /// (!)Changes this Set itself.
+        /// </summary>
+        /// <param name="values"></param>
+        public void Append(params V[] values)
+        {
+            foreach (V v in values)
+                Values.Add(v);
+        }
+
+        /// <summary>
+        /// (!)Changes this Set itself.
+        /// </summary>
+        /// <param name="values"></param>
+        public void Remove(params V[] values)
+        {
+            foreach (V v in values)
+                Values.Remove(v);
         }
 
         /// <summary>

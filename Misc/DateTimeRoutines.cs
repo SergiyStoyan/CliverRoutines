@@ -53,6 +53,10 @@ namespace Cliver
             /// </summary>
             readonly public int LengthOfTime = -1;
             /// <summary>
+            /// Position of the string remainder behind the detected date and time
+            /// </summary>
+            readonly public int IndexOfRemainder = -1;
+            /// <summary>
             /// DateTime detected
             /// </summary>
             readonly public DateTime DateTime;
@@ -77,28 +81,27 @@ namespace Cliver
             /// </summary>
             public DateTime UtcDateTime;
 
-            internal ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime, DateTime dateTime)
+            ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime)
             {
                 IndexOfDate = indexOfDate;
                 LengthOfDate = lengthOfDate;
                 IndexOfTime = indexOfTime;
                 LengthOfTime = lengthOfTime;
-                DateTime = dateTime;
+                IndexOfRemainder = IndexOfTime > IndexOfDate ? IndexOfTime + LengthOfTime : IndexOfDate + LengthOfDate;
                 IsDateFound = indexOfDate > -1;
                 IsTimeFound = indexOfTime > -1;
+            }
+
+            internal ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime, DateTime dateTime) : this(indexOfDate, lengthOfDate, indexOfTime, lengthOfTime)
+            {
+                DateTime = dateTime;
                 UtcOffset = new TimeSpan(25, 0, 0);
                 IsUtcOffsetFound = false;
                 UtcDateTime = new DateTime(1, 1, 1);
             }
 
-            internal ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime, DateTime dateTime, TimeSpan utcOffset)
+            internal ParsedDateTime(int indexOfDate, int lengthOfDate, int indexOfTime, int lengthOfTime, DateTime dateTime, TimeSpan utcOffset) : this(indexOfDate, lengthOfDate, indexOfTime, lengthOfTime)
             {
-                IndexOfDate = indexOfDate;
-                LengthOfDate = lengthOfDate;
-                IndexOfTime = indexOfTime;
-                LengthOfTime = lengthOfTime;
-                IsDateFound = indexOfDate > -1;
-                IsTimeFound = indexOfTime > -1;
                 UtcOffset = utcOffset;
                 IsUtcOffsetFound = Math.Abs(utcOffset.TotalHours) < 12;
                 if (!IsUtcOffsetFound)
