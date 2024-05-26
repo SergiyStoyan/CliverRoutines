@@ -77,6 +77,7 @@ namespace CliverRoutinesTests
         List<DTTest> get_tests2()
         {
             List<DTTest> tests = get_tests1();
+            tests.Add(new DTTest(@"Your program recognizes string : 05/07/2024 Tue 06:01 AM blah blah", new DateTime(2024, 5, 7, 6, 1, 0, DateTimeKind.Utc)));
             tests.Add(new DTTest(@"Your program recognizes string : 21 Jun 2010 04:20:19 -0430 blah blah", new DateTime(2010, 6, 20, 23, 50, 19, DateTimeKind.Utc)));
             tests.Add(new DTTest(@"Your program recognizes string : 21 Jun 2010 04:20:19 UTC blah blah", new DateTime(2010, 6, 21, 4, 20, 19, DateTimeKind.Utc)));
             tests.Add(new DTTest(@"Your program recognizes string : 21 Jun 2010 04:20:19 EST blah blah", new DateTime(2010, 6, 20, 23, 20, 19, DateTimeKind.Utc)));
@@ -86,6 +87,7 @@ namespace CliverRoutinesTests
         List<DTTest> get_tests1()
         {
             List<DTTest> tests = new List<DTTest>();
+            tests.Add(new DTTest(@"Member since:  05/07/2024 Tue 06:02 AM", new DateTime(2024, 5, 7, 6, 2, 0)));
             tests.Add(new DTTest(@"Member since:  	10-Feb-2008", new DateTime(2008, 2, 10, 0, 0, 0)));
             tests.Add(new DTTest(@"Last Update: 18:16 11 Feb '08 ", new DateTime(2008, 2, 11, 18, 16, 0)));
             tests.Add(new DTTest(@"date	Tue, Feb 10, 2008 at 11:06 AM", new DateTime(2008, 2, 10, 11, 06, 0)));
