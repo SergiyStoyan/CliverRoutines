@@ -53,6 +53,14 @@ namespace Cliver
             /// </summary>
             readonly public int LengthOfTime = -1;
             /// <summary>
+            /// Position of the substring containing the detected date and/or time
+            /// </summary>
+            readonly public int IndexOfStart = -1;
+            /// <summary>
+            /// Length of the substring containing the detected date and/or time
+            /// </summary>
+            readonly public int LengthOfDateTime = -1;
+            /// <summary>
             /// Position of the string remainder behind the detected date and time
             /// </summary>
             readonly public int IndexOfRemainder = -1;
@@ -87,7 +95,11 @@ namespace Cliver
                 LengthOfDate = lengthOfDate;
                 IndexOfTime = indexOfTime;
                 LengthOfTime = lengthOfTime;
-                IndexOfRemainder = IndexOfTime > IndexOfDate ? IndexOfTime + LengthOfTime : IndexOfDate + LengthOfDate;
+                IndexOfStart = IndexOfDate < IndexOfTime ? IndexOfDate : IndexOfTime;
+                int dl = IndexOfDate + LengthOfDate;
+                int tl = IndexOfTime + LengthOfTime;
+                IndexOfRemainder = dl < tl ? tl : dl;
+                LengthOfDateTime = IndexOfRemainder - IndexOfStart;
                 IsDateFound = indexOfDate > -1;
                 IsTimeFound = indexOfTime > -1;
             }
