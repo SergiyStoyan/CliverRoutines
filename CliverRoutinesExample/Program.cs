@@ -12,6 +12,9 @@ namespace Example
             {
                 //SleepRoutines.WaitForCondition(()=> { return false; }, 2000, 1000, true,3);
 
+                DateTimeRoutines.TryParseDateOrTime("05/07/2024 Tue 06:00 AM", DateTimeRoutines.DateTimeFormat.USA_DATE, out DateTimeRoutines.ParsedDateTime dateOut);
+             
+
 
                 Log.Inform("\r\n" + Log.GetAssembliesInfo(nameof(Cliver)));
 

@@ -373,12 +373,13 @@ namespace Cliver
             Match m;
             if (parsedDate != null && parsedDate.IndexOfDate > -1)
             {//look around the found date
+                string ts = str.Substring(parsedDate.IndexOfDate + parsedDate.LengthOfDate);
                 //look for <date> hh:mm:ss <UTC offset> 
-                m = Regex.Match(str.Substring(parsedDate.IndexOfDate + parsedDate.LengthOfDate), @"(?<=^\s*,?\s+|^\s*at\s*|^\s*[T\-]\s*)(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})(?=$|[^\d\w])", RegexOptions.Compiled);
+                m = Regex.Match(ts, @"(?<=^\s+[^\d\s]*\s+|^\s*[T\-]\s*)(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})(?=$|[^\d\w])", RegexOptions.Compiled);
                 if (!m.Success)
                 {
                     //look for <date> [h]h:mm[:ss] [PM/AM] [UTC/GMT] 
-                    m = Regex.Match(str.Substring(parsedDate.IndexOfDate + parsedDate.LengthOfDate), @"(?<=^\s*,?\s+|^\s*at\s*|^\s*[T\-]\s*)(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
+                    m = Regex.Match(ts, @"(?<=^\s+[^\d\s]*\s+|^\s*[T\-]\s*)(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
                     if (!m.Success)
                     {
                         //look for [h]h:mm:ss [PM/AM] [UTC/GMT] <date>

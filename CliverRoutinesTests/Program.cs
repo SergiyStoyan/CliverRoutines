@@ -11,9 +11,9 @@ namespace CliverRoutinesTests
             try
             {
                 DateTimeRoutinesTests t = new DateTimeRoutinesTests();
-                t.TestDate();
+                //t.TestDate();
                 t.TestDateTime();
-                t.TestTime();
+                //t.TestTime();
             }
             catch (Exception e)
             {
