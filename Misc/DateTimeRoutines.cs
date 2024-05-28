@@ -371,22 +371,35 @@ namespace Cliver
                 time_zone_r = @"(?:\s*(?'time_zone'UTC|GMT))?";
 
             Match m;
+            int timeIndex = -1;
             if (parsedDate != null && parsedDate.IndexOfDate > -1)
             {//look around the found date
                 string ts = str.Substring(parsedDate.IndexOfDate + parsedDate.LengthOfDate);
                 //look for <date> hh:mm:ss <UTC offset> 
-                m = Regex.Match(ts, @"^\s*(?:,?\s|[\D\S]+\s|[T\-])?\s*(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})(?=$|[^\d\w])", RegexOptions.Compiled);
-                if (!m.Success)
+                m = Regex.Match(ts, @"(?<=^\s*(?:,?\s|[\D\S]+\s|[T\-])?\s*)(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})(?=$|[^\d\w])", RegexOptions.Compiled);
+                if (m.Success)
+                    timeIndex = parsedDate.IndexOfDate + parsedDate.LengthOfDate + m.Groups["hour"].Index;
+                else
                 {
                     //look for <date> [h]h:mm[:ss] [PM/AM] [UTC/GMT] 
-                    m = Regex.Match(ts, @"^\s*(?:,?\s|[\D\S]+\s|[T\-])?\s*(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
-                    if (!m.Success)
+                    m = Regex.Match(ts, @"(?<=^\s*(?:,?\s|[\D\S]+\s|[T\-])?\s*)(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
+                    if (m.Success)
+                        timeIndex = parsedDate.IndexOfDate + parsedDate.LengthOfDate + m.Groups["hour"].Index;
+                    else
                     {
                         //look for [h]h:mm:ss [PM/AM] [UTC/GMT] <date>
                         m = Regex.Match(str.Substring(0, parsedDate.IndexOfDate), @"(?<=^|[^\d])(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[\s,]+)", RegexOptions.Compiled);
-                        if (!m.Success)
+                        if (m.Success)
+                            timeIndex = m.Groups["hour"].Index;
+                        else
+                        {
                             //look for [h]h:mm:ss [PM/AM] [UTC/GMT] within <date>
                             m = Regex.Match(str.Substring(parsedDate.IndexOfDate, parsedDate.LengthOfDate), @"(?<=^|[^\d])(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[\s,]+)", RegexOptions.Compiled);
+                            if (m.Success)
+                                timeIndex = parsedDate.IndexOfDate + m.Groups["hour"].Index;
+                            else
+                                return false;
+                        }
                     }
                 }
             }
@@ -394,13 +407,18 @@ namespace Cliver
             {
                 //look for hh:mm:ss <UTC offset> 
                 m = Regex.Match(str, @"(?<=^|\s+|\s*T\s*)(?'hour'\d{2})\s*:\s*(?'minute'\d{2})\s*:\s*(?'second'\d{2})\s+(?'offset_sign'[\+\-])(?'offset_hh'\d{2}):?(?'offset_mm'\d{2})?(?=$|[^\d\w])", RegexOptions.Compiled);
-                if (!m.Success)
+                if (m.Success)
+                    timeIndex = m.Groups["hour"].Index;
+                else
+                {
                     //look for [h]h:mm[:ss] [PM/AM] [UTC/GMT]
                     m = Regex.Match(str, @"(?<=^|\s+|\s*T\s*)(?'hour'\d{1,2})\s*:\s*(?'minute'\d{2})\s*(?::\s*(?'second'\d{2}))?(?:\s*(?'ampm'AM|am|PM|pm))?" + time_zone_r + @"(?=$|[^\d\w])", RegexOptions.Compiled);
+                    if (m.Success)
+                        timeIndex = m.Groups["hour"].Index;
+                    else
+                        return false;
+                }
             }
-
-            if (!m.Success)
-                return false;
 
             //try
             //{
@@ -436,7 +454,7 @@ namespace Cliver
                 TimeSpan utcOffset = new TimeSpan(offset_hh, offset_mm, 0);
                 if (m.Groups["offset_sign"].Value == "-")
                     utcOffset = -utcOffset;
-                parsedTime = new ParsedDateTime(-1, -1, m.Index, m.Length, dateTime, utcOffset);
+                parsedTime = new ParsedDateTime(-1, -1, timeIndex, m.Length, dateTime, utcOffset);
                 return true;
             }
 
@@ -458,11 +476,11 @@ namespace Cliver
                     default:
                         throw new Exception("Time zone: " + m.Groups["time_zone"].Value + " is not defined.");
                 }
-                parsedTime = new ParsedDateTime(-1, -1, m.Index, m.Length, dateTime, utcOffset);
+                parsedTime = new ParsedDateTime(-1, -1, timeIndex, m.Length, dateTime, utcOffset);
                 return true;
             }
 
-            parsedTime = new ParsedDateTime(-1, -1, m.Index, m.Length, dateTime);
+            parsedTime = new ParsedDateTime(-1, -1, timeIndex, m.Length, dateTime);
             //}
             //catch(Exception e)
             //{
