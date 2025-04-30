@@ -31,26 +31,26 @@ namespace Cliver
             return t;
         }
 
-        //static public Serializable __Load(Type serializableType, string file)
-        //{
-        //    Serializable t = get(serializableType, file, InitMode.LOAD);
-        //    t.__Loaded();
-        //    return t;
-        //}
+        static public Serializable __Load(Type serializableType, string file)
+        {
+            Serializable t = get(serializableType, file, InitMode.LOAD);
+            t.__Loaded();
+            return t;
+        }
 
-        //static public Serializable __LoadOrCreate(Type serializableType, string file)
-        //{
-        //    Serializable t = get(serializableType, file, InitMode.LOAD_OR_CREATE);
-        //    t.__Loaded();
-        //    return t;
-        //}
+        static public Serializable __LoadOrCreate(Type serializableType, string file)
+        {
+            Serializable t = get(serializableType, file, InitMode.LOAD_OR_CREATE);
+            t.__Loaded();
+            return t;
+        }
 
-        //static public Serializable __Create(Type serializableType, string file)
-        //{
-        //    Serializable t = get(serializableType, file, InitMode.CREATE);
-        //    t.__Loaded();
-        //    return t;
-        //}
+        static public Serializable __Create(Type serializableType, string file)
+        {
+            Serializable t = get(serializableType, file, InitMode.CREATE);
+            t.__Loaded();
+            return t;
+        }
 
         static Serializable get(Type serializableType, string file, InitMode initMode)
         {
@@ -90,17 +90,17 @@ namespace Cliver
         [Newtonsoft.Json.JsonIgnore]
         public bool __Indented = true;
 
-        virtual public void __Loaded()
+        virtual protected void __Loaded()
         {
 
         }
 
-        virtual public void __Saving()
+        virtual protected void __Saving()
         {
 
         }
 
-        virtual public void __Saved()
+        virtual protected void __Saved()
         {
 
         }

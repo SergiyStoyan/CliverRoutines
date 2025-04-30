@@ -11,7 +11,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.50.0</Version>
+    <Version>6.51.0</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in most desktop applications and not only them:
@@ -48,7 +48,13 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.48.0 =&gt; 6.49.0
+    <PackageReleaseNotes>6.49.0 =&gt; 6.51.0
+- Serializable updated;
+- Trier2 added;
+- DateTimeRoutines::IndexOfTime fixed;
+- HandyList updated;
+
+6.48.0 =&gt; 6.49.0
 - DateTimeRoutines updated;
 
 6.47.0 =&gt; 6.48.0

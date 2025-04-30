@@ -13,7 +13,7 @@ namespace Cliver
 {
     /// <summary>
     /// Features:
-    /// - auto-disposing IDisposable values which have left the list;
+    /// - auto-disposing IDisposable Values which have left the list;
     /// </summary>
     /// <typeparam name="VT"></typeparam>
     public class HandyList<VT> : IDisposable, IEnumerable<VT> //where VT: class
@@ -25,7 +25,7 @@ namespace Cliver
 
         public HandyList(IEnumerable<VT> list)
         {
-            values = list.ToList();
+            Values = list.ToList();
         }
 
         ~HandyList()
@@ -37,10 +37,10 @@ namespace Cliver
         {
             lock (this)
             {
-                if (values != null)
+                if (Values != null)
                 {
                     Clear();
-                    values = null;
+                    Values = null;
                 }
             }
         }
@@ -49,10 +49,10 @@ namespace Cliver
         {
             lock (this)
             {
-                foreach (VT v in values)
+                foreach (VT v in Values)
                     if (v != null && v is IDisposable)
                         ((IDisposable)v).Dispose();
-                values.Clear();
+                Values.Clear();
             }
         }
 
@@ -60,8 +60,8 @@ namespace Cliver
         {
             lock (this)
             {                
-                    dispose(values[index]);
-                values.RemoveAt(index);
+                    dispose(Values[index]);
+                Values.RemoveAt(index);
             }
         }
 
@@ -72,7 +72,7 @@ namespace Cliver
                 if (value == null || !(value is IDisposable))
                     return;
                 int vKeyCount = 0;
-                values.Where(a => a.Equals(value)).TakeWhile(a => ++vKeyCount < 2);
+                Values.Where(a => a.Equals(value)).TakeWhile(a => ++vKeyCount < 2);
                 if (vKeyCount < 2)//make sure it is the only inclusion of the object
                     ((IDisposable)value).Dispose();
             }
@@ -90,30 +90,34 @@ namespace Cliver
             {
                 lock (this)
                 {
-                    return values[index];
+                    return Values[index];
                 }
             }
             set
             {
                 lock (this)
                 {
-                    VT v = values[index];
+                    VT v = Values[index];
                     if (v != null && !v.Equals(value))
                     {
                         int vKeyCount = 0;
-                        values.Where(a => a.Equals(v)).TakeWhile(a => ++vKeyCount < 2);
+                        Values.Where(a => a.Equals(v)).TakeWhile(a => ++vKeyCount < 2);
                         if (vKeyCount < 2)//make sure it is the only inclusion of the object
                             dispose(v);
                     }
-                    values[index] = value;
+                    Values[index] = value;
                 }
             }
         }
-        List<VT> values = new List<VT>();
+
+        /// <summary>
+        /// Underlaying List which can be used for the ordinary operations.
+        /// </summary>
+    public    List<VT> Values { get; private set; } = new List<VT>();
 
         public IEnumerator<VT> GetEnumerator()
         {
-            return values.GetEnumerator();
+            return Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -123,25 +127,20 @@ namespace Cliver
 
         public void Add(VT value)
         {
-           values.Add(value);
+           Values.Add(value);
         }
 
         public int Count
         {
             get
             {
-                return values.Count;
+                return Values.Count;
             }
         }
 
         public List<VT> GetRange(int index, int count)
         {
-            return values.GetRange(index, count);
-        }
-
-        public List<VT> AsList()
-        {
-            return values;
+            return Values.GetRange(index, count);
         }
     }
 }

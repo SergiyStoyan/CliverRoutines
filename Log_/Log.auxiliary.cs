@@ -203,7 +203,7 @@ namespace Cliver
         /// <summary>
         /// Return name of the method which called this function
         /// </summary>
-        /// <param name="name">don't change it</param>
+        /// <param name="name">(!)don't set it</param>
         /// <returns>name of the calling method</returns>
         static public string GetThisMethodName([System.Runtime.CompilerServices.CallerMemberName] string name = "undefined")
         {
