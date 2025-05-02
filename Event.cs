@@ -83,6 +83,14 @@ namespace Cliver
             }
         }
 
+        public void RemoveHandlers(Action<ArgumentT> action)
+        {
+            lock (this)
+            {
+                Handlers.RemoveAll(a => a.Action == action);
+            }
+        }
+
         public bool __Subscribed
         {
             get
