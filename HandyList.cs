@@ -59,9 +59,19 @@ namespace Cliver
         public void RemoveAt(int index)
         {
             lock (this)
-            {                
-                    dispose(Values[index]);
+            {
+                var v = Values[index];
                 Values.RemoveAt(index);
+                dispose(v);
+            }
+        }
+
+        public void Remove(VT value)
+        {
+            lock (this)
+            {
+                Values.Remove(value);
+                dispose(value);
             }
         }
 
@@ -113,7 +123,7 @@ namespace Cliver
         /// <summary>
         /// Underlaying List which can be used for the ordinary operations.
         /// </summary>
-    public    List<VT> Values { get; private set; } = new List<VT>();
+        public List<VT> Values { get; private set; } = new List<VT>();
 
         public IEnumerator<VT> GetEnumerator()
         {
@@ -127,7 +137,7 @@ namespace Cliver
 
         public void Add(VT value)
         {
-           Values.Add(value);
+            Values.Add(value);
         }
 
         public int Count

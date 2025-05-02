@@ -45,9 +45,78 @@ namespace Cliver
         }
         abstract protected IEnumerable<RecordT> read();
 
-        public class Tsv : StorageFile<RecordT>
+        //public class Tsv : StorageFile<RecordT>
+        //{
+        //    public Tsv(string file) : base(file)
+        //    {
+        //        foreach (FieldInfo fi in typeof(RecordT).GetFields())
+        //            if (fi.GetCustomAttribute<FieldPreparation.IgnoredField>() == null)
+        //                fis.Add(fi);
+        //        if (fis.Count == 0)
+        //            throw new Exception("Record type " + typeof(RecordT).Name + " has no serilazable fields.");
+        //    }
+        //    readonly List<FieldInfo> fis = new List<FieldInfo>();
+
+        //    override protected void write(IEnumerable<RecordT> records, bool append = true)
+        //    {
+        //        using (TextWriter tw = new StreamWriter(File, append))
+        //        {
+        //            FileInfo fileInfo = new FileInfo(File);
+        //            if (!append || !fileInfo.Exists || fileInfo.Length == 0)
+        //            {
+        //                List<string> hs = new List<string>();
+        //                foreach (FieldInfo fi in fis)
+        //                    hs.Add(fi.Name);
+        //                tw.WriteLine(getLine(hs));
+        //            }
+        //            foreach (RecordT r in records)
+        //                tw.WriteLine(getLine(r));
+        //        }
+        //    }
+        //    string getLine(RecordT record)
+        //    {
+        //        IEnumerable<object> getValues()
+        //        {
+        //            foreach (FieldInfo fi in fis)
+        //                yield return fi.GetValue(record);
+        //        }
+        //        return getLine(getValues());
+        //    }
+        //    string getLine(IEnumerable<object> values)
+        //    {
+        //        List<string> ss = new List<string>();
+        //        foreach (object v in values)
+        //        {
+        //            string s = v == null ? "" : Regex.Replace(v.ToString(), @"\t+", " ");
+        //            ss.Add(s);
+        //        }
+        //        return string.Join("\t", ss);
+        //    }
+
+        //    override protected IEnumerable<RecordT> read()
+        //    {
+        //        if (System.IO.File.Exists(File))
+        //            using (TextReader tr = new StreamReader(File))
+        //            {
+        //                string l = tr.ReadLine();//pass off the header
+        //                for (l = tr.ReadLine(); l != null; l = tr.ReadLine())
+        //                {
+        //                    string[] vs = l.Split('\t');
+        //                    //RecordT d = Activator.CreateInstance<RecordT>();
+        //                    RecordT r = new RecordT();
+        //                    for (int i = 0; i < fis.Count; i++)
+        //                        fis[i].SetValue(r, Convert.ChangeType(vs[i], fis[i].FieldType));
+        //                    yield return r;
+        //                }
+        //            }
+        //    }
+        //}
+        abstract public class Sv : StorageFile<RecordT>
         {
-            public Tsv(string file) : base(file)
+            protected abstract string regexSeparator { get; } //@"\t"
+            protected abstract char charSeparator { get; } //'\t'
+
+            public Sv(string file) : base(file)
             {
                 foreach (FieldInfo fi in typeof(RecordT).GetFields())
                     if (fi.GetCustomAttribute<FieldPreparation.IgnoredField>() == null)
@@ -87,7 +156,7 @@ namespace Cliver
                 List<string> ss = new List<string>();
                 foreach (object v in values)
                 {
-                    string s = v == null ? "" : Regex.Replace(v.ToString(), @"\t+", " ");
+                    string s = v == null ? "" : Regex.Replace(v.ToString(), regexSeparator + "+", " ");
                     ss.Add(s);
                 }
                 return string.Join("\t", ss);
@@ -101,7 +170,7 @@ namespace Cliver
                         string l = tr.ReadLine();//pass off the header
                         for (l = tr.ReadLine(); l != null; l = tr.ReadLine())
                         {
-                            string[] vs = l.Split('\t');
+                            string[] vs = l.Split(charSeparator);
                             //RecordT d = Activator.CreateInstance<RecordT>();
                             RecordT r = new RecordT();
                             for (int i = 0; i < fis.Count; i++)
@@ -110,6 +179,22 @@ namespace Cliver
                         }
                     }
             }
+        }
+
+        public class Tsv : Sv
+        {
+            protected override string regexSeparator { get; } = @"\t";
+            protected override char charSeparator { get; } = '\t';
+
+            public Tsv(string file) : base(file) { }
+        }
+
+        public class Csv : Sv
+        {
+            protected override string regexSeparator { get; } = @",";
+            protected override char charSeparator { get; } = ',';
+
+            public Csv(string file) : base(file) { }
         }
 
         public class Json : StorageFile<RecordT>

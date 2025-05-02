@@ -15,27 +15,62 @@ namespace Cliver
 
         public class Handler
         {
-            public Action<ArgumentT> Action { get; internal set; }
-            public bool Synchronous { get; internal set; }
+            public Action<ArgumentT> Action
+            {
+                get
+                {
+                    if (whileAliveObjectWeakRef == null || whileAliveObjectWeakRef.TryGetTarget(out object o))
+                        return action;
+                    return null;
+                }
+            }
+            Action<ArgumentT> action;
+            readonly WeakReference<object> whileAliveObjectWeakRef;
 
-            internal Handler() { }
+            public readonly bool Synchronous;
+
+            internal Handler(Action<ArgumentT> action, bool synchronous, object whileAliveObject)
+            {
+                this.action = action;
+                if (whileAliveObject != null)
+                    whileAliveObjectWeakRef = new WeakReference<object>(whileAliveObject, false);
+                Synchronous = synchronous;
+            }
         }
 
         public int HandlersCount { get { return Handlers.Count; } }
 
-        public Handler AddHandler(Action<ArgumentT> action, bool synchronous, bool uniqueAction = true)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="synchronous"></param>
+        /// <param name="uniqueAction"></param>
+        /// <param name="whileAliveObject">if set, callback depends on the weak reference to this object</param>
+        /// <returns></returns>
+        public Handler AddHandler(Action<ArgumentT> action, bool synchronous, bool uniqueAction = true, object whileAliveObject = null)
         {
             lock (this)
             {
                 if (uniqueAction && Handlers.Find(a => a.Action == action) != null)
                     return null;
-                Handler h = new Handler { Action = action, Synchronous = synchronous };
+                Handler h = new Handler(action, synchronous, whileAliveObject);
                 Handlers.Add(h);
                 return h;
             }
         }
 
-        public Handler InsertHandler(Handler beforeHandler, Action<ArgumentT> action, bool synchronous, bool uniqueAction = true)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeHandler"></param>
+        /// <param name="action"></param>
+        /// <param name="synchronous"></param>
+        /// <param name="uniqueAction"></param>
+        /// <param name="whileAliveObject">if set, callback depends on the weak reference to this object</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public Handler InsertHandler(Handler beforeHandler, Action<ArgumentT> action, bool synchronous, bool uniqueAction = true, object whileAliveObject = null)
         {
             lock (this)
             {
@@ -45,8 +80,8 @@ namespace Cliver
                 int bhi = Handlers.IndexOf(beforeHandler);
                 if (bhi < 0)
                     throw new Exception("No beforeHandler found: " + beforeHandler.ToString());
-                Handler h = new Handler { Action = action, Synchronous = synchronous };
-                Handlers.Insert(bhi, new Handler { Action = action, Synchronous = synchronous });
+                Handler h = new Handler(action, synchronous, whileAliveObject);
+                Handlers.Insert(bhi, new Handler(action, synchronous, whileAliveObject));
                 return h;
             }
         }
@@ -83,6 +118,14 @@ namespace Cliver
             }
         }
 
+        public void RemoveHandlers(Action<ArgumentT> action)
+        {
+            lock (this)
+            {
+                Handlers.RemoveAll(a => a.Action == action);
+            }
+        }
+
         public bool __Subscribed
         {
             get
@@ -113,11 +156,20 @@ namespace Cliver
         {
             lock (this)
             {
-                foreach (var h in Handlers)
+                for (int i = Handlers.Count - 1; i >= 0; i--)
+                {
+                    var h = Handlers[i];
+                    var a = h.Action;
+                    if (a == null)
+                    {
+                        Handlers.RemoveAt(i);
+                        continue;
+                    }
                     if (h.Synchronous)
-                        h.Action.Invoke(argument);
+                        a.Invoke(argument);
                     else
-                        h.Action.BeginInvoke(argument);
+                        a.BeginInvoke(argument);
+                }
             }
         }
     }

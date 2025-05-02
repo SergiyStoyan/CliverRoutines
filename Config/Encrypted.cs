@@ -43,7 +43,7 @@ namespace Cliver
         /// <summary>
         /// Decrypted value to be used in the custom code.
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public T Value
         {
             get

@@ -5,8 +5,7 @@
 //********************************************************************************************
 using System;
 using System.Threading;
-using System.Collections.Generic;
-
+using System.Threading.Tasks;
 
 namespace Cliver
 {
@@ -52,6 +51,22 @@ namespace Cliver
                     Thread.Sleep(pollSpanMss);
                 }
         }
+
+        ///// <summary>
+        ///// Always polls at least 1 time.
+        ///// </summary>
+        ///// <param name="condition"></param>
+        ///// <param name="timeoutMss"></param>
+        ///// <param name="pollSpanMss"></param>
+        ///// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        ///// <param name="pollMinNumber"></param>
+        ///// <returns></returns>
+        //public static Task<bool> WaitForConditionAsync(Func<bool> condition, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false, int pollMinNumber = -1)
+        //{
+        //    Task<bool> t = new Task<bool>(() => { return WaitForCondition(condition, timeoutMss, pollSpanMss, pollSpanStartsBeforeConditionCheck, pollMinNumber); });
+        //    t.Start();
+        //    return t;
+        //}
 
         ///// <summary>        
         ///// Always polls at least 1 time.
@@ -108,6 +123,23 @@ namespace Cliver
             }, timeoutMss, pollSpanMss, pollSpanStartsBeforeConditionCheck, pollMinNumber);
             return o;
         }
+
+        ///// <summary>
+        ///// Always polls at least 1 time.
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="getObject"></param>
+        ///// <param name="timeoutMss"></param>
+        ///// <param name="pollSpanMss"></param>
+        ///// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        ///// <param name="pollMinNumber"></param>
+        ///// <returns></returns>
+        //public static Task<T> WaitForObjectAsync<T>(Func<T> getObject, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false, int pollMinNumber = -1) where T : class
+        //{
+        //    Task<T> t = new Task<T>(() => { return WaitForObject(getObject, timeoutMss, pollSpanMss, pollSpanStartsBeforeConditionCheck, pollMinNumber); });
+        //    t.Start();
+        //    return t;
+        //}
 
         ///// <summary>
         ///// Always polls at least 1 time.
