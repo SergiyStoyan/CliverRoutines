@@ -15,6 +15,7 @@ namespace Cliver
     /// <summary>
     /// (!)Deprecated. Replaced with Endec class.
     /// </summary>
+    [Obsolete("Deprecated, please use Endec class instead.")]
     public abstract class Crypto
     {
         abstract public byte[] Encrypt(byte[] bytes);
