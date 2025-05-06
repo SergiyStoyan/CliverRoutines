@@ -60,8 +60,18 @@ namespace Cliver
         {
             lock (this)
             {
-                dispose(Values[index]);
+                var v = Values[index];
                 Values.RemoveAt(index);
+                dispose(v);
+            }
+        }
+
+        public void Remove(VT value)
+        {
+            lock (this)
+            {
+                Values.Remove(value);
+                dispose(value);
             }
         }
 
