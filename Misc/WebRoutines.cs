@@ -14,9 +14,14 @@ namespace Cliver
 {
     public static class WebRoutines
     {
-        static public string GetUrlQuery(Dictionary<string, string> names2value)
+        static public string GetUrlQuery(Dictionary<string, object> names2value)
         {
-            return string.Join("&", names2value.Select(n2v => WebUtility.UrlEncode(n2v.Key) + "=" + WebUtility.UrlEncode(n2v.Value)));
+            return GetUrlQuery(names2value.Select(n2v => (n2v.Key, n2v.Value)));
+        }
+
+        static public string GetUrlQuery(IEnumerable<(string Name, object Value)> names2value)
+        {
+            return string.Join("&", names2value.Select(n2v => WebUtility.UrlEncode(n2v.Name) + "=" + WebUtility.UrlEncode(n2v.Value.ToString())));
         }
 
         static public string GetUrlEncoded(string value)
