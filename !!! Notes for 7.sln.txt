@@ -1,3 +1,4 @@
 ﻿- add __ to all methods in Settings;
 - move SleepRoutines to ThreadRoutines;
+- migrate from Newtonsoft.Json to System.Text.Json,
 - add to Config the entire serializer configuration, or even probably possibility to use any serializer which corresponds the interface;
