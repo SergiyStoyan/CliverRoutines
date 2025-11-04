@@ -13,7 +13,27 @@ namespace Cliver
     public static class TaskRoutines
     {
         /// <summary>
-        /// Execute's an async Task<T> method which has a void return value synchronously
+        /// Execute synchronously an async Task<T> method which returns void.
+        /// </summary>
+        /// <param name="task"></param>
+        public static void RunSync(this Task task)
+        {
+            RunSynchronously(() => task);
+        }
+
+        /// <summary>
+        /// Execute synchronously an async Task<T> method which returns a T value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="task"></param>
+        /// <returns></returns>
+        public static T RunSync<T>(this Task<T> task)
+        {
+            return RunSynchronously(() => task);
+        }
+
+        /// <summary>
+        /// Execute synchronously an async Task<T> method which returns void.
         /// </summary>
         /// <param name="task">Task<T> method to execute</param>
         public static void RunSynchronously(Func<Task> task)
@@ -43,7 +63,7 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Execute's an async Task<T> method which has a T return type synchronously
+        /// Execute synchronously an async Task<T> method which returns a T value.
         /// </summary>
         /// <typeparam name="T">Return Type</typeparam>
         /// <param name="task">Task<T> method to execute</param>

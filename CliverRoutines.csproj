@@ -11,7 +11,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.52.1</Version>
+    <Version>6.53.0</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in most desktop applications and not only them:
@@ -48,7 +48,10 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.49.0 =&gt; 6.51.1
+    <PackageReleaseNotes>6.52 =&gt; 6.53.0
+- RunSync(this Task task) added;
+
+6.49.0 =&gt; 6.52.1
 - Unix epoch methods added;
 - StorageFile.Tsv redefined, StorageFile.Csv added;
 - HandyList enhanced;
@@ -138,7 +141,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
