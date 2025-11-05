@@ -15,28 +15,8 @@ namespace Cliver
         /// <summary>
         /// Execute synchronously an async Task<T> method which returns void.
         /// </summary>
-        /// <param name="task"></param>
-        public static void RunSync(this Task task)
-        {
-            RunSynchronously(() => task);
-        }
-
-        /// <summary>
-        /// Execute synchronously an async Task<T> method which returns a T value.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="task"></param>
-        /// <returns></returns>
-        public static T RunSync<T>(this Task<T> task)
-        {
-            return RunSynchronously(() => task);
-        }
-
-        /// <summary>
-        /// Execute synchronously an async Task<T> method which returns void.
-        /// </summary>
         /// <param name="task">Task<T> method to execute</param>
-        public static void RunSynchronously(Func<Task> task)
+        public static void RunSync(Func<Task> task)
         {
             var oldContext = SynchronizationContext.Current;
             var synch = new ExclusiveSynchronizationContext();
@@ -68,7 +48,7 @@ namespace Cliver
         /// <typeparam name="T">Return Type</typeparam>
         /// <param name="task">Task<T> method to execute</param>
         /// <returns></returns>
-        public static T RunSynchronously<T>(Func<Task<T>> task)
+        public static T RunSync<T>(Func<Task<T>> task)
         {
             var oldContext = SynchronizationContext.Current;
             var synch = new ExclusiveSynchronizationContext();
@@ -136,7 +116,7 @@ namespace Cliver
                     {
                         task.sendOrPostCallback(task.state);
                         if (InnerException != null)
-                            throw new Exception(nameof(TaskRoutines.RunSynchronously) + " method threw an exception.", InnerException);
+                            throw new Exception(nameof(TaskRoutines.RunSync) + " method threw an exception.", InnerException);
                     }
                     else
                     {
