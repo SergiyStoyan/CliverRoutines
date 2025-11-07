@@ -1,4 +1,5 @@
 ﻿- add __ to all methods in Settings;
-- move SleepRoutines to ThreadRoutines;
-- migrate from Newtonsoft.Json to System.Text.Json,
-- add to Config the entire serializer configuration, or even probably possibility to use any serializer which corresponds the interface;
+- ? move SleepRoutines to ThreadRoutines;
+- ? migrate from Newtonsoft.Json to System.Text.Json (the latter does not support ploymorphism),
+- ? add to Config the entire serializer configuration, or even probably possibility to use any serializer which corresponds the interface 
+(what is the goal? An interace can be introduced but the veriety of attributes cannot be replaced);

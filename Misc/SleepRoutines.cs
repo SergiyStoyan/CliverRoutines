@@ -52,6 +52,38 @@ namespace Cliver
                 }
         }
 
+        async public static Task<bool> WaitForConditionAsync(Func<Task<bool>> conditionAsync, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false, int pollMinNumber = -1)
+        {
+            int pollNumber = 0;
+            if (pollSpanStartsBeforeConditionCheck)
+                for (DateTime lastDt = DateTime.Now.AddMilliseconds(timeoutMss); ;)
+                {
+                    DateTime nextPollTime = DateTime.Now.AddMilliseconds(pollSpanMss);
+                    if (await conditionAsync())
+                        return true;
+                    pollNumber++;
+                    if ((DateTime.Now > lastDt || nextPollTime > lastDt)
+                        && (pollNumber >= pollMinNumber)
+                        )
+                        return false;
+                    int mss = (int)(nextPollTime - DateTime.Now).TotalMilliseconds;
+                    if (mss > 0)
+                        await Task.Delay(mss);
+                }
+            else
+                for (DateTime lastDt = DateTime.Now.AddMilliseconds(timeoutMss); ;)
+                {
+                    if (await conditionAsync())
+                        return true;
+                    pollNumber++;
+                    if (DateTime.Now.AddMilliseconds(pollSpanMss) > lastDt
+                        && (pollNumber >= pollMinNumber)
+                        )
+                        return false;
+                    await Task.Delay(pollSpanMss);
+                }
+        }
+
         ///// <summary>
         ///// Always polls at least 1 time.
         ///// </summary>
@@ -121,6 +153,17 @@ namespace Cliver
                 o = getObject();
                 return o != null;
             }, timeoutMss, pollSpanMss, pollSpanStartsBeforeConditionCheck, pollMinNumber);
+            return o;
+        }
+
+        async public static Task<T> WaitForObjectAsync<T>(Func<Task<T>> getObjectAsync, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false, int pollMinNumber = -1) where T : class
+        {
+            T o = null;
+            await WaitForConditionAsync(async () =>
+             {
+                 o = await getObjectAsync();
+                 return o != null;
+             }, timeoutMss, pollSpanMss, pollSpanStartsBeforeConditionCheck, pollMinNumber);
             return o;
         }
 
