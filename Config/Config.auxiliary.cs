@@ -27,7 +27,7 @@ namespace Cliver
         {
             if (settings.__Info == null)
                 throw new Exception("This method cannot be performed on a Settings object which has __Info not defined.");
-            return (S)Settings.Create(settings.__Info, true);
+            return (S)Settings.__Create(settings.__Info, true);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Cliver
         {
             if (settings.__Info == null)
                 throw new Exception("This method cannot be performed on a Settings object which has __Info not defined.");
-            return (S)Settings.Create(settings.__Info, false);
+            return (S)Settings.__Create(settings.__Info, false);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace Cliver
                         File.Copy(sfi.InitFile, file2);
                     else
                     {
-                        Settings s = Settings.Create(sfi, true);
-                        s.Save(sfi);
+                        Settings s = Settings.__Create(sfi, true);
+                        s.__Save(sfi);
                         File.Move(sfi.File, file2);
                     }
                 }
@@ -164,7 +164,7 @@ namespace Cliver
 
         ///// <summary>
         ///// Get SettingsFieldInfos for the Settings type.
-        ///// ATTENTION: potentially a SettingsFieldInfo object can become out of game so be careful operating with it.
+        ///// ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
         ///// </summary>
         ///// <param name="settingsType">Settings type</param>
         ///// <param name="fresh">if TRUE then the app is re-parsed looking up for the required Settings type</param>
@@ -181,7 +181,7 @@ namespace Cliver
 
         /// <summary>
         /// Get all the SettingsFieldInfo's in the app.
-        /// ATTENTION: potentially, SettingsFieldInfo objects may become out of game so be careful while operating with them.
+        /// ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
         /// </summary>
         /// <returns>SettingsFieldInfo ennumerator</returns>
         static public IEnumerable<SettingsFieldInfo> GetSettingsFieldInfos()

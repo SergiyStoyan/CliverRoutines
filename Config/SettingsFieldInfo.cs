@@ -242,7 +242,7 @@ namespace Cliver
         /// </summary>
         internal Settings ResetObject()
         {
-            Settings s = Settings.Create(this, true);
+            Settings s = Settings.__Create(this, true);
             SetObject(s);
             return s;
         }
@@ -255,7 +255,7 @@ namespace Cliver
         /// </summary>
         internal Settings ReloadObject()
         {
-            Settings s = Settings.Create(this, false);
+            Settings s = Settings.__Create(this, false);
             SetObject(s);
             return s;
         }

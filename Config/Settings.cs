@@ -27,7 +27,7 @@ namespace Cliver
         {
             get
             {
-                return settingsFieldInfo;
+                return __settingsFieldInfo;
             }
             set
             {
@@ -40,33 +40,33 @@ namespace Cliver
                     if (Config.GetSettingsFieldInfo(value.FullName) != value)
                         throw new Exception("This SettingsFieldInfo object is not registered in Config. Probably it was created before the re-initialization.");
                 }
-                settingsFieldInfo = value;
+                __settingsFieldInfo = value;
             }
         }
-        SettingsFieldInfo settingsFieldInfo = null;
+        SettingsFieldInfo __settingsFieldInfo = null;
 
-        internal static Settings Create(SettingsFieldInfo settingsFieldInfo, bool reset)
+        internal static Settings __Create(SettingsFieldInfo settingsFieldInfo, bool reset)
         {
-            Settings settings = create(settingsFieldInfo, reset);
+            Settings settings = __create(settingsFieldInfo, reset);
             settings.__Info = settingsFieldInfo;
-            settings.Loaded();
-            settings.loading = false;
+            settings.__Loaded();
+            settings.__loading = false;
             return settings;
         }
-        static Settings create(SettingsFieldInfo settingsFieldInfo, bool reset)
+        static Settings __create(SettingsFieldInfo settingsFieldInfo, bool reset)
         {
             if (!reset && File.Exists(settingsFieldInfo.File))
-                return loadFromFile(settingsFieldInfo);
+                return __loadFromFile(settingsFieldInfo);
             if (File.Exists(settingsFieldInfo.InitFile))
             {
                 FileSystemRoutines.CopyFile(settingsFieldInfo.InitFile, settingsFieldInfo.File, true);
-                return loadFromFile(settingsFieldInfo);
+                return __loadFromFile(settingsFieldInfo);
             }
             Settings settings = (Settings)Activator.CreateInstance(settingsFieldInfo.Type);
             settings.__TypeVersion = settingsFieldInfo.TypeVersion;
             return settings;
         }
-        static Settings loadFromFile(SettingsFieldInfo settingsFieldInfo)
+        static Settings __loadFromFile(SettingsFieldInfo settingsFieldInfo)
         {
             string s = File.ReadAllText(settingsFieldInfo.File);
             if (settingsFieldInfo.Endec != null)
@@ -89,12 +89,12 @@ namespace Cliver
             }
             return settings;
         }
-        bool loading = true;
+        bool __loading = true;
 
         /// <summary>
         /// Indicates whether this Settings object is the value of the Settings field defined by __Info.
         /// </summary>
-        public bool IsAttached()
+        public bool __IsAttached()
         {
             return __Info != null
                 //&& __Info.GetObject() == this;!!!if Config was reloaded and __Info was recreated, it still would work which is wrong
@@ -104,27 +104,27 @@ namespace Cliver
         /// <summary>
         /// Serializes this Settings object to its storage file.
         /// </summary>
-        public void Save()
+        public void __Save()
         {
             lock (this)
             {
                 if (__Info == null)//it can be called on a detached instance in order to be used by UnsupportedFormatHandler(). Also, saving a detached object is not confusing.
                     throw new Exception("This method cannot be performed on this Settings object because its __Info is not set.");
-                save();
+                __save();
             }
         }
-        void save()
+        void __save()
         {
             __TypeVersion = __Info.TypeVersion;
-            Saving();
+            __Saving();
             string s = Serialization.Json.Serialize(this, __Info.Indented, true, !__Info.NullSerialized, false/*!!!default values always must be stored*/);
             if (__Info.Endec != null)
                 s = __Info.Endec.Encrypt(s);
             FileSystemRoutines.CreateDirectory(PathRoutines.GetFileDir(__Info.File));
             File.WriteAllText(__Info.File, s);
-            Saved();
+            __Saved();
         }
-        internal void Save(SettingsFieldInfo correctSettingsFieldInfo)//checks that __Info was not replaced and provides an appropriate exception message
+        internal void __Save(SettingsFieldInfo correctSettingsFieldInfo)//checks that __Info was not replaced and provides an appropriate exception message
         {
             lock (this)
             {
@@ -134,7 +134,7 @@ namespace Cliver
                     //- Config was reloaded while an old object was preserved;
                     //All this will lead to a confusion.
                     throw new Exception("Settings field '" + correctSettingsFieldInfo.FullName + "' cannot be saved because its __Info has been altered.");
-                save();
+                __save();
             }
         }
 
@@ -145,9 +145,9 @@ namespace Cliver
         /// (!)Calling this method on a detached Settings object throws an exception because otherwise it could lead to a confusing effect. 
         /// Nevertheless, it can be called from Loaded() method.
         /// </summary>
-        public void Reset(/*bool ignoreInitFile = false*/)
+        public void __Reset(/*bool ignoreInitFile = false*/)
         {
-            if (!loading && !IsAttached())//while technically it is possible, it could lead to a confusion: called on one object it might replace an other one!
+            if (!__loading && !__IsAttached())//while technically it is possible, it could lead to a confusion: called on one object it might replace an other one!
                 throw new Exception("This method cannot be performed on this Settings object because it is not attached to its Settings field (" + __Info?.FullName + ").");
             __Info.ResetObject();
         }
@@ -160,9 +160,9 @@ namespace Cliver
         /// (!)Calling this method on a detached Settings object throws an exception because otherwise it could lead to a confusing effect. 
         /// Nevertheless, it can be called from Loaded() method.
         /// </summary>
-        public void Reload()
+        public void __Reload()
         {
-            if (!loading && !IsAttached())//while technically it is possible, it could lead to a confusion: called on one object it might replace an other one!
+            if (!__loading && !__IsAttached())//while technically it is possible, it could lead to a confusion: called on one object it might replace an other one!
                 throw new Exception("This method cannot be performed on this Settings object because it is not attached to its Settings field (" + __Info?.FullName + ").");
             __Info.ReloadObject();
         }
@@ -171,13 +171,13 @@ namespace Cliver
         /// Compares serializable fields/properties of this object with the ones stored in the file or the default ones.
         /// </summary>
         /// <returns>False if the values are identical.</returns>
-        public bool IsChanged()
+        public bool __IsChanged()
         {
             lock (this)
             {
                 if (__Info == null)//was created outside Config
                     throw new Exception("This method cannot be performed on this Settings object because its __Info is not set.");
-                Settings settings = create(__Info, false);
+                Settings settings = __create(__Info, false);
                 return !Serialization.Json.IsEqual(this, settings);
             }
         }
@@ -200,7 +200,7 @@ namespace Cliver
         virtual protected void UnsupportedFormatHandler(Exception deserializingException)
         {
             if (deserializingException != null)
-                throw new Exception("Error while deserializing settings " + settingsFieldInfo.FullName + " from file " + settingsFieldInfo.InitFile, deserializingException);
+                throw new Exception("Error while deserializing settings " + __settingsFieldInfo.FullName + " from file " + __settingsFieldInfo.InitFile, deserializingException);
             throw new Exception("Unsupported type version of " + __Info.FullName + ": " + __TypeVersion + "\r\nin the file: " + __Info.File);
         }
 
@@ -209,17 +209,17 @@ namespace Cliver
         /// <summary>
         /// 
         /// </summary>
-        virtual protected void Loaded() { }
+        virtual protected void __Loaded() { }
 
         /// <summary>
         /// 
         /// </summary>
-        virtual protected void Saving() { }
+        virtual protected void __Saving() { }
 
         /// <summary>
         /// 
         /// </summary>
-        virtual protected void Saved() { }
+        virtual protected void __Saved() { }
 
         /*//version with static __StorageDir
         /// <summary>
