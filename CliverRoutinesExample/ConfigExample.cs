@@ -20,12 +20,12 @@ namespace Example
             Settings.Server.Host = "1.1.1.1";
             Settings.Server.Port = 10;
             //save on disk
-            Settings.Server.Save();
+            Settings.Server.__Save();
             Log.Inform("The settings are saved to: " + Settings.Server.__Info.File);
             //or, restore the previously saved values
-            Settings.Server.Reload();
+            Settings.Server.__Reload();
             //or, reset to initial values
-            Settings.Server.Reset();
+            Settings.Server.__Reset();
 
             editServerByDialog();
 
@@ -66,7 +66,7 @@ namespace Example
                     return;
 
                 Settings.Server = server2;
-                Settings.Server.Save();
+                Settings.Server.__Save();
                 Log.Inform("The settings are saved to: " + Settings.Server.__Info.File);
             }
             catch (Exception e)

@@ -19,12 +19,12 @@ namespace Example
     {
         public Dictionary<string, User> Users = new Dictionary<string, User>();
 
-        protected override void Loaded()
+        protected override void __Loaded()
         {
             ConfigExample.Log.Inform0("Settings loaded: " + __Info.FullName);
         }
 
-        protected override void Saving()
+        protected override void __Saving()
         {
             ConfigExample.Log.Inform0("Settings saving...: " + __Info.FullName + " with indention: " + __Info.Indented);
         }

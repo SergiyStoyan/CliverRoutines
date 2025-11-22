@@ -25,12 +25,7 @@ namespace Cliver
         /// <summary>
         /// Storage folder for this Settings located in CommonApplicationData.
         /// </summary>
-        sealed public override string __StorageDir { get; protected set; } = StorageDir;
-
-        /// <summary>
-        /// Storage folder for this Settings located in CommonApplicationData.
-        /// </summary>
-        public static readonly string StorageDir = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyCommonDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 
     /// <summary>
@@ -48,12 +43,7 @@ namespace Cliver
         /// <summary>
         /// Storage folder for this Settings located in LocalApplicationData.
         /// </summary>
-        sealed public override string __StorageDir { get; protected set; } = StorageDir;
-
-        /// <summary>
-        /// Storage folder for this Settings located in LocalApplicationData.
-        /// </summary>
-        public static readonly string StorageDir = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        sealed public override string __StorageDir { get; protected set; } = Log.AppCompanyUserDataDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 
     /// <summary>
@@ -64,11 +54,6 @@ namespace Cliver
         /// <summary>
         /// Storage folder for this Settings located in the app's folder.
         /// </summary>
-        sealed public override string __StorageDir { get; protected set; } = StorageDir;
-
-        /// <summary>
-        /// Storage folder for this Settings located in the app's folder.
-        /// </summary>
-        public static readonly string StorageDir = Log.AppDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        sealed public override string __StorageDir { get; protected set; } = Log.AppDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
     }
 }

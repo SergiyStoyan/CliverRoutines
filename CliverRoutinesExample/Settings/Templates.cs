@@ -46,7 +46,7 @@ namespace Example
                     o["__TypeVersion"] = 200601;
                     //save
                     __Info.WriteStorageFileAsJObject(o);
-                    Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
+                    __Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
                     return;
                 }
                 if (__TypeVersion < 210301)
@@ -58,7 +58,7 @@ namespace Example
                     __Info.UpdateTypeVersionInStorageFileString(210301, ref s);
                     //save
                     __Info.WriteStorageFileAsString(s);
-                    Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
+                    __Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
                     return;
                 }
                 if (__TypeVersion < __Info.TypeVersion)
@@ -67,7 +67,7 @@ namespace Example
                         t.Name = Regex.Replace(t.Name, @"^test", "_TEST_");
                     //...
                     //save
-                    Save();//(!)when saving, the current type version is set
+                    __Save();//(!)when saving, the current type version is set
                     return;
                 }
 
