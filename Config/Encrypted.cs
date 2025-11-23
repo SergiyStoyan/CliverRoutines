@@ -5,7 +5,6 @@
 //********************************************************************************************
 
 using System;
-using Newtonsoft.Json;
 using System.Text;
 
 namespace Cliver
@@ -14,7 +13,7 @@ namespace Cliver
     /// A field/property of this type is implicitly encrypted when it is a member of a Settings class.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Encrypted<T> where T : class
+    abstract public class Encrypted<T> where T : class
     {
         /// <summary>
         /// (!)The default constructor is used by the deserializer.
@@ -37,14 +36,12 @@ namespace Cliver
         /// <summary>
         /// Encypted value. It must not be called from the custom code.
         /// </summary>
-        [JsonProperty]//forces serialization for private 
-        string _Value { get; set; } = null;
+        virtual protected string _Value { get; set; } = null;
 
         /// <summary>
         /// Decrypted value to be used in the custom code.
         /// </summary>
-        [JsonIgnore]
-        public T Value
+        virtual public T Value
         {
             get
             {

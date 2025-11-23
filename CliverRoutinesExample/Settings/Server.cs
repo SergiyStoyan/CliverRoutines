@@ -26,7 +26,7 @@ namespace Example
         public string Host = "";
         public int Port = 123;
         //This field is encrypted. It decrypts its value only when it is explicitly called.
-        public Cliver.Encrypted<string> Password = new Cliver.Encrypted<string>("test");
+        public Cliver.Encrypted<string> Password = new Cliver.Newtonsoft_Encrypted<string>("test");
         //Windows alternative provided by CliverWinRoutines that does not require a key:
         //public Cliver.Encrypted<string> Password = new Cliver.Win.Encrypted<string>("test");
     }

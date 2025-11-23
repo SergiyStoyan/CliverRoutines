@@ -8,7 +8,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Cliver
 {
@@ -55,9 +54,22 @@ namespace Cliver
         /// <param name="settings"></param>
         /// <param name="jsonSerializerSettings">allows to customize cloning</param>
         /// <returns></returns>
-        public static S CreateClone<S>(this S settings, JsonSerializerSettings jsonSerializerSettings = null) where S : Settings, new()
+        public static S CreateClone<S>(this S settings, Newtonsoft.Json.JsonSerializerSettings jsonSerializerSettings = null) where S : Settings, new()
         {
-            S s = Serialization.Json.Clone(settings, jsonSerializerSettings);
+            return settings.CreateClone(s => Serialization.Json.Clone(s, jsonSerializerSettings));
+        }
+
+        /// <summary>
+        /// Creates a new instance of the given Settings field with cloned values.
+        /// (!)The new instance shares the same __Info object with the original instance.
+        /// </summary>
+        /// <typeparam name="S"></typeparam>
+        /// <param name="settings"></param>
+        /// <param name="clone">allows to customize cloning</param>
+        /// <returns></returns>
+        public static S CreateClone<S>(this S settings, Func<S, S> clone) where S : Settings, new()
+        {
+            S s = clone(settings);
             if (settings.__Info != null)
                 s.__Info = settings.__Info;
             return s;
@@ -164,7 +176,7 @@ namespace Cliver
 
         ///// <summary>
         ///// Get SettingsFieldInfos for the Settings type.
-        ///// ATTENTION: potentially a SettingsFieldInfo object can become out of game so be careful operating with it.
+        ///// ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
         ///// </summary>
         ///// <param name="settingsType">Settings type</param>
         ///// <param name="fresh">if TRUE then the app is re-parsed looking up for the required Settings type</param>
@@ -181,7 +193,7 @@ namespace Cliver
 
         /// <summary>
         /// Get all the SettingsFieldInfo's in the app.
-        /// ATTENTION: potentially, SettingsFieldInfo objects may become out of game so be careful while operating with them.
+        /// ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
         /// </summary>
         /// <returns>SettingsFieldInfo ennumerator</returns>
         static public IEnumerable<SettingsFieldInfo> GetSettingsFieldInfos()

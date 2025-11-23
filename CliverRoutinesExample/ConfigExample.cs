@@ -56,7 +56,7 @@ namespace Example
                 server2.Port = 30;
                 if (server2.Password == null)
                 {
-                    server2.Password = new Encrypted<string>();
+                    server2.Password = new Newtonsoft_Encrypted<string>();
                     //if it is not a Cliver.Win.Encrypted instance and Endec was not set by InitializeDefault() then it must be set:
                     //server2.Password.Endec = new Cliver.StringEndec.Rijndael("123");
                 }
