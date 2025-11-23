@@ -14,7 +14,7 @@ namespace Example
     }
 
     [SettingsAttributes.Config(Indented = false)]//to serialize without indention
-    class GeneralSettings : Cliver.Newtonsoft.UserSettings//UserSettings based class is serialized in the user directory
+    class GeneralSettings : Cliver.Newtonsoft_UserSettings//UserSettings based class is serialized in the user directory
     {
         public Dictionary<string, User> Users = new Dictionary<string, User>();
 

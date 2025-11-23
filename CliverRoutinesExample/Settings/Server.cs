@@ -10,7 +10,7 @@ namespace Example
         public static ServerSettings Server { get; set; }
     }
 
-    class ServerSettings : Cliver.Newtonsoft.UserSettings//UserSettings based class is serialized in the user directory
+    class ServerSettings : Cliver.Newtonsoft_UserSettings//UserSettings based class is serialized in the user directory
     {
         //optional static initialization
         static ServerSettings()

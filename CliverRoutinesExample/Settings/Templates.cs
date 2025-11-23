@@ -22,7 +22,7 @@ namespace Example
     //Example how to check the type version and migrate to the current type if needed.
     //When this attribute is set, Config checks if the version set by the attribute accords with the version saved in the storage file.
     [SettingsAttributes.TypeVersion(210701)]
-    class TemplatesSettings : Cliver.Newtonsoft.UserSettings//UserSettings based class is serialized in the user directory
+    class TemplatesSettings : Cliver.Newtonsoft_UserSettings//UserSettings based class is serialized in the user directory
     {
         public List<Template> Templates = new List<Template> { new Template { Name = "test", Words = new List<string> { "apple", "box" } } };
 
@@ -39,25 +39,25 @@ namespace Example
                 if (__TypeVersion < 200601)
                 {//editing the data as JSON object
                     //remove property Field which does not exist anymore
-                    Newtonsoft.Json.Linq.JObject o = ((Cliver.Newtonsoft.SettingsFieldInfo)__Info).ReadStorageFileAsJObject();
+                    Newtonsoft.Json.Linq.JObject o = ((Cliver.Newtonsoft_SettingsFieldInfo)__Info).ReadStorageFileAsJObject();
                     for (int i = o["Templates"].Count() - 1; i >= 0; i--)
                         o["Templates"][i]["Field"]?.Remove();
                     //set the respective version
                     o["__TypeVersion"] = 200601;
                     //save
-                    ((Cliver.Newtonsoft.SettingsFieldInfo)__Info).WriteStorageFileAsJObject(o);
+                    ((Cliver.Newtonsoft_SettingsFieldInfo)__Info).WriteStorageFileAsJObject(o);
                     __Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
                     return;
                 }
                 if (__TypeVersion < 210301)
                 {//editing the data as string
-                    string s = ((Cliver.Newtonsoft.SettingsFieldInfo)__Info).ReadStorageFileAsString();
+                    string s = ((Cliver.Newtonsoft_SettingsFieldInfo)__Info).ReadStorageFileAsString();
                     //edit the old data as a serialized string. It is the most low-level option of data altering.
                     //...
                     //set the respective version                
-                    ((Cliver.Newtonsoft.SettingsFieldInfo)__Info).UpdateTypeVersionInStorageFileString(210301, ref s);
+                    ((Cliver.Newtonsoft_SettingsFieldInfo)__Info).UpdateTypeVersionInStorageFileString(210301, ref s);
                     //save
-                    ((Cliver.Newtonsoft.SettingsFieldInfo)__Info).WriteStorageFileAsString(s);
+                    ((Cliver.Newtonsoft_SettingsFieldInfo)__Info).WriteStorageFileAsString(s);
                     __Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
                     return;
                 }

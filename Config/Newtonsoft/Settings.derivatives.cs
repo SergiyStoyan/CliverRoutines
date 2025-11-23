@@ -8,13 +8,13 @@ using System;
 using System.IO;
 using Cliver;
 
-namespace Cliver.Newtonsoft
+namespace Cliver
 {
     /// <summary>
     /// Instances of this class are to be stored in CommonApplicationData folder.
     /// CliverWinRoutines lib contains AppSettings adapted for Windows.
     /// </summary>
-    public class AppSettings : Settings
+    public class Newtonsoft_AppSettings : Newtonsoft_Settings
     {
         /*//version with static __StorageDir
         /// <summary>
@@ -32,7 +32,7 @@ namespace Cliver.Newtonsoft
     /// <summary>
     /// Instances of this class are to be stored in LocalApplicationData folder.
     /// </summary>
-    public class UserSettings : Settings
+    public class Newtonsoft_UserSettings : Newtonsoft_Settings
     {
         /*//version with static __StorageDir
         /// <summary>
@@ -50,7 +50,7 @@ namespace Cliver.Newtonsoft
     /// <summary>
     /// Instances of this class are to be stored in the app's folder.
     /// </summary>
-    public class PortableSettings : Settings
+    public class Newtonsoft_PortableSettings : Newtonsoft_Settings
     {
         /// <summary>
         /// Storage folder for this Settings located in the app's folder.

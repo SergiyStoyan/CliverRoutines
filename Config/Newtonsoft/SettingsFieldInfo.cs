@@ -9,11 +9,11 @@ using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace Cliver.Newtonsoft
+namespace Cliver
 {
-    abstract public class SettingsFieldInfo : Cliver.SettingsFieldInfo
+    abstract public class Newtonsoft_SettingsFieldInfo : Cliver.SettingsFieldInfo
     {
-        protected SettingsFieldInfo(MemberInfo settingsTypeMemberInfo, Type settingsType) : base(settingsTypeMemberInfo, settingsType)
+        protected Newtonsoft_SettingsFieldInfo(MemberInfo settingsTypeMemberInfo, Type settingsType) : base(settingsTypeMemberInfo, settingsType)
         {
         }
 

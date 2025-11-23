@@ -8,12 +8,12 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace Cliver.Newtonsoft
+namespace Cliver
 {
-    abstract public partial class Settings : Cliver.Settings
+    abstract public class Newtonsoft_Settings : Cliver.Settings
     {
         [JsonIgnore]
-        override public Cliver.SettingsFieldInfo __Info
+        override public SettingsFieldInfo __Info
         {
             get
             {
@@ -25,7 +25,7 @@ namespace Cliver.Newtonsoft
             }
         }
 
-        override internal Cliver.Settings Deserialize(Type type, string json, bool polymorphic = true, bool createNewObjects = true)
+        override internal Settings Deserialize(Type type, string json, bool polymorphic = true, bool createNewObjects = true)
         {
             return (Settings)Serialization.Json.Deserialize(type, json, polymorphic, createNewObjects);
         }
