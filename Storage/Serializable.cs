@@ -5,6 +5,7 @@
 //********************************************************************************************
 using System;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Cliver
 {
@@ -73,7 +74,7 @@ namespace Cliver
         }
 
         //[ScriptIgnore]
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public string __File { get; private set; }
 
         public void __Save(string file = null)
@@ -87,7 +88,7 @@ namespace Cliver
                 __Saved();
             }
         }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public bool __Indented = true;
 
         virtual protected void __Loaded()

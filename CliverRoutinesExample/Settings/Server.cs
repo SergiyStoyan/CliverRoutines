@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Cliver;
 
 namespace Example
 {
@@ -11,7 +10,7 @@ namespace Example
         public static ServerSettings Server { get; set; }
     }
 
-    class ServerSettings : Cliver.UserSettings//UserSettings based class is serialized in the user directory
+    class ServerSettings : Cliver.Newtonsoft.UserSettings//UserSettings based class is serialized in the user directory
     {
         //optional static initialization
         static ServerSettings()

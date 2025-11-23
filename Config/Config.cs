@@ -305,7 +305,7 @@ namespace Cliver
                 HashSet<string> requiredOptionalFieldFullNames = RequiredOptionalFieldFullNames == null ? null : new HashSet<string>(RequiredOptionalFieldFullNames);
                 foreach (SettingsFieldInfo settingsFieldInfo in settingsFieldInfos)
                     if (!settingsFieldInfo.Optional /*|| RequiredOptionalSettingsTypes?.Contains(settingsFieldInfo.Type) == true*/ || requiredOptionalFieldFullNames?.Remove(settingsFieldInfo.FullName) == true)
-                        settingsFieldInfo.SetObject(Settings.__Create(settingsFieldInfo, reset));
+                        settingsFieldInfo.SetObject(Settings.Create(settingsFieldInfo, reset));
                 if (requiredOptionalFieldFullNames?.Count > 0)
                     throw new Exception("RequiredOptionalFieldFullNames contains name which was not found: '" + RequiredOptionalFieldFullNames[0] + "'");
             }
@@ -341,7 +341,7 @@ namespace Cliver
             lock (settingsFieldFullNames2SettingsFieldInfo)
             {
                 foreach (SettingsFieldInfo settingsFieldInfo in settingsFieldFullNames2SettingsFieldInfo.Values)
-                    settingsFieldInfo.GetObject()?.__Save(settingsFieldInfo);
+                    settingsFieldInfo.GetObject()?.Save(settingsFieldInfo);
             }
         }
 

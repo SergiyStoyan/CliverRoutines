@@ -6,8 +6,9 @@
 
 using System;
 using System.IO;
+using Cliver;
 
-namespace Cliver
+namespace Cliver.Newtonsoft
 {
     /// <summary>
     /// Instances of this class are to be stored in CommonApplicationData folder.

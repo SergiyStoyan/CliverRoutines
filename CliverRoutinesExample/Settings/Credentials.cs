@@ -25,7 +25,7 @@ namespace Example
     //This attribute can be applied to either a Settings type or a Settings field. Being applied to a type, it causes any field of the type to be encrypted.
     //Specify the class and the property that expose a StringEndec object to be used for encryption.
     [SettingsAttributes.Encrypted(endecGetterHostingType: typeof(Settings), endecGetterName: nameof(Settings.Endec))]
-    class CredentialsSettings : Cliver.UserSettings
+    class CredentialsSettings : Cliver.Newtonsoft.UserSettings
     {
         public string Key = "test";
         public string Token = "123";

@@ -4,6 +4,7 @@
 //        http://www.cliversoft.com
 //********************************************************************************************
 
+using Cliver.Newtonsoft;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Reflection;
 
 namespace Cliver
 {
-    public partial class Settings
+    public partial class Settings<SettingsFieldInfoT> where SettingsFieldInfoT : SettingsFieldInfo
     {
         ///// <summary>
         ///// Returns the value of a serializable field identified by its name.

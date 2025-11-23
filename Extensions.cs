@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Cliver
 {
@@ -134,19 +135,19 @@ namespace Cliver
 
         public static string ToStringByJson(this object o, bool indented = true, bool polymorphic = false, bool ignoreNullValues = true, bool ignoreDefaultValues = false/*, bool ignoreReferenceLoop = true !!!can go to the endless cycle*/)
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(o,
-                    indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
-                   new Newtonsoft.Json.JsonSerializerSettings
+            return JsonConvert.SerializeObject(o,
+                    indented ? Formatting.Indented : Formatting.None,
+                   new JsonSerializerSettings
                    {
-                       TypeNameHandling = polymorphic ? Newtonsoft.Json.TypeNameHandling.Auto : Newtonsoft.Json.TypeNameHandling.None,
-                       NullValueHandling = ignoreNullValues ? Newtonsoft.Json.NullValueHandling.Ignore : Newtonsoft.Json.NullValueHandling.Include,
-                       DefaultValueHandling = ignoreDefaultValues ? Newtonsoft.Json.DefaultValueHandling.Ignore : Newtonsoft.Json.DefaultValueHandling.Include,
+                       TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None,
+                       NullValueHandling = ignoreNullValues ? NullValueHandling.Ignore : NullValueHandling.Include,
+                       DefaultValueHandling = ignoreDefaultValues ? DefaultValueHandling.Ignore : DefaultValueHandling.Include,
                        //ReferenceLoopHandling = ignoreReferenceLoop ? Newtonsoft.Json.ReferenceLoopHandling.Serialize : Newtonsoft.Json.ReferenceLoopHandling.Error
                    }
                    );
         }
 
-        public static string ToStringByJson(this object o, Newtonsoft.Json.JsonSerializerSettings jsonSerializerSettings)
+        public static string ToStringByJson(this object o, JsonSerializerSettings jsonSerializerSettings)
         {
             return Serialization.Json.Serialize(o, jsonSerializerSettings);
         }

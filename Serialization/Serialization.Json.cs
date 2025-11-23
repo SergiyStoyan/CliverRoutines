@@ -29,7 +29,7 @@ namespace Cliver
                 if (o == null)
                     return null;
                 return JsonConvert.SerializeObject(o,
-                    indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+                    indented ? Formatting.Indented : Formatting.None,
                     new JsonSerializerSettings
                     {
                         TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None,
@@ -44,7 +44,7 @@ namespace Cliver
                 if (jsonSerializerSettings == null)
                     return Serialize(o, indented);
                 return JsonConvert.SerializeObject(o,
-                    indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+                    indented ? Formatting.Indented : Formatting.None,
                     jsonSerializerSettings
                     );
             }
