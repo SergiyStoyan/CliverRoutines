@@ -6,11 +6,12 @@
 
 
 using System;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.IO;
-using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Drawing;
 
 namespace Cliver
 {
@@ -28,55 +29,52 @@ namespace Cliver
             {
                 if (o == null)
                     return null;
-                return JsonConvert.SerializeObject(o,
-                    indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
-                    new JsonSerializerSettings
-                    {
-                        TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None,
-                        NullValueHandling = ignoreNullValues ? NullValueHandling.Ignore : NullValueHandling.Include,
-                        DefaultValueHandling = ignoreDefaultValues ? DefaultValueHandling.Ignore : DefaultValueHandling.Include
-                    }
-                );
+                var options = new JsonSerializerOptions
+                {
+                    TypeInfoResolver = new PolymorphicTypeResolver(),
+                    WriteIndented = indented,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault,
+                    IncludeFields = true,
+                };
+                return JsonSerializer.Serialize(o, options);
             }
 
-            public static string Serialize(object o, JsonSerializerSettings jsonSerializerSettings, bool indented = true)
+            public static string Serialize(object o, JsonSerializerOptions  jsonSerializerOptions, bool indented = true)
             {
-                if (jsonSerializerSettings == null)
+                if (jsonSerializerOptions == null)
                     return Serialize(o, indented);
-                return JsonConvert.SerializeObject(o,
-                    indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
-                    jsonSerializerSettings
-                    );
+                jsonSerializerOptions.WriteIndented = indented;
+                return JsonSerializer.Serialize(o, jsonSerializerOptions);
             }
 
             public static T Deserialize<T>(string json, bool polymorphic = true, bool createNewObjects = true)
             {
                 //System.Runtime.Serialization.FormatterServices.GetUninitializedObject();
-                return JsonConvert.DeserializeObject<T>(json,
-                    new JsonSerializerSettings { TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None, ObjectCreationHandling = createNewObjects ? ObjectCreationHandling.Replace : ObjectCreationHandling.Auto }
+                return JsonSerializer.Deserialize<T>(json,
+                    new JsonSerializerOptions { TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None, ObjectCreationHandling = createNewObjects ? ObjectCreationHandling.Replace : ObjectCreationHandling.Auto }
                     );
             }
 
-            public static T Deserialize<T>(string json, JsonSerializerSettings jsonSerializerSettings)
+            public static T Deserialize<T>(string json, JsonSerializerOptions jsonSerializerOptions)
             {
-                return JsonConvert.DeserializeObject<T>(json,
-                    jsonSerializerSettings
+                return JsonSerializer.Deserialize<T>(json,
+                    jsonSerializerOptions
                     );
             }
 
             public static object Deserialize(Type type, string json, bool polymorphic = true, bool createNewObjects = true)
             {
-                return JsonConvert.DeserializeObject(json,
+                return JsonSerializer.Deserialize(json,
                     type,
-                    new JsonSerializerSettings { TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None, ObjectCreationHandling = createNewObjects ? ObjectCreationHandling.Replace : ObjectCreationHandling.Auto }
+                    new JsonSerializerOptions { TypeNameHandling = polymorphic ? TypeNameHandling.Auto : TypeNameHandling.None, ObjectCreationHandling = createNewObjects ? ObjectCreationHandling.Replace : ObjectCreationHandling.Auto }
                     );
             }
 
-            public static object Deserialize(Type type, string json, JsonSerializerSettings jsonSerializerSettings)
+            public static object Deserialize(Type type, string json, JsonSerializerOptions jsonSerializerOptions)
             {
-                return JsonConvert.DeserializeObject(json,
+                return JsonSerializer.Deserialize(json,
                     type,
-                    jsonSerializerSettings
+                    jsonSerializerOptions
                     );
             }
 
@@ -96,44 +94,44 @@ namespace Cliver
                 return Deserialize(type, File.ReadAllText(file), polymorphic, createNewObjects);
             }
 
-            public static O Clone<O>(O o, JsonSerializerSettings jsonSerializerSettings = null)
+            public static O Clone<O>(O o, JsonSerializerOptions jsonSerializerOptions = null)
             {
-                if (jsonSerializerSettings == null)
-                    jsonSerializerSettings = new JsonSerializerSettings
+                if (jsonSerializerOptions == null)
+                    jsonSerializerOptions = new JsonSerializerOptions
                     {
                         TypeNameHandling = TypeNameHandling.Auto,
                     };
-                return Deserialize<O>(Serialize(o, jsonSerializerSettings, false));
+                return Deserialize<O>(Serialize(o, jsonSerializerOptions, false));
             }
 
-            public static object Clone(Type type, object o, JsonSerializerSettings jsonSerializerSettings = null)
+            public static object Clone(Type type, object o, JsonSerializerOptions jsonSerializerOptions = null)
             {
-                if (jsonSerializerSettings == null)
-                    jsonSerializerSettings = new JsonSerializerSettings
+                if (jsonSerializerOptions == null)
+                    jsonSerializerOptions = new JsonSerializerOptions
                     {
                         TypeNameHandling = TypeNameHandling.Auto,
                     };
-                return Deserialize(type, Serialize(o, jsonSerializerSettings, false));
+                return Deserialize(type, Serialize(o, jsonSerializerOptions, false));
             }
 
-            public static object Clone2(object o, JsonSerializerSettings jsonSerializerSettings = null)
+            public static object Clone2(object o, JsonSerializerOptions jsonSerializerOptions = null)
             {
-                if (jsonSerializerSettings == null)
-                    jsonSerializerSettings = new JsonSerializerSettings
+                if (jsonSerializerOptions == null)
+                    jsonSerializerOptions = new JsonSerializerOptions
                     {
                         TypeNameHandling = TypeNameHandling.Auto,
                     };
-                return Deserialize(o.GetType(), Serialize(o, jsonSerializerSettings, false));
+                return Deserialize(o.GetType(), Serialize(o, jsonSerializerOptions, false));
             }
 
-            public static bool IsEqual(object a, object b, JsonSerializerSettings jsonSerializerSettings = null)
+            public static bool IsEqual(object a, object b, JsonSerializerOptions jsonSerializerOptions = null)
             {
-                if (jsonSerializerSettings == null)
-                    jsonSerializerSettings = new JsonSerializerSettings
+                if (jsonSerializerOptions == null)
+                    jsonSerializerOptions = new JsonSerializerOptions
                     {
                         TypeNameHandling = TypeNameHandling.Auto,
                     };
-                return Serialize(a, jsonSerializerSettings, false) == Serialize(b, jsonSerializerSettings, false);
+                return Serialize(a, jsonSerializerOptions, false) == Serialize(b, jsonSerializerOptions, false);
             }
 
             public static IEnumerable<string> GetMemberNames(object o)

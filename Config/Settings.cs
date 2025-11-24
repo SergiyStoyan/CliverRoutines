@@ -6,6 +6,7 @@
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace Cliver
 {
@@ -22,7 +23,7 @@ namespace Cliver
         /// Cloned Settings objects share the same __Info instance which means that while multiple Settings objects can reference the same Settings field, the field can reference only one of them (which is called as 'attached object').
         /// For some rare needs (for instance when a Settings object was created by deserialization/cloning and therefore has empty __Info), setting __Info from an application's code is allowed (with caution!).
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public SettingsFieldInfo __Info
         {
             get
@@ -235,7 +236,7 @@ namespace Cliver
         /// Despite of the fact it is not static, actually it is instance independent as only the initial value is used.
         /// (It is not static because C# does not support static polymorphism.)
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public abstract string __StorageDir { get; protected set; }
     }
 }
