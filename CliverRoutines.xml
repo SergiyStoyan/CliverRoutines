@@ -335,15 +335,31 @@
         </member>
         <member name="T:Cliver.PortableSettings">
             <summary>
-            Instances of this class are to be stored in the app's folder.
+            Instances of this class are to be stored in the app's folder/config folder.
             </summary>
         </member>
         <member name="P:Cliver.PortableSettings.__StorageDir">
             <summary>
-            Storage folder for this Settings located in the app's folder.
+            Storage folder for this Settings located in the app's folder/config folder.
             </summary>
         </member>
         <member name="F:Cliver.PortableSettings.StorageDir">
+            <summary>
+            Storage folder for this Settings located in the app's folder/config folder.
+            </summary>
+        </member>
+        <member name="T:Cliver.PortableSettings0">
+            <summary>
+            Instances of this class are to be stored directly in the app's folder.
+            That's the storage settings file coincides with the initial settings file which thus will be ovewritten Save() call.
+            </summary>
+        </member>
+        <member name="P:Cliver.PortableSettings0.__StorageDir">
+            <summary>
+            Storage folder for this Settings located in the app's folder.
+            </summary>
+        </member>
+        <member name="F:Cliver.PortableSettings0.StorageDir">
             <summary>
             Storage folder for this Settings located in the app's folder.
             </summary>

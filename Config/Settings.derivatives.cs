@@ -57,9 +57,26 @@ namespace Cliver
     }
 
     /// <summary>
-    /// Instances of this class are to be stored in the app's folder.
+    /// Instances of this class are to be stored in the app's folder/config folder.
     /// </summary>
     public class PortableSettings : Settings
+    {
+        /// <summary>
+        /// Storage folder for this Settings located in the app's folder/config folder.
+        /// </summary>
+        sealed public override string __StorageDir { get; protected set; } = StorageDir;
+
+        /// <summary>
+        /// Storage folder for this Settings located in the app's folder/config folder.
+        /// </summary>
+        public static readonly string StorageDir = Log.AppDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+    }
+
+    /// <summary>
+    /// Instances of this class are to be stored directly in the app's folder.
+    /// That's the storage settings file coincides with the initial settings file which thus will be ovewritten Save() call.
+    /// </summary>
+    public class PortableSettings0 : Settings
     {
         /// <summary>
         /// Storage folder for this Settings located in the app's folder.
@@ -69,6 +86,6 @@ namespace Cliver
         /// <summary>
         /// Storage folder for this Settings located in the app's folder.
         /// </summary>
-        public static readonly string StorageDir = Log.AppDir + Path.DirectorySeparatorChar + Config.CONFIG_FOLDER_NAME;
+        public static readonly string StorageDir = Log.AppDir;
     }
 }

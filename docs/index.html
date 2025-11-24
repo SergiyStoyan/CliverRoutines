@@ -161,7 +161,7 @@ Hence, you can apply attributes provided by Newtonsoft.Json to <a href='#seriali
 <br> - auxiliary methods. Some of them can be redefined in your <a href='#settings_class'>settings class</a> if needed;
 <br>See the API for the complete info.
 
-        <p>			Usually you will not inherit <a href='#cliver_settings'><code>Cliver.Settings</code></a> directly but rather use one of its derivatives provided by CliverRoutines: <a href="#cliver_usersettings"><code>Cliver.UserSettings</code></a> and <a href="#cliver_appsettings"><code>Cliver.AppSettings</code></a>.
+        <p>			Usually you will not inherit <a href='#cliver_settings'><code>Cliver.Settings</code></a> directly but rather use one of its derivatives provided by CliverRoutines such as <a href="#cliver_usersettings"><code>Cliver.UserSettings</code></a> and <a href="#cliver_appsettings"><code>Cliver.AppSettings</code></a>.
 			<br>If your <a href='#settings_class'>settings class</a> inherits <a href='#cliver_settings'><code>Cliver.Settings</code></a> directly then you have to define the serialization directory in it.
 
 
@@ -175,6 +175,19 @@ Hence, you can apply attributes provided by Newtonsoft.Json to <a href='#seriali
             <h4><a name="cliver_appsettings">Cliver.AppSettings</a></h4>
 <a href="#cliver_appsettings"><code>Cliver.AppSettings</code></a> is a <a href='#cliver_settings'><code>Cliver.Settings</code></a> derivative which performs serialization to the common (user-irrelevant) application data directory. 
 <p><span class='attention'>(!)</span>Writing to this directory on Windows may require additional permissions which is solved by <code>Cliver.Win.AppSettings</code> in CliverWinRoutines package.
+
+				    
+			
+
+            <h4><a name="cliver_portablesettings">Cliver.PortableSettings</a></h4>
+<a href="#cliver_portablesettings"><code>Cliver.PortableSettings</code></a> is a <a href='#cliver_settings'><code>Cliver.Settings</code></a> derivative which performs serialization to the app's directory, still creating its own folder in it.
+
+				    
+			
+
+            <h4><a name="cliver_0portablesettings0">Cliver.PortableSettings0</a></h4>
+<a href="#cliver_portablesettings0"><code>Cliver.PortableSettings0</code></a> is a <a href='#cliver_settings'><code>Cliver.Settings</code></a> derivative which performs serialization directly to the app's directory. 
+<p><span class='attention'>(!)</span>In this case the <a href='#storage_file'>storage file</a> coincides with the <a href='#initial_file'>initial file</a> which thus will be ovewritten by <code>Save()</code> call.
 
 				    
 				   
@@ -257,7 +270,7 @@ Cliver.Config.Reload();</script>
 			
 			
 <h3><a name='storage_file'>Storage file</a></h3>
-		A <a href='#storage_file'>storage file</a> stores serialized data for one <a href='#settings_field'>settings field</a>. Thus, every <a href='#settings_field'>settings field</a> has its own <a href='#storage_file'>storage file</a>. 
+	<a href='#storage_file'>Storage file</a> stores serialized data for one <a href='#settings_field'>settings field</a>. Thus, every <a href='#settings_field'>settings field</a> has its own <a href='#storage_file'>storage file</a>. 
 		
 		<p>It is (re)created by <code>Save()</code> method:
 <script type="text/plain" class="language-csharp">public partial class Settings
@@ -309,18 +322,18 @@ The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>s
 			
 			
 <h3><a name='initial_file'>Initial file</a></h3>
-			<p>An <a href='#initial_file'>initial file</a> keeps the data that is to override the values hard-coded in a <a href='#settings_class'>settings type</a>'s definition. Each <a href='#settings_field'>settings field</a> can have its own <a href='#initial_file'>initial file</a> and thus can have its own initial value set distinct from the hard-coded one. 
+			<p><a href='#initial_file'>Initial file</a> keeps values that override the values hard-coded in a <a href='#settings_class'>settings type</a>'s definition. Each <a href='#settings_field'>settings field</a> can have its own <a href='#initial_file'>initial file</a> and thus can have its own initial value set distinct from the hard-coded one. 
 			
 			<p>It is optional and has the same format as a <a href='#storage_file'>storage file</a>.
 			
-		<p>An <a href='#initial_file'>initial file</a> is (re)read by <code>Reset()</code> method or, when no <a href='#storage_file'>storage file</a> exists, also by <code>Reload()</code> method.
+		<p><a href='#initial_file'>Initial file</a> is (re)read by <code>Reset()</code> method or, when no <a href='#storage_file'>storage file</a> exists, also by <code>Reload()</code> method.
 			
 			<p>It is supplied in the same directory as the application's entry assembly.
 		 
 			
 			<p><a href='#initial_file'>Initial file</a> is used when:
-			<br> - initial settings data are too big to be kept in code;
-			<br> - initial settings data are managed better in a file than in code;
+			<br> - initial settings data is too big to be kept in code;
+			<br> - initial settings data is managed easier in a file than in code;
 			<br> - the application has several <a href='#settings_field'>settings fields</a> of the same <a href='#settings_class'>type</a> and each of them must be initiated by its own value set;
 						
 			
