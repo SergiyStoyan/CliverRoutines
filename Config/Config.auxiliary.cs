@@ -26,7 +26,7 @@ namespace Cliver
         public static S CreateResetClone<S>(this S settings) where S : Settings, new()
         {
             if (settings.__Info == null)
-                throw new Exception("This method cannot be performed on a Settings object which has __Info not defined.");
+                throw new Exception("This method cannot be performed on a Settings object that has __Info not defined.");
             return (S)Settings.Create(settings.__Info, true);
         }
 
@@ -43,7 +43,7 @@ namespace Cliver
         public static S CreateReloadedClone<S>(this S settings) where S : Settings, new()
         {
             if (settings.__Info == null)
-                throw new Exception("This method cannot be performed on a Settings object which has __Info not defined.");
+                throw new Exception("This method cannot be performed on a Settings object that has __Info not defined.");
             return (S)Settings.Create(settings.__Info, false);
         }
 
@@ -164,7 +164,7 @@ namespace Cliver
 
         ///// <summary>
         ///// Get SettingsFieldInfos for the Settings type.
-        ///// ATTENTION: potentially a SettingsFieldInfo object can become out of game so be careful operating with it.
+        ///// ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
         ///// </summary>
         ///// <param name="settingsType">Settings type</param>
         ///// <param name="fresh">if TRUE then the app is re-parsed looking up for the required Settings type</param>
@@ -181,7 +181,7 @@ namespace Cliver
 
         /// <summary>
         /// Get all the SettingsFieldInfo's in the app.
-        /// ATTENTION: potentially, SettingsFieldInfo objects may become out of game so be careful while operating with them.
+        /// ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
         /// </summary>
         /// <returns>SettingsFieldInfo ennumerator</returns>
         static public IEnumerable<SettingsFieldInfo> GetSettingsFieldInfos()

@@ -49,7 +49,7 @@
             Creates a new instance of the given Settings field initiated with default values.
             Tries to load values from the initial file located in the app's directory. 
             If this file does not exist, it creates an object with the hardcoded values.
-            The new instance shares the same __Info object with the original instance.
+            (!)The new instance shares the same __Info object with the original instance.
             </summary>
             <typeparam name="S"></typeparam>
             <param name="settings"></param>
@@ -61,19 +61,20 @@
             Tries to load values from the storage file.
             If this file does not exist, it tries to load values from the initial file located in the app's directory. 
             If this file does not exist, it creates an object with the hardcoded values.
-            The new instance shares the same __Info object with the original instance.
+            (!)The new instance shares the same __Info object with the original instance.
             </summary>
             <typeparam name="S"></typeparam>
             <param name="settings"></param>
             <returns></returns>
         </member>
-        <member name="M:Cliver.Config.CreateClone``1(``0)">
+        <member name="M:Cliver.Config.CreateClone``1(``0,Newtonsoft.Json.JsonSerializerSettings)">
             <summary>
             Creates a new instance of the given Settings field with cloned values.
-            The new instance shares the same __Info object with the original instance.
+            (!)The new instance shares the same __Info object with the original instance.
             </summary>
             <typeparam name="S"></typeparam>
             <param name="settings"></param>
+            <param name="jsonSerializerSettings">allows to customize cloning</param>
             <returns></returns>
         </member>
         <member name="M:Cliver.Config.ExportStorageFiles(System.String)">
@@ -119,7 +120,7 @@
         <member name="M:Cliver.Config.GetSettingsFieldInfos">
             <summary>
             Get all the SettingsFieldInfo's in the app.
-            ATTENTION: potentially, SettingsFieldInfo objects may become out of game so be careful while operating with them.
+            ATTENTION: potentially, SettingsFieldInfo objects may come out of game so be careful when operating with them.
             </summary>
             <returns>SettingsFieldInfo ennumerator</returns>
         </member>
@@ -186,6 +187,11 @@
             </summary>
             <typeparam name="T"></typeparam>
         </member>
+        <member name="M:Cliver.Encrypted`1.#ctor">
+            <summary>
+            (!)The default constructor is used by the deserializer.
+            </summary>
+        </member>
         <member name="P:Cliver.Encrypted`1._Value">
             <summary>
             Encypted value. It must not be called from the custom code.
@@ -196,15 +202,19 @@
             Decrypted value to be used in the custom code.
             </summary>
         </member>
-        <member name="T:Cliver.StringEndec">
+        <member name="M:Cliver.Encrypted`1.Initialize(Cliver.StringEndec)">
             <summary>
-            Abstract string encrypting/decrypting class
+            It must be called before the first Value use (if InitializeDefault() was not called before).
             </summary>
+            <param name="endec"></param>
+            <exception cref="T:System.Exception"></exception>
         </member>
-        <member name="T:Cliver.Endec`1">
+        <member name="M:Cliver.Encrypted`1.InitializeDefault(Cliver.StringEndec)">
             <summary>
-            Abstract encrypting/decrypting class
+            Defines Endec for the whole type.
             </summary>
+            <param name="endec"></param>
+            <exception cref="T:System.Exception"></exception>
         </member>
         <member name="T:Cliver.Settings">
             <summary>
@@ -321,6 +331,37 @@
         <member name="F:Cliver.UserSettings.StorageDir">
             <summary>
             Storage folder for this Settings located in LocalApplicationData.
+            </summary>
+        </member>
+        <member name="T:Cliver.PortableSettings">
+            <summary>
+            Instances of this class are to be stored in the app's folder/config folder.
+            </summary>
+        </member>
+        <member name="P:Cliver.PortableSettings.__StorageDir">
+            <summary>
+            Storage folder for this Settings located in the app's folder/config folder.
+            </summary>
+        </member>
+        <member name="F:Cliver.PortableSettings.StorageDir">
+            <summary>
+            Storage folder for this Settings located in the app's folder/config folder.
+            </summary>
+        </member>
+        <member name="T:Cliver.PortableSettings0">
+            <summary>
+            Instances of this class are to be stored directly in the app's folder.
+            That's the storage settings file coincides with the initial settings file which thus will be ovewritten Save() call.
+            </summary>
+        </member>
+        <member name="P:Cliver.PortableSettings0.__StorageDir">
+            <summary>
+            Storage folder for this Settings located in the app's folder.
+            </summary>
+        </member>
+        <member name="F:Cliver.PortableSettings0.StorageDir">
+            <summary>
+            Storage folder for this Settings located in the app's folder.
             </summary>
         </member>
         <member name="F:Cliver.SettingsAttributes.ConfigAttribute.Optional">
@@ -482,6 +523,11 @@
             If this file does not exist, it creates an object with the hardcoded values.
             </summary>
         </member>
+        <member name="T:Cliver.Crypto">
+            <summary>
+            (!)Deprecated. Replaced with Endec class.
+            </summary>
+        </member>
         <member name="M:Cliver.Crypto.Halojoy.convert_by_halojoy(System.String)">
             <summary>
             EnCrypt to/from DeCrypt
@@ -489,24 +535,35 @@
             <param name="str"></param>
             <returns></returns>
         </member>
-        <member name="P:Cliver.DbConnection.Database">
+        <member name="P:Cliver.Db.Command.NativeCommand">
+            <summary>
+            Use it carefully, only when unavoidable, because it can interfere with the wraper class.
+            </summary>
+        </member>
+        <member name="P:Cliver.Db.Connection.Database">
             <summary>
             Current database
             </summary>
         </member>
-        <member name="P:Cliver.DbConnection.RefreshedNativeConnection">
+        <member name="P:Cliver.Db.Connection.RefreshedNativeConnection">
             <summary>
             Native connection that must be casted.
             </summary>
         </member>
-        <member name="P:Cliver.DbConnection.Item(System.String)">
+        <member name="P:Cliver.Db.Connection.NativeConnection">
             <summary>
-            Creates and caches a command.
+            Use it carefully, only when unavoidable, because it can interfere with the wraper class.
+            </summary>
+        </member>
+        <member name="P:Cliver.Db.Connection.Item(System.String,System.Nullable{Cliver.Log.MessageType})">
+            <summary>
+            Creates and caches/retrieves a command.
             </summary>
             <param name="sql"></param>
+            <param name="logLevel"></param>
             <returns></returns>
         </member>
-        <member name="M:Cliver.DbConnection.Get(System.String)">
+        <member name="M:Cliver.Db.Connection.Get(System.String,System.Nullable{Cliver.Log.MessageType})">
             <summary>
             Creates a not cached command.
             </summary>
@@ -567,6 +624,46 @@
             </summary>
             <typeparam name="E"></typeparam>
             <param name="objects"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Event`1.AddHandler(System.Action{`0},System.Boolean,System.Boolean,System.Object)">
+            <summary>
+            
+            </summary>
+            <param name="action"></param>
+            <param name="synchronous"></param>
+            <param name="uniqueAction"></param>
+            <param name="whileAliveObject">if set, callback depends on the weak reference to this object</param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Event`1.InsertHandler(Cliver.Event{`0}.Handler,System.Action{`0},System.Boolean,System.Boolean,System.Object)">
+            <summary>
+            
+            </summary>
+            <param name="beforeHandler"></param>
+            <param name="action"></param>
+            <param name="synchronous"></param>
+            <param name="uniqueAction"></param>
+            <param name="whileAliveObject">if set, callback depends on the weak reference to this object</param>
+            <returns></returns>
+            <exception cref="T:System.Exception"></exception>
+        </member>
+        <member name="M:Cliver.Extensions.ToString2``1(``0,System.String)">
+            <summary>
+            Works for multiple values too, unlike the built-in ToString()
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="e"></param>
+            <param name="separator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Extensions.CopyRanges``1(``0[],System.ValueTuple{System.Int32,System.Int32}[])">
+            <summary>
+            Copy the list of ranges into an output array. A range can be reversed.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="ps"></param>
+            <param name="ranges"></param>
             <returns></returns>
         </member>
         <member name="M:Cliver.Extensions.BeginInvoke(System.Delegate,System.Object[])">
@@ -691,7 +788,7 @@
         <member name="T:Cliver.HandyList`1">
             <summary>
             Features:
-            - auto-disposing IDisposable values which have left the list;
+            - auto-disposing IDisposable Values which have left the list;
             </summary>
             <typeparam name="VT"></typeparam>
         </member>
@@ -702,6 +799,11 @@
             </summary>
             <param name="index"></param>
             <returns></returns>
+        </member>
+        <member name="P:Cliver.HandyList`1.Values">
+            <summary>
+            Underlaying List which can be used for the ordinary operations.
+            </summary>
         </member>
         <member name="M:Cliver.ListDb.IndexedTable`1.Save(`0)">
             <summary>
@@ -723,16 +825,33 @@
             <param name="index"></param>
             <param name="document"></param>
         </member>
+        <member name="M:Cliver.ListDb.Table`1.Flush">
+            <summary>
+            Write data to the file, cleaning opearations if any.
+            </summary>
+        </member>
+        <member name="M:Cliver.ListDb.Table`1.Drop">
+            <summary>
+            Delete the table.
+            </summary>
+        </member>
+        <member name="M:Cliver.ListDb.Table`1.Clear">
+            <summary>
+            Remove all the data from the table.
+            </summary>
+        </member>
         <member name="M:Cliver.ListDb.Table`1.Save(`0)">
             <summary>
-            Table works as an ordered HashSet
+            Adds a document to the table if it does not exists. Otherwise, overwrites it.
+            Table works as an ordered HashSet.
             </summary>
             <param name="document"></param>
             <returns></returns>
         </member>
         <member name="M:Cliver.ListDb.Table`1.Add(`0)">
             <summary>
-            Table works as an ordered HashSet
+            Adds a document to the end. If it exists then it is moved to the end. 
+            Table works as an ordered HashSet.
             </summary>
             <param name="document"></param>
         </member>
@@ -741,6 +860,47 @@
             Table works as an ordered HashSet
             </summary>
             <param name="document"></param>
+        </member>
+        <member name="T:Cliver.Exception2">
+            <summary>
+            Trace info for such Exception is not logged. 
+            It is intended for foreseen errors.
+            </summary>
+        </member>
+        <member name="T:Cliver.MessageException">
+            <summary>
+            Informative Exception with controllable logging features.
+            </summary>
+        </member>
+        <member name="T:Cliver.InformException">
+            <summary>
+            Used to intercept informative messages in checking scopes.
+            </summary>
+        </member>
+        <member name="T:Cliver.InformException0">
+            <summary>
+            Used to intercept informative messages in checking scopes. Logged with trace details.
+            </summary>
+        </member>
+        <member name="T:Cliver.WarningException">
+            <summary>
+            Used to intercept warning messages in checking scopes. Logged with trace details.
+            </summary>
+        </member>
+        <member name="T:Cliver.WarningException2">
+            <summary>
+            Used to intercept informative messages in checking scopes. Logged without trace details.
+            </summary>
+        </member>
+        <member name="T:Cliver.ErrorException">
+            <summary>
+            Used to intercept informative messages in checking scopes. Logged with trace details.
+            </summary>
+        </member>
+        <member name="T:Cliver.ErrorException2">
+            <summary>
+            Used to intercept informative messages in checking scopes. Logged without trace details.
+            </summary>
         </member>
         <member name="T:Cliver.Log">
             <summary>
@@ -760,23 +920,23 @@
         </member>
         <member name="M:Cliver.Log.GetStackString(System.Int32,System.Int32,System.Boolean)">
             <summary>
-            Get stack information for the caller.
+            Returns stack information for the caller.
             </summary>
             <param name="startFrame">frame to start with</param>
-            <param name="frameCount">number of frames to take</param>
+            <param name="frameCount">number of frames to take. If negative then retrieve all frames</param>
             <param name="endOnEmptyFile">if true, stop when going out of the app</param>
             <returns>stack info</returns>
         </member>
         <member name="M:Cliver.Log.GetExceptionMessage2(System.Exception)">
             <summary>
-            Get exception message without stack info.
+            Returns exception message without stack info.
             </summary>
             <param name="e">exception</param>
             <returns>exception message chain</returns>
         </member>
         <member name="M:Cliver.Log.GetExceptionMessage(System.Exception,System.Boolean)">
             <summary>
-            Get the exception message chain.
+            Returns the exception message chain.
             </summary>
             <param name="e">exception</param>
             <param name="withDetails">add stack info</param>
@@ -786,8 +946,30 @@
             <summary>
             Return name of the method which called this function
             </summary>
-            <param name="name">don't change it</param>
+            <param name="name">(!)don't set it</param>
             <returns>name of the calling method</returns>
+        </member>
+        <member name="M:Cliver.Log.GetThisMethodInfo(System.Object[])">
+            <summary>
+            Return the full name of the calling method together with the passed parameters.
+            </summary>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Log.GetAssembliesInfo(System.String[])">
+            <summary>
+            (!)It is slow because it loads assemblies.
+            </summary>
+            <param name="namespaces"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.Log.GetReferencedAssembliesInfo(System.String[])">
+            <summary>
+            Checks only references assemblies.
+            It is fast because does not load assemblies.
+            </summary>
+            <param name="names"></param>
+            <returns></returns>
         </member>
         <member name="F:Cliver.Log.ProgramName">
             <summary>
@@ -831,7 +1013,16 @@
             Shuts down the log engine and re-initializes it. Optional.
             </summary>
             <param name="mode">log configuration</param>
-            <param name="baseDirs">directories for logging, ordered by preference. When NULL, the built-in directory list is used.</param>
+            <param name="baseDirs">directories for logging, ordered by preference. When NULL or not usable, the built-in directory list is used.</param>
+            <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted. When negative, no clean-up is performed.</param>
+            <param name="rootDirName">RootDir folder name</param>
+        </member>
+        <member name="M:Cliver.Log.Initialize(System.String,System.Nullable{Cliver.Log.Mode},System.Int32,System.String)">
+            <summary>
+            Shuts down the log engine and re-initializes it. Optional. Must be used when only 1 explicite baseDir must be set.
+            </summary>
+            <param name="baseDir">the definite directory for logging. NULL triggers exception.</param>
+            <param name="mode">log configuration</param>
             <param name="deleteLogsOlderThanDays">old logs that are older than the number of days will be deleted. When negative, no clean-up is performed.</param>
             <param name="rootDirName">RootDir folder name</param>
         </member>
@@ -923,6 +1114,16 @@
             Message types.
             </summary>
         </member>
+        <member name="F:Cliver.Log.MessageType.LOG">
+            <summary>
+            Message with no label.
+            </summary>
+        </member>
+        <member name="F:Cliver.Log.MessageType.EXIT">
+            <summary>
+            (!)The app exits right after logging this message.
+            </summary>
+        </member>
         <member name="M:Cliver.Log.CloseAll">
             <summary>
             Clear all existing sessions and close all the logs.
@@ -932,6 +1133,17 @@
              <summary>
             Directory where logs and log sessions are written.
              </summary>
+        </member>
+        <member name="F:Cliver.Log.DeleteOldLogsDialog">
+            <summary>
+            Optional handler used to ask user for the permission to delete old logs.
+            </summary>
+        </member>
+        <member name="P:Cliver.Log.IsRootDirSet">
+            <summary>
+            Can be checked in the custom code before accessing auto-created objects like Log.Head, Log.Head.Main to prevent creating a root dir when no log is actually in use yet.
+            It is usually needed before Initialize() or any writing method.
+            </summary>
         </member>
         <member name="P:Cliver.Log.BaseDir">
              <summary>
@@ -1227,11 +1439,6 @@
             Session to which this log belongs.
             </summary>
         </member>
-        <member name="P:Cliver.Log.Session.Writer.Level">
-            <summary>
-            Message importance level.
-            </summary>
-        </member>
         <member name="M:Cliver.Log.Error(System.Exception)">
             <summary>
             Write exception with details.
@@ -1376,6 +1583,12 @@
             <param name="message"></param>
             <param name="details"></param>
         </member>
+        <member name="M:Cliver.Log.Write(System.Exception)">
+            <summary>
+            Write an Exception while treating MessageException types particularly.
+            </summary>
+            <param name="e"></param>
+        </member>
         <member name="T:Cliver.Log.Writer">
             <summary>
             The base log writer. 
@@ -1426,11 +1639,17 @@
             Triggered before writing message.
             </summary>
         </member>
-        <member name="T:Cliver.Exception2">
+        <member name="M:Cliver.Log.Writer.ClearWritingSubscriptions">
             <summary>
-            Trace info for such Exception is not logged. 
-            It is intended for foreseen errors.
+            Remove all subscriptions for the Writing event.
             </summary>
+        </member>
+        <member name="M:Cliver.Log.Writer.Write(System.Exception)">
+            <summary>
+            Base writting exception method which treats the message depending on the exception's type.
+            </summary>
+            <param name="e"></param>
+            <exception cref="T:System.Exception"></exception>
         </member>
         <member name="M:Cliver.ConvertionRoutines.Normalize(System.Decimal)">
             <summary>
@@ -1455,10 +1674,31 @@
         </member>
         <member name="M:Cliver.DateTimeRoutines.GetSecondsSinceUnixEpoch(System.DateTime)">
             <summary>
-            Amount of seconds elapsed between 1970-01-01 00:00:00 and the date-time.
+            Amount of seconds elapsed between 1970-01-01 00:00:00 and the dateTime.
             </summary>
             <param name="dateTime">date-time</param>
             <returns>seconds</returns>
+        </member>
+        <member name="M:Cliver.DateTimeRoutines.GetMillisecondsSinceUnixEpoch(System.DateTime)">
+            <summary>
+            Amount of milliseconds elapsed between 1970-01-01 00:00:00 and the dateTime.
+            </summary>
+            <param name="dateTime">date-time</param>
+            <returns>seconds</returns>
+        </member>
+        <member name="M:Cliver.DateTimeRoutines.GetDateTimeFromSecondsSinceUnixEpoch(System.UInt32)">
+            <summary>
+            DateTime defined by seconds elapsed between 1970-01-01 00:00:00.
+            </summary>
+            <param name="secondsSinceUnixEpoch"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.DateTimeRoutines.GetDateTimeFromMillisecondsSinceUnixEpoch(System.UInt64)">
+            <summary>
+            DateTime defined by milliseconds elapsed between 1970-01-01 00:00:00.
+            </summary>
+            <param name="millisecondsSinceUnixEpoch"></param>
+            <returns></returns>
         </member>
         <member name="T:Cliver.DateTimeRoutines.ParsedDateTime">
             <summary>
@@ -1483,6 +1723,21 @@
         <member name="F:Cliver.DateTimeRoutines.ParsedDateTime.LengthOfTime">
             <summary>
             Length of the time substring found
+            </summary>
+        </member>
+        <member name="F:Cliver.DateTimeRoutines.ParsedDateTime.IndexOfStart">
+            <summary>
+            Position of the substring containing the detected date and/or time
+            </summary>
+        </member>
+        <member name="F:Cliver.DateTimeRoutines.ParsedDateTime.LengthOfDateTime">
+            <summary>
+            Length of the substring containing the detected date and/or time
+            </summary>
+        </member>
+        <member name="F:Cliver.DateTimeRoutines.ParsedDateTime.IndexOfRemainder">
+            <summary>
+            Position of the string remainder behind the detected date and time
             </summary>
         </member>
         <member name="F:Cliver.DateTimeRoutines.ParsedDateTime.DateTime">
@@ -1549,8 +1804,8 @@
             Tries to find date and time within the passed string and return it as DateTime structure. 
             </summary>
             <param name="str">string that contains date and/or time</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="date_time">parsed date-time output</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="dateTime">parsed date-time output</param>
             <returns>true if both date and time were found, else false</returns>
         </member>
         <member name="M:Cliver.DateTimeRoutines.TryParseDateOrTime(System.String,Cliver.DateTimeRoutines.DateTimeFormat,System.DateTime@)">
@@ -1560,8 +1815,8 @@
             If only time was found, date in the returned DateTime is DefaultDate.
             </summary>
             <param name="str">string that contains date and(or) time</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="date_time">parsed date-time output</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="dateTime">parsed date-time output</param>
             <returns>true if date and/or time was found, else false</returns>
         </member>
         <member name="M:Cliver.DateTimeRoutines.TryParseTime(System.String,Cliver.DateTimeRoutines.DateTimeFormat,System.DateTime@)">
@@ -1570,7 +1825,7 @@
             It recognizes only time while ignoring date, so date in the returned DateTime is always 1/1/1.
             </summary>
             <param name="str">string that contains time</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
             <param name="time">parsed time output</param>
             <returns>true if time was found, else false</returns>
         </member>
@@ -1581,7 +1836,7 @@
             If year of the date was not found then it accepts the current year. 
             </summary>
             <param name="str">string that contains date</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
             <param name="date">parsed date output</param>
             <returns>true if date was found, else false</returns>
         </member>
@@ -1590,8 +1845,8 @@
             Tries to find date and time within the passed string and return it as ParsedDateTime object. 
             </summary>
             <param name="str">string that contains date-time</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="parsed_date_time">parsed date-time output</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="parsedDateTime">parsed date-time output</param>
             <returns>true if both date and time were found, else false</returns>
         </member>
         <member name="M:Cliver.DateTimeRoutines.TryParseTime(System.String,Cliver.DateTimeRoutines.DateTimeFormat,Cliver.DateTimeRoutines.ParsedDateTime@)">
@@ -1600,8 +1855,8 @@
             It recognizes only time while ignoring date, so date in the returned ParsedDateTime is always 1/1/1
             </summary>
             <param name="str">string that contains date-time</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="parsed_time">parsed date-time output</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="parsedTime">parsed date-time output</param>
             <returns>true if time was found, else false</returns>
         </member>
         <member name="M:Cliver.DateTimeRoutines.TryParseDateOrTime(System.String,Cliver.DateTimeRoutines.DateTimeFormat,Cliver.DateTimeRoutines.ParsedDateTime@)">
@@ -1611,19 +1866,19 @@
             If only time was found, date in the returned ParsedDateTime is DefaultDate.
             </summary>
             <param name="str">string that contains date-time</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="parsed_date_time">parsed date-time output</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="parsedDateTime">parsed date-time output</param>
             <returns>true if date or time was found, else false</returns>
         </member>
         <member name="M:Cliver.DateTimeRoutines.TryParseTime(System.String,Cliver.DateTimeRoutines.DateTimeFormat,Cliver.DateTimeRoutines.ParsedDateTime@,Cliver.DateTimeRoutines.ParsedDateTime)">
             <summary>
-            Tries to find time within the passed string (relatively to the passed parsed_date if any) and return it as ParsedDateTime object.
+            Tries to find time within the passed string (relatively to the passed parsedDate if any) and return it as ParsedDateTime object.
             It recognizes only time while ignoring date, so date in the returned ParsedDateTime is always 1/1/1
             </summary>
             <param name="str">string that contains date</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="parsed_time">parsed date-time output</param>
-            <param name="parsed_date">ParsedDateTime object if the date was found within this string, else NULL</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="parsedTime">parsed date-time output</param>
+            <param name="parsedDate">ParsedDateTime object if the date was found within this string, else NULL</param>
             <returns>true if time was found, else false</returns>
         </member>
         <member name="M:Cliver.DateTimeRoutines.TryParseDate(System.String,Cliver.DateTimeRoutines.DateTimeFormat,Cliver.DateTimeRoutines.ParsedDateTime@)">
@@ -1633,9 +1888,15 @@
             If year of the date was not found then it accepts the current year. 
             </summary>
             <param name="str">string that contains date</param>
-            <param name="default_format">format to be used preferably in ambivalent instances</param>
-            <param name="parsed_date">parsed date output</param>
+            <param name="defaultFormat">format to be used preferably in ambivalent instances</param>
+            <param name="parsedDate">parsed date output</param>
             <returns>true if date was found, else false</returns>
+        </member>
+        <member name="M:Cliver.DiagnosticsRoutines.IsCallingMethodInStackTwice">
+            <summary>
+            Used to prevent calling a handler of changes when it itself does changes.
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:Cliver.FileSystemRoutines.FindFullCommandLinePath(System.String,System.String,System.String)">
             <summary>
@@ -1646,6 +1907,14 @@
             <param name="PATHEXTs">extensions listed like environmentVariable PATHEXT</param>
             <returns></returns>
         </member>
+        <member name="M:Cliver.FileSystemRoutines.CreateDirectory(System.String,System.Boolean)">
+            <summary>
+            Create if does not exists.
+            </summary>
+            <param name="directory"></param>
+            <param name="unique"></param>
+            <returns></returns>
+        </member>
         <member name="M:Cliver.FileSystemRoutines.CopyFile(System.String,System.String,System.Boolean)">
             <summary>
             Creates the dir if it is missing.
@@ -1653,7 +1922,7 @@
             </summary>
             <param name="file1"></param>
             <param name="file2"></param>
-            <param name="overwrite"></param>
+            <param name="overwriteElseException"></param>
         </member>
         <member name="T:Cliver.PathRoutines">
             <summary>
@@ -1666,16 +1935,17 @@
             </summary>
             <param name="path"></param>
             <param name="webDecode"></param>
-            <param name="illegalCharReplacement"></param>
+            <param name="illegalCharSubstitute"></param>
             <returns></returns>
         </member>
-        <member name="M:Cliver.PathRoutines.GetLegalizedFileName(System.String,System.Boolean,System.String)">
+        <member name="M:Cliver.PathRoutines.GetLegalizedFileName(System.String,System.Boolean,System.String,System.Boolean)">
             <summary>
             Exctract the file name and convert illegal characters in it.
             </summary>
             <param name="file"></param>
             <param name="webDecode"></param>
-            <param name="illegalCharReplacement"></param>
+            <param name="illegalCharSubstitute"></param>
+            <param name="treatFileAsName">DirectorySeparatorChar will be considered an InvalidFileNameChar and replaced</param>
             <returns></returns>
         </member>
         <member name="M:Cliver.PathRoutines.GetLegalizedFile(System.String,System.Boolean,System.String)">
@@ -1684,7 +1954,7 @@
             </summary>
             <param name="file"></param>
             <param name="webDecode"></param>
-            <param name="illegalCharReplacement"></param>
+            <param name="illegalCharSubstitute"></param>
             <returns></returns>
         </member>
         <member name="M:Cliver.PathRoutines.GetFileName(System.String)">
@@ -1750,10 +2020,94 @@
             <param name="frame"></param>
             <returns></returns>
         </member>
+        <member name="M:Cliver.SleepRoutines.WaitForCondition(System.Func{System.Boolean},System.Int32,System.Int32,System.Boolean,System.Int32)">
+            <summary>
+            Always polls at least 1 time.
+            </summary>
+            <param name="condition"></param>
+            <param name="timeoutMss"></param>
+            <param name="pollSpanMss"></param>
+            <param name="pollSpanStartsBeforeConditionCheck"></param>
+            <param name="pollMinNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.SleepRoutines.WaitForObject``1(System.Func{``0},System.Int32,System.Int32,System.Boolean,System.Int32)">
+            <summary>
+            Always polls at least 1 time.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="getObject"></param>
+            <param name="timeoutMss"></param>
+            <param name="pollSpanMss"></param>
+            <param name="pollSpanStartsBeforeConditionCheck"></param>
+            <param name="pollMinNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Cliver.TaskRoutines">
+            <summary>
+            Credit to: https://social.msdn.microsoft.com/Forums/en-US/163ef755-ff7b-4ea5-b226-bbe8ef5f4796/is-there-a-pattern-for-calling-an-async-method-synchronously?forum=async
+            https://stackoverflow.com/questions/5095183/how-would-i-run-an-async-taskt-method-synchronously
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Cliver.TaskRoutines.RunSync(System.Func{System.Threading.Tasks.Task})" -->
+        <!-- Badly formed XML comment ignored for member "M:Cliver.TaskRoutines.RunSync``1(System.Func{System.Threading.Tasks.Task{``0}})" -->
         <member name="T:Cliver.ThreadRoutines">
             <summary>
             Sleep not freezing the app
             </summary>
+        </member>
+        <member name="T:Cliver.ProgressExample">
+            <summary>
+            Usage example
+            </summary>
+        </member>
+        <member name="T:Cliver.Progress">
+            <summary>
+            Used to display progress bar with multiple tasks.
+            </summary>
+        </member>
+        <member name="P:Cliver.Progress.Stage.Weight">
+            <summary>
+            Can be any. Important is the ratio between all the weights.
+            </summary>
+        </member>
+        <member name="M:Cliver.Progress.Stage.Reset">
+            <summary>
+            Makes this Stage not touched yet.
+            </summary>
+        </member>
+        <member name="M:Cliver.Progress.Stage.GetValue1">
+            <summary>
+            [0:1]
+            </summary>
+            <returns>[0:1]</returns>
+        </member>
+        <member name="T:Cliver.Progress.AsymptoticStage">
+            <summary>
+            Used when Maximum cannot be determined at the beginning.
+            </summary>
+        </member>
+        <member name="M:Cliver.Progress.AsymptoticStage.Reset">
+            <summary>
+            Makes this Stage not touched yet.
+            </summary>
+        </member>
+        <member name="M:Cliver.Progress.#ctor">
+            <summary>
+            Auto-detects Stages in the deriving custom class
+            </summary>
+        </member>
+        <member name="M:Cliver.Progress.GetValue1">
+            <summary>
+            [0:1]
+            </summary>
+            <returns>[0:1]</returns>
+        </member>
+        <member name="M:Cliver.Progress.GetValue">
+            <summary>
+            [0:Maximum]
+            </summary>
+            <returns>[0:Maximum]</returns>
         </member>
         <member name="T:Cliver.Serialization">
             <summary>
@@ -1860,6 +2214,18 @@
             <param name="values"></param>
             <returns></returns>
         </member>
+        <member name="M:Cliver.Set`2.Append(`0[])">
+            <summary>
+            (!)Changes this Set itself.
+            </summary>
+            <param name="values"></param>
+        </member>
+        <member name="M:Cliver.Set`2.Remove(`0[])">
+            <summary>
+            (!)Changes this Set itself.
+            </summary>
+            <param name="values"></param>
+        </member>
         <member name="M:Cliver.Set`2.op_Equality(Cliver.Set{`0,`1},Cliver.Set{`0,`1})">
             <summary>
             2 Set's comprise of the same Enum's.
@@ -1909,6 +2275,48 @@
             <typeparam name="S"></typeparam>
             <param name="set"></param>
             <returns></returns>
+        </member>
+        <member name="T:Cliver.StorageFile`1">
+            <summary>
+            Read/write a record-per-line file. Thread-safe.
+            </summary>
+        </member>
+        <member name="M:Cliver.StringTable.Enumerate(System.Collections.Generic.IList{System.Collections.Generic.IList{System.Object}},System.Boolean,Cliver.StringTable.ReadingMode)">
+            <summary>
+            (!)When rememberRows=FALSE, calling the class members that depend on Rows will cause an exception.
+            </summary>
+            <param name="valuess"></param>
+            <param name="rememberRows"></param>
+            <param name="mode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.StringTable.Enumerate(System.String,System.Boolean,Cliver.StringTable.ReadingMode)">
+            <summary>
+            (!)When rememberRows=FALSE, calling the class members that depend on Rows will cause an exception.
+            </summary>
+            <param name="file"></param>
+            <param name="rememberRows"></param>
+            <param name="mode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.StringTable.Enumerate(System.Boolean,System.IO.StreamReader,Cliver.StringTable.ReadingMode)">
+            <summary>
+            (!)When rememberRows=FALSE, calling the class members that depend on Rows will cause an exception.
+            </summary>
+            <param name="rememberRows"></param>
+            <param name="streamReader"></param>
+            <param name="mode"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Cliver.StringTable.Row.Y">
+            <summary>
+            1-based number of the row in Rows.
+            </summary>
+        </member>
+        <member name="P:Cliver.StringTable.Row.LineNumber">
+            <summary>
+            1-based number of line in the input stream.
+            </summary>
         </member>
         <member name="T:Cliver.Synchronization">
             <summary>

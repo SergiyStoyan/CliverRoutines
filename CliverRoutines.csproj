@@ -11,7 +11,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.56.0</Version>
+    <Version>6.57.0</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in most desktop applications and not only them:
@@ -48,7 +48,11 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.52 =&gt; 6.55.0
+    <PackageReleaseNotes>6.55 =&gt; 6.56.0
+- PortableSettings added;
+- WaitForConditionAsync() added;
+
+6.52 =&gt; 6.55.0
 - GetUrlQuery() enhanced;
 - RunSynchronously() renamed to RunSync() (not to confuse with the native RunSynchronously);
 
@@ -108,7 +112,7 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>c:\Users\serge\Documents\_PROJECTS\CliverRoutines\CliverRoutines.xml</DocumentationFile>
+    <DocumentationFile>c:\Users\sergi\Documents\_PROJECTS\CliverRoutines\CliverRoutines.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
