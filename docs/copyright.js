@@ -16,7 +16,7 @@ table.copyright td {margin:0; padding:0; width:6px; height:6px;}',
 
 document.write('\
 <div class="copyright">\
-    <a href="http://cliversoft.com" title="cliversoft.com">\
+    <a href="https://github.com/SergiyStoyan/" title="https://github.com/SergiyStoyan/">\
         <TABLE class="copyright">\
             <TR>\
                 <TD id="copyright_td1"></TD>\
