@@ -351,7 +351,7 @@
         <member name="T:Cliver.PortableSettings0">
             <summary>
             Instances of this class are to be stored directly in the app's folder.
-            That's the storage settings file coincides with the initial settings file which thus will be ovewritten Save() call.
+            That's the storage settings file coincides with the initial settings file which thus be ovewritten by Save() call.
             </summary>
         </member>
         <member name="P:Cliver.PortableSettings0.__StorageDir">
@@ -2055,6 +2055,49 @@
             <summary>
             Sleep not freezing the app
             </summary>
+        </member>
+        <member name="T:Cliver.Operation">
+            <summary>
+            A base class for a custom operation that exposes a standard API to operation invoker which is usually GUI.
+            See OperationController for details.
+            </summary>
+        </member>
+        <member name="T:Cliver.Operation2">
+            <summary>
+            A base class for a custom operation that exposes a standard API to operation invoker which is usually GUI.
+            See OperationController for details.
+            </summary>
+        </member>
+        <member name="T:Cliver.Operation3">
+            <summary>
+            A base class for a custom operation that exposes a standard API to operation invoker which is usually GUI.
+            See OperationController for details.
+            </summary>
+        </member>
+        <member name="T:Cliver.OperationController">
+            <summary>
+            An intermediary object between an operation method/class and its invoker which is usually GUI.
+            (!)The object must be available to the operation method/class.
+            Can be inherited and enhanced with methods like OnProgress() etc.
+            Provides:
+            - safely aborting of the operation;
+            - event entries;
+            - async methods;
+            </summary>
+        </member>
+        <member name="M:Cliver.OperationController.Perform">
+            <summary>
+            Must be called by the invoker.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Cliver.OperationController.AddAbortingActions(System.Action[])">
+            <summary>
+            Provides aborting mechanisms, usually by causing exceptions within the operation code.
+            Must be called from the operation method.
+            </summary>
+            <param name="actions"></param>
+            <exception cref="T:System.Exception"></exception>
         </member>
         <member name="T:Cliver.ProgressExample">
             <summary>
