@@ -11,7 +11,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.59.0</Version>
+    <Version>6.60.0</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in most desktop applications and not only them:
@@ -48,9 +48,10 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.56 =&gt; 6.58.0
+    <PackageReleaseNotes>6.56 =&gt; 6.60.0
 - Operation, OperationContoller added;
-- Trier3 added;
+- (!) old Triers commented;
+- new Triers added;
 
 6.55 =&gt; 6.56.0
 - PortableSettings added;

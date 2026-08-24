@@ -79,6 +79,9 @@ namespace Cliver
 
         readonly public List<Action<Exception>> OnException = new List<Action<Exception>>();
 
+        /// <summary>
+        /// The operation must throw exception on error. Otherwise it is considered completed successfully.
+        /// </summary>
         public virtual Action Operation
         {
             get { return operation; }

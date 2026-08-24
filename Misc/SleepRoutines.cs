@@ -12,6 +12,7 @@ namespace Cliver
     public static class SleepRoutines
     {
         /// <summary>
+        /// (!)It waits until condition() returns irrelatively to the timeout.
         /// Always polls at least 1 time.
         /// </summary>
         /// <param name="condition"></param>
@@ -52,6 +53,16 @@ namespace Cliver
                 }
         }
 
+        /// <summary>
+        /// (!)It waits until condition() returns irrelatively to the timeout.
+        /// Always polls at least 1 time.
+        /// </summary>
+        /// <param name="conditionAsync"></param>
+        /// <param name="timeoutMss"></param>
+        /// <param name="pollSpanMss"></param>
+        /// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        /// <param name="pollMinNumber"></param>
+        /// <returns></returns>
         async public static Task<bool> WaitForConditionAsync(Func<Task<bool>> conditionAsync, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false, int pollMinNumber = -1)
         {
             int pollNumber = 0;
@@ -136,6 +147,7 @@ namespace Cliver
         //}
 
         /// <summary>
+        /// (!)It waits until condition() returns irrelatively to the timeout.
         /// Always polls at least 1 time.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -156,6 +168,17 @@ namespace Cliver
             return o;
         }
 
+        /// <summary>
+        /// (!)It waits until condition() returns irrelatively to the timeout.
+        /// Always polls at least 1 time.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="getObjectAsync"></param>
+        /// <param name="timeoutMss"></param>
+        /// <param name="pollSpanMss"></param>
+        /// <param name="pollSpanStartsBeforeConditionCheck"></param>
+        /// <param name="pollMinNumber"></param>
+        /// <returns></returns>
         async public static Task<T> WaitForObjectAsync<T>(Func<Task<T>> getObjectAsync, int timeoutMss, int pollSpanMss, bool pollSpanStartsBeforeConditionCheck = false, int pollMinNumber = -1) where T : class
         {
             T o = null;
