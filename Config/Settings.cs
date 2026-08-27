@@ -85,7 +85,7 @@ namespace Cliver
             if (exception != null || settingsFieldInfo.TypeVersion != settings.__TypeVersion)
             {
                 settings.__Info = settingsFieldInfo;
-                settings.UnsupportedFormatHandler(exception);
+                settings.__UnsupportedFormatHandler(exception);
             }
             return settings;
         }
@@ -197,7 +197,7 @@ namespace Cliver
         /// - the storage/init file could not be deserialized;
         /// Here is your chance to amend the data to migrate to the current version.
         /// </summary>
-        virtual protected void UnsupportedFormatHandler(Exception deserializingException)
+        virtual protected void __UnsupportedFormatHandler(Exception deserializingException)
         {
             if (deserializingException != null)
                 throw new Exception("Error while deserializing settings " + __settingsFieldInfo.FullName + " from file " + __settingsFieldInfo.InitFile, deserializingException);

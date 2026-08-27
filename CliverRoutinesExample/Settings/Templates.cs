@@ -27,7 +27,7 @@ namespace Example
         public List<Template> Templates = new List<Template> { new Template { Name = "test", Words = new List<string> { "apple", "box" } } };
 
         //Here is your chance to upgrade the data to the current format.
-        override protected void UnsupportedFormatHandler(Exception deserializingException)
+        override protected void __UnsupportedFormatHandler(Exception deserializingException)
         {
             try
             {
