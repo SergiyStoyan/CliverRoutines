@@ -3,15 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <!--AssemblyVersion>6.10.1.0</AssemblyVersion-->
     <RepositoryUrl>https://github.com/sergiystoyan/CliverRoutines.git</RepositoryUrl>
-    <!--FileVersion>6.10.1.0</FileVersion-->
-    <!--PackageLicenseFile>LICENSE</PackageLicenseFile-->
-	<PackageLicenseExpression></PackageLicenseExpression>
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-    <Version>6.60.0</Version>
+	<Version>6.60.1
+.$([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 1787830000)), 5))</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
     <Description>Cross-platform routines needed in most desktop applications and not only them:
@@ -116,10 +113,6 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>c:\Users\sergi\Documents\_PROJECTS\CliverRoutines\CliverRoutines.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="CliverRoutinesExample\**" />
     <Compile Remove="CliverRoutinesTests\**" />
