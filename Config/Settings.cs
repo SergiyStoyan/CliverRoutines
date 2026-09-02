@@ -4,6 +4,8 @@
 //        http://www.cliversoft.com
 //********************************************************************************************
 
+#pragma warning disable IDE1006 //suppress: naming rule violation prefix '__' is not expected
+
 using System;
 using System.IO;
 
