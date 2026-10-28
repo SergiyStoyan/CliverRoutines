@@ -49,12 +49,22 @@ namespace Cliver
             return ns2fi;
         }
 
-        public static Dictionary<string, object> GetFieldValues(object o, BindingFlags bindingFlags)
+        public static Dictionary<string, object> GetFieldNames2Value(object o, BindingFlags? bindingFlags = null)
         {
-            Dictionary<string, object> ns2fi = new Dictionary<string, object>();
-            foreach (FieldInfo fi in o.GetType().GetFields(bindingFlags))
-                ns2fi[fi.Name] = fi.GetValue(o);
-            return ns2fi;
+            Dictionary<string, object> ns2v = new Dictionary<string, object>();
+            foreach (FieldInfo fi in bindingFlags != null ? o.GetType().GetFields(bindingFlags.Value) : o.GetType().GetFields())
+                ns2v[fi.Name] = fi.GetValue(o);
+            return ns2v;
+        }
+
+        public static Dictionary<string, object> GetPropertyNames2Value(object o, BindingFlags? bindingFlags = null)
+        {
+            Dictionary<string, object> ns2v = new Dictionary<string, object>();
+            //foreach (System.ComponentModel.PropertyDescriptor pd in System.ComponentModel.TypeDescriptor.GetProperties(o))
+            //    ns2v[pd.Name] = pd.GetValue(o);
+            foreach (var pi in bindingFlags != null ? o.GetType().GetProperties(bindingFlags.Value) : o.GetType().GetProperties())
+                ns2v[pi.Name] = pi.GetValue(o);
+            return ns2v;
         }
 
         //public static HandyDictionary<string, object> GetFields(this object o, BindingFlags bindingFlags = BindingFlags.Public)

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Cliver
@@ -27,8 +28,15 @@ namespace Cliver
 
         public virtual bool Success { get; protected set; } = false;
 
+        public virtual TimeSpan Delay { get; set; } = new TimeSpan(0, 0, 0);
+
+        public DateTime NextRunTime { get; protected set; } = new DateTime(0);
+
         virtual public T Run<T>(Func<T> function) where T : class
         {
+            var delay = NextRunTime - DateTime.Now;
+            if (delay > TimeSpan.Zero)
+                Thread.Sleep(delay);
             T result = null;
             Success = SleepRoutines.WaitForCondition(
                 () =>
@@ -47,29 +55,13 @@ namespace Cliver
                 },
                 0, RetryDelayMss, pollSpanStartsBeforeConditionCheck: false, MaxTryNumber
             );
+            NextRunTime = DateTime.Now.Add(Delay);
             return result;
-        }
-
-        virtual public async Task<T> RunAsync<T>(Func<T> function) where T : class
-        {
-            Task<T> t = new Task<T>(() => { return Run(function); });
-            t.Start();
-            return await t;
-        }
-
-        virtual public void Run(Action action)
-        {
-            Run(() => { action(); return (object)null; });
-        }
-
-        virtual public async Task RunAsync(Action action)
-        {
-            await RunAsync(() => { action(); return (object)null; });
         }
     }
 
     /// <summary>
-    /// The most powerful trier that can be used either as is or be inherited.
+    /// The most versatile trier that can be used either as is or be inherited.
     /// </summary>
     public class Trier : TrierBase
     {
@@ -96,29 +88,26 @@ namespace Cliver
             return result;
         }
 
+        virtual public T Run<T>(string message, Func<Task<T>> functionAsync) where T : class
+        {
+            return Run(message, () => TaskRoutines.RunSync(functionAsync));
+        }
+
         virtual public async Task<T> RunAsync<T>(string message, Func<T> function) where T : class
         {
             Message = message;
             onStart();
-            T result = await base.RunAsync(function);
+            //T result = await base.RunAsync(function);
+            Task<T> t = new Task<T>(() => Run(function));
+            t.Start();
+            T result = await t;
             onEnd();
             return result;
         }
 
-        virtual public void Run(string message, Action action)
+        virtual public Task<T> RunAsync<T>(string message, Func<Task<T>> functionAsync) where T : class
         {
-            Message = message;
-            onStart();
-            base.Run(action);
-            onEnd();
-        }
-
-        virtual public async Task RunAsync(string message, Action action)
-        {
-            Message = message;
-            onStart();
-            await base.RunAsync(action);
-            onEnd();
+            return RunAsync(message, () => TaskRoutines.RunSync(functionAsync));
         }
 
         virtual public T Run<T>(Func<T> function) where T : class
@@ -126,20 +115,62 @@ namespace Cliver
             return Run(null, function);
         }
 
+        virtual public T Run<T>(Func<Task<T>> functionAsync) where T : class
+        {
+            return Run(null, functionAsync);
+        }
+
         virtual public async Task<T> RunAsync<T>(Func<T> function) where T : class
         {
             return await RunAsync(null, function);
         }
 
-        override public void Run(Action action)
+        virtual public Task<T> RunAsync<T>(Func<Task<T>> functionAsync) where T : class
+        {
+            return RunAsync(null, () => TaskRoutines.RunSync(functionAsync));
+        }
+
+        #region Actions
+        virtual public void Run(string message, Action action)
+        {
+            Run(message, () => { action(); return (object)null; });
+        }
+
+        virtual public void Run(string message, Func<Task> actionAsync)
+        {
+            Run(message, () => TaskRoutines.RunSync(actionAsync));
+        }
+
+        virtual public async Task RunAsync(string message, Action action)
+        {
+            await RunAsync(message, () => { action(); return (object)null; });
+        }
+
+        virtual public Task RunAsync<T>(string message, Func<Task> actionAsync) where T : class
+        {
+            return RunAsync(message, () => TaskRoutines.RunSync(actionAsync));
+        }
+
+        virtual public void Run(Action action)
         {
             Run(null, action);
         }
 
-        override public async Task RunAsync(Action action)
+        virtual public void Run(Func<Task> actionAsync)
+        {
+            Run(null, () => TaskRoutines.RunSync(actionAsync));
+        }
+
+        virtual public async Task RunAsync(Action action)
         {
             await RunAsync(null, action);
         }
+
+        virtual public Task RunAsync(string message, Func<Task> actionAsync)
+        {
+            return RunAsync(null, actionAsync);
+        }
+        #endregion
     }
 
     /// <summary>

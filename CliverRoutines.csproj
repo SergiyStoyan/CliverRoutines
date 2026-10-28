@@ -7,7 +7,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-	<Version>6.60.2
+	<Version>6.61.0
 .$([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 1787830000)), 600))</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
@@ -45,7 +45,12 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.56 =&gt; 6.60.0
+    <PackageReleaseNotes>6.60 =&gt; 6.61
+- GetFieldNames()=&gt;GetFieldNames2Value();
+- GetPropertyNames2Value() added;
+- Trier changed;
+
+6.56 =&gt; 6.60.0
 - Operation, OperationContoller added;
 - (!) old Triers commented;
 - new Triers added;
