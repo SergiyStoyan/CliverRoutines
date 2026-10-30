@@ -44,11 +44,11 @@ namespace Cliver
             return p;
         }
 
-        public static string GetAbsolutePath(string path)
+        public static string GetAbsolutePath(string path, string basePath = null)
         {
             if (Path.IsPathRooted(path))
                 return path;
-            return Log.AppDir + Path.DirectorySeparatorChar + path;
+            return (basePath == null ? Log.AppDir : basePath) + Path.DirectorySeparatorChar + path;
         }
 
         /// <summary>

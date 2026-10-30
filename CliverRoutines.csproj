@@ -7,7 +7,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-	<Version>6.61.0
+	<Version>6.62.0
 .$([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 1787830000)), 600))</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
@@ -45,7 +45,12 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.60 =&gt; 6.61
+    <PackageReleaseNotes>6.61 =&gt; 6.62
+- Config engine updated;
+- AssemblyResolver added;
+- GetAbsolutePath() updated;
+
+6.60 =&gt; 6.61
 - GetFieldNames()=&gt;GetFieldNames2Value();
 - GetPropertyNames2Value() added;
 - Trier changed;

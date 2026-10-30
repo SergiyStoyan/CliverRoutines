@@ -115,157 +115,200 @@ namespace Cliver
         static List<Assembly> lastExplicitlyTrackedAssemblies = null;
         static int lastAssemblyChainMaxLength = 0;
         static Dictionary<string, SettingsFieldInfo> settingsFieldFullNames2SettingsFieldInfo = new Dictionary<string, SettingsFieldInfo>();
-        //static IEnumerable<SettingsFieldInfo> getSettingsFieldInfos()
-        //{
-        //    List<Assembly> assemblies;
-        //    if (ExplicitlyTrackedAssemblies != null)
-        //        assemblies = new List<Assembly>(ExplicitlyTrackedAssemblies);
-        //    else
-        //    {
-        //        Assembly configAssembly = Assembly.GetExecutingAssembly();
-        //        StackTrace stackTrace = new StackTrace();
-        //        Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != configAssembly).FirstOrDefault();
-        //        if (callingAssembly == null)
-        //            callingAssembly = Assembly.GetEntryAssembly();
-        //        assemblies = new List<Assembly> { callingAssembly };
-        //        string configAssemblyFullName = configAssembly.FullName;
-        //        //!!!The search scope is limited as it is in order not to load more assemblies which is unavoidable while enumerating them.
-        //        foreach (AssemblyName assemblyName in callingAssembly.GetReferencedAssemblies())
-        //        {
-        //            Assembly a = Assembly.Load(assemblyName);
-        //            if (null != a.GetReferencedAssemblies().Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
-        //                assemblies.Add(a);
-        //        }
-        //    }
-        //    foreach (Assembly assembly in assemblies.Where(a => a != null).Distinct())
-        //    {
-        //        Type[] types = assembly.GetTypes();
-        //        IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/;
-        //        if (settingsTypes.Any())
-        //            foreach (Type type in types)
-        //                //!!!while FieldInfo can see property, it loses its attributes if any. So we need to retrieve by GetMembers().
-        //                foreach (MemberInfo settingsTypeMemberInfo in type.GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)/*.Where(f => settingsTypes.Contains(f.Member)*/ /* && f.FieldType.IsAssignableFrom(settingsType)*/)
-        //                {
-        //                    FieldInfo fi = settingsTypeMemberInfo as FieldInfo;
-        //                    if (fi != null)
-        //                    {
-        //                        if (!fi.Name.StartsWith("<")/*it is a compiled property*/ && settingsTypes.Contains(fi.FieldType))
-        //                            yield return new SettingsFieldFieldInfo(fi);
-        //                    }
-        //                    else
-        //                    {
-        //                        PropertyInfo pi = settingsTypeMemberInfo as PropertyInfo;
-        //                        if (pi != null && settingsTypes.Contains(pi.PropertyType))
-        //                            yield return new SettingsFieldPropertyInfo(pi);
-        //                    }
-        //                }
-        //    }
 
-        //    //List<Type> types = new List<Type>();
-        //    //List<Type> settingsTypes = new List<Type>();
-        //    //foreach (Assembly assembly in assemblies.Where(a => a != null).Distinct())
-        //    //    types.AddRange(assembly.GetTypes());
-        //    //settingsTypes.AddRange(types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/);
-        //    //foreach (Type type in types)
-        //    //    //!!!while FieldInfo can see property, it loses its attributes if any. So we need to retrieve by GetMembers().
-        //    //    foreach (MemberInfo settingsTypeMemberInfo in type.GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)/*.Where(f => settingsTypes.Contains(f.Member)*/ /* && f.FieldType.IsAssignableFrom(settingsType)*/)
-        //    //    {
-        //    //        FieldInfo fi = settingsTypeMemberInfo as FieldInfo;
-        //    //        if (fi != null)
-        //    //        {
-        //    //            if (!fi.Name.StartsWith("<")/*it is a compiled property*/ && settingsTypes.Contains(fi.FieldType))
-        //    //                yield return new SettingsFieldFieldInfo(fi);
-        //    //        }
-        //    //        else
-        //    //        {
-        //    //            PropertyInfo pi = settingsTypeMemberInfo as PropertyInfo;
-        //    //            if (pi != null && settingsTypes.Contains(pi.PropertyType))
-        //    //                yield return new SettingsFieldPropertyInfo(pi);
-        //    //        }
-        //    //    }
-        //}
-        class ReferenceAssembly
-        {
-            readonly int level;
-            readonly Assembly assembly;
-            readonly List<ReferenceAssembly> referenceAssemblies = new List<ReferenceAssembly>();
-            readonly Type[] types;
-            readonly List<Type> settingsTypes;
-
-            public ReferenceAssembly(Assembly assembly, string configAssemblyFullName, int maxLevel) : this(assembly, configAssemblyFullName, 0, maxLevel)
-            {
-            }
-            ReferenceAssembly(Assembly assembly, string configAssemblyFullName, int level, int maxLevel)
-            {
-                this.level = level;
-                this.assembly = assembly;
-                if (level <= maxLevel)
-                    foreach (AssemblyName assemblyName in assembly.GetReferencedAssemblies())
-                    {
-                        Assembly a = Assembly.Load(assemblyName);
-                        if (null != a.GetReferencedAssemblies().Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
-                            referenceAssemblies.Add(new ReferenceAssembly(a, configAssemblyFullName, level + 1, maxLevel));
-                    }
-                types = assembly.GetTypes();
-                settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/.ToList();
-            }
-
-            public IEnumerable<SettingsFieldInfo> GetSettingsFieldInfos()
-            {
-                foreach (SettingsFieldInfo sfi in getSettingsFieldInfosForSettingsTypes(settingsTypes))
-                    yield return sfi;
-                foreach (ReferenceAssembly ra in referenceAssemblies)
-                {
-                    foreach (SettingsFieldInfo sfi in getSettingsFieldInfosForSettingsTypes(ra.settingsTypes))
-                        yield return sfi;
-                    foreach (SettingsFieldInfo sfi in ra.GetSettingsFieldInfos())
-                        yield return sfi;
-                }
-            }
-            IEnumerable<SettingsFieldInfo> getSettingsFieldInfosForSettingsTypes(List<Type> settingsTypes)
-            {
-                if (settingsTypes.Count < 1)
-                    yield break;
-                foreach (Type type in types)
-                    //!!!while FieldInfo can see property, it loses its attributes if any. So we need to retrieve by GetMembers().
-                    foreach (MemberInfo settingsTypeMemberInfo in type.GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)/*.Where(f => settingsTypes.Contains(f.Member)*/ /* && f.FieldType.IsAssignableFrom(settingsType)*/)
-                    {
-                        FieldInfo fi = settingsTypeMemberInfo as FieldInfo;
-                        if (fi != null)
-                        {
-                            if (!fi.Name.StartsWith("<")/*it is a compiled property*/ && settingsTypes.Contains(fi.FieldType))
-                                yield return new SettingsFieldFieldInfo(fi);
-                        }
-                        else
-                        {
-                            PropertyInfo pi = settingsTypeMemberInfo as PropertyInfo;
-                            if (pi != null && settingsTypes.Contains(pi.PropertyType))
-                                yield return new SettingsFieldPropertyInfo(pi);
-                        }
-                    }
-            }
-        }
         static IEnumerable<SettingsFieldInfo> getSettingsFieldInfos()
         {
-            List<ReferenceAssembly> referenceAssembly0s = new List<ReferenceAssembly>();
-            Assembly configAssembly = Assembly.GetExecutingAssembly();
+            HashSet<Assembly> assemblies;
             if (ExplicitlyTrackedAssemblies != null)
-                foreach (Assembly a in ExplicitlyTrackedAssemblies)
-                    referenceAssembly0s.Add(new ReferenceAssembly(a, configAssembly.FullName,
-                    /*The search scope is limited as it is in order not to load more assemblies which is unavoidable while enumerating them.*/AssemblyChainMaxLength));
+                assemblies = new HashSet<Assembly>(ExplicitlyTrackedAssemblies);
             else
             {
+                Assembly configAssembly = Assembly.GetExecutingAssembly();
                 StackTrace stackTrace = new StackTrace();
                 Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != configAssembly).FirstOrDefault();
                 if (callingAssembly == null)
                     callingAssembly = Assembly.GetEntryAssembly();
-                referenceAssembly0s.Add(new ReferenceAssembly(callingAssembly, configAssembly.FullName,
-                    /*The search scope is limited as it is in order not to load more assemblies which is unavoidable while enumerating them.*/AssemblyChainMaxLength));
+                string configAssemblyFullName = configAssembly.FullName;
+
+                assemblies = new HashSet<Assembly> { };
+                //HashSet<Assembly> viewedAssemblies = new HashSet<Assembly>();
+                void getReferencedAssemblies(Assembly assembly, int level)
+                {
+                    if (level > AssemblyChainMaxLength)
+                        //(!)The search scope is limited as it is in order not to load more assemblies which is unavoidable while enumerating them.
+                        return;
+                    if (assemblies.Contains(assembly))
+                        return;
+                    var ans = assembly.GetReferencedAssemblies();
+                    if (null == ans.Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
+                        //(!)if assembly does ot reference Settings then its referenced assemblies are ignored, too,
+                        //which in theory can lead to missed Settings fields but it is done so to save load time.
+                        return;
+                    assemblies.Add(assembly);
+                    level++;
+                    foreach (AssemblyName assemblyName in ans)
+                    {
+                        Assembly a = Assembly.Load(assemblyName);
+                        getReferencedAssemblies(a, level);
+                    }
+                }
+                getReferencedAssemblies(callingAssembly, 0);
             }
-            foreach (ReferenceAssembly ra in referenceAssembly0s)
-                foreach (SettingsFieldInfo sfi in ra.GetSettingsFieldInfos())
-                    yield return sfi;
+            Type[] getLoadableTypes(Assembly assembly)
+            {
+                try
+                {
+                    return assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException e)//usually absent assemblies are not used in the code so their types are not needed anyway
+                {
+                    if (null != e.LoaderExceptions.FirstOrDefault(a => !(a is FileNotFoundException)))
+                        throw;
+                    return e.Types.Where(t => t != null).ToArray();
+                }
+            }
+            foreach (Assembly assembly in assemblies.Where(a => a != null))
+            {
+                Type[] types = getLoadableTypes(assembly);
+                IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/;
+                if (settingsTypes.Any())
+                    foreach (Type type in types)
+                        //!!!while FieldInfo can see property, it loses its attributes if any. So we need to retrieve by GetMembers().
+                        foreach (MemberInfo settingsTypeMemberInfo in type.GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)/*.Where(f => settingsTypes.Contains(f.Member)*/ /* && f.FieldType.IsAssignableFrom(settingsType)*/)
+                        {
+                            FieldInfo fi = settingsTypeMemberInfo as FieldInfo;
+                            if (fi != null)
+                            {
+                                if (!fi.Name.StartsWith("<")/*it is a compiled property*/ && settingsTypes.Contains(fi.FieldType))
+                                    yield return new SettingsFieldFieldInfo(fi);
+                            }
+                            else
+                            {
+                                PropertyInfo pi = settingsTypeMemberInfo as PropertyInfo;
+                                if (pi != null && settingsTypes.Contains(pi.PropertyType))
+                                    yield return new SettingsFieldPropertyInfo(pi);
+                            }
+                        }
+            }
+
+            //List<Type> types = new List<Type>();
+            //List<Type> settingsTypes = new List<Type>();
+            //foreach (Assembly assembly in assemblies.Where(a => a != null).Distinct())
+            //    types.AddRange(assembly.GetTypes());
+            //settingsTypes.AddRange(types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/);
+            //foreach (Type type in types)
+            //    //!!!while FieldInfo can see property, it loses its attributes if any. So we need to retrieve by GetMembers().
+            //    foreach (MemberInfo settingsTypeMemberInfo in type.GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)/*.Where(f => settingsTypes.Contains(f.Member)*/ /* && f.FieldType.IsAssignableFrom(settingsType)*/)
+            //    {
+            //        FieldInfo fi = settingsTypeMemberInfo as FieldInfo;
+            //        if (fi != null)
+            //        {
+            //            if (!fi.Name.StartsWith("<")/*it is a compiled property*/ && settingsTypes.Contains(fi.FieldType))
+            //                yield return new SettingsFieldFieldInfo(fi);
+            //        }
+            //        else
+            //        {
+            //            PropertyInfo pi = settingsTypeMemberInfo as PropertyInfo;
+            //            if (pi != null && settingsTypes.Contains(pi.PropertyType))
+            //                yield return new SettingsFieldPropertyInfo(pi);
+            //        }
+            //    }
         }
+        //class ReferenceAssembly
+        //{
+        //    readonly int level;
+        //    readonly Assembly assembly;
+        //    readonly List<ReferenceAssembly> referenceAssemblies = new List<ReferenceAssembly>();
+        //    readonly Type[] types;
+        //    readonly List<Type> settingsTypes;
+
+        //    public ReferenceAssembly(Assembly assembly, string configAssemblyFullName, int maxLevel) : this(assembly, configAssemblyFullName, 0, maxLevel)
+        //    {
+        //    }
+        //    ReferenceAssembly(Assembly assembly, string configAssemblyFullName, int level, int maxLevel)
+        //    {
+        //        this.level = level;
+        //        this.assembly = assembly;
+        //        if (level <= maxLevel)
+        //            foreach (AssemblyName assemblyName in assembly.GetReferencedAssemblies())
+        //            {
+        //                Assembly a = Assembly.Load(assemblyName);
+        //                if (null != a.GetReferencedAssemblies().Where(an => an.FullName == configAssemblyFullName).FirstOrDefault())
+        //                    referenceAssemblies.Add(new ReferenceAssembly(a, configAssemblyFullName, level + 1, maxLevel));
+        //            }
+        //        types = getLoadableTypes(assembly);
+        //        settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/.ToList();
+        //    }
+        //    static Type[] getLoadableTypes(Assembly assembly)
+        //    {
+        //        try
+        //        {
+        //            return assembly.GetTypes();
+        //        }
+        //        catch (ReflectionTypeLoadException e)//usually absent assemblies are not used in the code so their types are not needed anyway
+        //        {
+        //            if (null != e.LoaderExceptions.FirstOrDefault(a => !(a is FileNotFoundException)))
+        //                throw;
+        //            return e.Types.Where(t => t != null).ToArray();
+        //        }
+        //    }
+
+        //    public IEnumerable<SettingsFieldInfo> GetSettingsFieldInfos()
+        //    {
+        //        foreach (SettingsFieldInfo sfi in getSettingsFieldInfosForSettingsTypes(settingsTypes))
+        //            yield return sfi;
+        //        foreach (ReferenceAssembly ra in referenceAssemblies)
+        //        {
+        //            foreach (SettingsFieldInfo sfi in getSettingsFieldInfosForSettingsTypes(ra.settingsTypes))
+        //                yield return sfi;
+        //            foreach (SettingsFieldInfo sfi in ra.GetSettingsFieldInfos())
+        //                yield return sfi;
+        //        }
+        //    }
+        //    IEnumerable<SettingsFieldInfo> getSettingsFieldInfosForSettingsTypes(List<Type> settingsTypes)
+        //    {
+        //        if (settingsTypes.Count < 1)
+        //            yield break;
+        //        foreach (Type type in types)
+        //            //!!!while FieldInfo can see property, it loses its attributes if any. So we need to retrieve by GetMembers().
+        //            foreach (MemberInfo settingsTypeMemberInfo in type.GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)/*.Where(f => settingsTypes.Contains(f.Member)*/ /* && f.FieldType.IsAssignableFrom(settingsType)*/)
+        //            {
+        //                FieldInfo fi = settingsTypeMemberInfo as FieldInfo;
+        //                if (fi != null)
+        //                {
+        //                    if (!fi.Name.StartsWith("<")/*it is a compiled property*/ && settingsTypes.Contains(fi.FieldType))
+        //                        yield return new SettingsFieldFieldInfo(fi);
+        //                }
+        //                else
+        //                {
+        //                    PropertyInfo pi = settingsTypeMemberInfo as PropertyInfo;
+        //                    if (pi != null && settingsTypes.Contains(pi.PropertyType))
+        //                        yield return new SettingsFieldPropertyInfo(pi);
+        //                }
+        //            }
+        //    }
+        //}
+        //static IEnumerable<SettingsFieldInfo> getSettingsFieldInfos()
+        //{
+        //    List<ReferenceAssembly> referenceAssembly0s = new List<ReferenceAssembly>();
+        //    Assembly configAssembly = Assembly.GetExecutingAssembly();
+        //    if (ExplicitlyTrackedAssemblies != null)
+        //        foreach (Assembly a in ExplicitlyTrackedAssemblies)
+        //            referenceAssembly0s.Add(new ReferenceAssembly(a, configAssembly.FullName,
+        //            /*The search scope is limited as it is in order not to load more assemblies which is unavoidable while enumerating them.*/AssemblyChainMaxLength));
+        //    else
+        //    {
+        //        StackTrace stackTrace = new StackTrace();
+        //        Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != configAssembly).FirstOrDefault();
+        //        if (callingAssembly == null)
+        //            callingAssembly = Assembly.GetEntryAssembly();
+        //        referenceAssembly0s.Add(new ReferenceAssembly(callingAssembly, configAssembly.FullName,
+        //            /*The search scope is limited as it is in order not to load more assemblies which is unavoidable while enumerating them.*/AssemblyChainMaxLength));
+        //    }
+        //    foreach (ReferenceAssembly ra in referenceAssembly0s)
+        //        foreach (SettingsFieldInfo sfi in ra.GetSettingsFieldInfos())
+        //            yield return sfi;
+        //}
 
         class SettingsTypeComparer : IComparer<Type>
         {
