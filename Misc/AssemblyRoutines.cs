@@ -195,29 +195,51 @@ namespace Cliver
                     yield return a;
         }
 
-        public static IEnumerable<Assembly> GetAssemblyBranchByNamespace(Assembly assembly, System.Text.RegularExpressions.Regex assemblyNamespaceFilter)
+        public static IEnumerable<Assembly> GetAssemblyBranchByNamespace(Assembly assembly, System.Text.RegularExpressions.Regex assemblyNamespaceFilter, TypeLoadMode typeLoadMode)
         {
-            if (assembly.GetTypes().FirstOrDefault(a => assemblyNamespaceFilter.IsMatch(a.FullName)) == null)
+            if (assembly.GetTypes(typeLoadMode).FirstOrDefault(a => assemblyNamespaceFilter.IsMatch(a.FullName)) == null)
                 yield break;
             HashSet<string> afns = new HashSet<string>();
             afns.Add(assembly.FullName);
             yield return assembly;
             foreach (AssemblyName an in assembly.GetReferencedAssemblies())
-                foreach (Assembly aa in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, afns))
+                foreach (Assembly aa in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, afns, typeLoadMode))
                     yield return aa;
         }
-        static IEnumerable<Assembly> getAssemblyBranchByNamespace(AssemblyName assemblyName, System.Text.RegularExpressions.Regex assemblyNamespaceFilter, HashSet<string> assemblyFullNames)
+        static IEnumerable<Assembly> getAssemblyBranchByNamespace(AssemblyName assemblyName, System.Text.RegularExpressions.Regex assemblyNamespaceFilter, HashSet<string> assemblyFullNames, TypeLoadMode typeLoadMode)
         {
             if (assemblyFullNames.Contains(assemblyName.FullName))
                 yield break;
             Assembly assembly = Assembly.Load(assemblyName);
-            if (assembly.GetTypes().FirstOrDefault(a => assemblyNamespaceFilter.IsMatch(a.FullName)) == null)
+            if (assembly.GetTypes(typeLoadMode).FirstOrDefault(a => assemblyNamespaceFilter.IsMatch(a.FullName)) == null)
                 yield break;
             assemblyFullNames.Add(assembly.FullName);
             yield return assembly;
             foreach (AssemblyName an in assembly.GetReferencedAssemblies())
-                foreach (Assembly a in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, assemblyFullNames))
+                foreach (Assembly a in getAssemblyBranchByNamespace(an, assemblyNamespaceFilter, assemblyFullNames, typeLoadMode))
                     yield return a;
+        }
+
+        public enum TypeLoadMode
+        {
+            MustLoad = 0,
+            /// <summary>
+            /// Usually absent assemblies are not used in the actual code so their types can be omitted.
+            /// </summary>
+            IgnoreAssemblyFileNotFound = 1,
+        }
+        static public Type[] GetTypes(this Assembly assembly, TypeLoadMode typeLoadMode)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                if (typeLoadMode.HasFlag(TypeLoadMode.IgnoreAssemblyFileNotFound) || null != e.LoaderExceptions.FirstOrDefault(a => !(a is System.IO.FileNotFoundException)))
+                    throw;
+                return e.Types.Where(t => t != null).ToArray();
+            }
         }
 
         public static string GetPath(this Assembly assembly)

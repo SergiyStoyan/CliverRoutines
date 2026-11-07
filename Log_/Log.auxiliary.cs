@@ -234,7 +234,7 @@ namespace Cliver
         /// </summary>
         /// <param name="namespaces"></param>
         /// <returns></returns>
-        static public string GetAssembliesInfo(params string[] namespaces)
+        static public string GetAssembliesInfo(AssemblyRoutines.TypeLoadMode typeLoadMode, params string[] namespaces)
         {
             StackTrace stackTrace = new StackTrace();
             Assembly logAssembly = Assembly.GetExecutingAssembly();
@@ -242,7 +242,7 @@ namespace Cliver
             if (callingAssembly == null)
                 callingAssembly = Assembly.GetEntryAssembly();
             return string.Join("\r\n",
-                AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaces.Select(a => Regex.Escape(a)))))
+                AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaces.Select(a => Regex.Escape(a)))), typeLoadMode)
                     .Distinct()
                     .Select(a => a.GetName()).Select(a => a.Name + " - " + a.Version)
                 );

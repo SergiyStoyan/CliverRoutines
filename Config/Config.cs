@@ -154,22 +154,9 @@ namespace Cliver
                 }
                 getReferencedAssemblies(callingAssembly, 0);
             }
-            Type[] getLoadableTypes(Assembly assembly)
-            {
-                try
-                {
-                    return assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)//usually absent assemblies are not used in the code so their types are not needed anyway
-                {
-                    if (null != e.LoaderExceptions.FirstOrDefault(a => !(a is FileNotFoundException)))
-                        throw;
-                    return e.Types.Where(t => t != null).ToArray();
-                }
-            }
             foreach (Assembly assembly in assemblies.Where(a => a != null))
             {
-                Type[] types = getLoadableTypes(assembly);
+                Type[] types = assembly.GetTypes(AssemblyRoutines.TypeLoadMode.IgnoreAssemblyFileNotFound);
                 IEnumerable<Type> settingsTypes = types.Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Settings)))/*.Distinct()*/;
                 if (settingsTypes.Any())
                     foreach (Type type in types)

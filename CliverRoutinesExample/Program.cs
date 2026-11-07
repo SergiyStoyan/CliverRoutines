@@ -12,8 +12,8 @@ namespace Example
             {
                 //SleepRoutines.WaitForCondition(()=> { return false; }, 2000, 1000, true,3);
 
-
-                Log.Inform("\r\n" + Log.GetAssembliesInfo(nameof(Cliver)));
+                string s = Log.GetAssembliesInfo(AssemblyRoutines.TypeLoadMode.MustLoad, nameof(Cliver)/*, nameof(Example)*/);
+                Log.Inform("\r\n" + s);
 
                 LogExample.Run();
 
