@@ -195,6 +195,13 @@ namespace Cliver
                     yield return a;
         }
 
+        /// <summary>
+        /// (!)It is slow because it loads assemblies.
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <param name="assemblyNamespaceFilter"></param>
+        /// <param name="typeLoadMode"></param>
+        /// <returns></returns>
         public static IEnumerable<Assembly> GetAssemblyBranchByNamespace(Assembly assembly, System.Text.RegularExpressions.Regex assemblyNamespaceFilter, TypeLoadMode typeLoadMode)
         {
             if (assembly.GetTypes(typeLoadMode).FirstOrDefault(a => assemblyNamespaceFilter.IsMatch(a.FullName)) == null)

@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Cliver
@@ -44,31 +45,73 @@ namespace Cliver
             Operation = operation;
         }
 
+        //public OperationController(string title, Func<Task> operationAsync) : this(title)
+        //{
+        //    OperationAsync = operationAsync;
+        //}
+
         /// <summary>
         /// Must be called by the invoker.
         /// </summary>
         /// <returns></returns>
         public OperationStatus Perform()
         {
-            OperationStatus status = OperationStatus.Running;
             try
             {
                 OnStart.ForEach(a => a());
-                Operation();
+
+                //if (Operation != null)
+                    Operation();
+                //else if (OperationAsync != null)
+                //    TaskRoutines.RunSync(OperationAsync);
+                //else
+                //    throw new Exception("Operation is not set.");
+
                 OnCompletion.ForEach(a => a());
-                status = OperationStatus.Completed;
+                Status = OperationStatus.Completed;
             }
             catch (Exception e)
             {
-                status = Aborting ? OperationStatus.Aborted : OperationStatus.Failed;
+                Status = Aborting ? OperationStatus.Aborted : OperationStatus.Failed;
                 OnException.ForEach(a => a(e));
             }
             finally
             {
                 OnFinally.ForEach(a => a());
-                Status = status;
             }
             return Status;
+        }
+
+        //async public Task<OperationStatus> PerformAsync()
+        //{
+        //    try
+        //    {
+        //        OnStart.ForEach(a => a());
+
+        //        if (Operation != null)
+        //            await Task.Run(Operation);
+        //        else if (OperationAsync != null)
+        //            await OperationAsync();
+        //        else
+        //            throw new Exception("Operation is not set.");
+
+        //        OnCompletion.ForEach(a => a());
+        //        Status = OperationStatus.Completed;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Status = Aborting ? OperationStatus.Aborted : OperationStatus.Failed;
+        //        OnException.ForEach(a => a(e));
+        //    }
+        //    finally
+        //    {
+        //        OnFinally.ForEach(a => a());
+        //    }
+        //    return Status;
+        //}
+        async public Task<OperationStatus> PerformAsync()
+        {
+            return await Task.Run(Perform);
         }
 
         readonly public List<Action> OnStart = new List<Action>();
@@ -80,19 +123,42 @@ namespace Cliver
         readonly public List<Action<Exception>> OnException = new List<Action<Exception>>();
 
         /// <summary>
-        /// The operation must throw exception on error. Otherwise it is considered completed successfully.
+        /// The operation must throw exception on error, otherwise it is considered completed successfully.
+        /// (!)It must not be async, otherwise the invoker will not be able to catch exceptions.
         /// </summary>
         public virtual Action Operation
         {
             get { return operation; }
             set
             {
+                //if (operationAsync != null)
+                //    throw new Exception($"{nameof(OperationAsync)} and {nameof(Operation)} must not be set together.");
                 if (operation != null)
                     throw new Exception(nameof(Operation) + " must be set only once.");
                 operation = value;
             }
         }
         Action operation = null;
+
+        //public virtual Func<Task> OperationAsync
+        //{
+        //    get { return operationAsync; }
+        //    set
+        //    {
+        //        if (operation != null)
+        //            throw new Exception($"{nameof(OperationAsync)} and {nameof(Operation)} must not be set together.");
+        //        if (operationAsync != null)
+        //            throw new Exception(nameof(OperationAsync) + " must be set only once.");
+        //        operationAsync = value;
+        //    }
+        //}
+        //Func<Task> operationAsync = null;
+
+        //bool isOperationAsync()
+        //{
+        //    MethodInfo method = Operation.Method;
+        //    return method.GetCustomAttribute<AsyncStateMachineAttribute>() != null;
+        //}
 
         /// <summary>
         /// Provides aborting mechanisms, usually by causing exceptions within the operation code.
@@ -125,11 +191,6 @@ namespace Cliver
             Failed
         }
         public OperationStatus Status { get; private set; } = OperationStatus.Created;
-
-        async public Task<OperationStatus> PerformAsync()
-        {
-            return await Task.Run(Perform);
-        }
 
         async public Task<bool> AbortAsync(int timeoutMss)
         {

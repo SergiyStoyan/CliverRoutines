@@ -41,7 +41,7 @@ namespace Cliver
             return IsOverridden(classType.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance));
         }
 
-        public static Dictionary<string, FieldInfo> GetFieldInfos(object o, BindingFlags bindingFlags)
+        public static Dictionary<string, FieldInfo> GetFieldInfos(object o, BindingFlags bindingFlags = BindingFlags.Public)
         {
             Dictionary<string, FieldInfo> ns2fi = new Dictionary<string, FieldInfo>();
             foreach (FieldInfo fi in o.GetType().GetFields(bindingFlags))
@@ -49,7 +49,7 @@ namespace Cliver
             return ns2fi;
         }
 
-        public static Dictionary<string, object> GetFieldNames2Value(object o, BindingFlags? bindingFlags = null)
+        public static Dictionary<string, object> GetFieldNames2Value(object o, BindingFlags? bindingFlags = BindingFlags.Public)
         {
             Dictionary<string, object> ns2v = new Dictionary<string, object>();
             foreach (FieldInfo fi in bindingFlags != null ? o.GetType().GetFields(bindingFlags.Value) : o.GetType().GetFields())
@@ -57,13 +57,57 @@ namespace Cliver
             return ns2v;
         }
 
-        public static Dictionary<string, object> GetPropertyNames2Value(object o, BindingFlags? bindingFlags = null)
+        public static Dictionary<string, object> GetPropertyNames2Value(object o, BindingFlags? bindingFlags = BindingFlags.Public | BindingFlags.Static)
         {
             Dictionary<string, object> ns2v = new Dictionary<string, object>();
             //foreach (System.ComponentModel.PropertyDescriptor pd in System.ComponentModel.TypeDescriptor.GetProperties(o))
             //    ns2v[pd.Name] = pd.GetValue(o);
             foreach (var pi in bindingFlags != null ? o.GetType().GetProperties(bindingFlags.Value) : o.GetType().GetProperties())
                 ns2v[pi.Name] = pi.GetValue(o);
+            return ns2v;
+        }
+
+        /// <summary>
+        /// For static
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="bindingFlags"></param>
+        /// <returns></returns>
+        public static Dictionary<string, FieldInfo> GetFieldInfos(Type t, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Static)
+        {
+            Dictionary<string, FieldInfo> ns2fi = new Dictionary<string, FieldInfo>();
+            foreach (FieldInfo fi in t.GetFields(bindingFlags))
+                ns2fi[fi.Name] = fi;
+            return ns2fi;
+        }
+
+        /// <summary>
+        /// For static
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="bindingFlags"></param>
+        /// <returns></returns>
+        public static Dictionary<string, object> GetFieldNames2Value(Type t, BindingFlags? bindingFlags = BindingFlags.Public | BindingFlags.Static)
+        {
+            Dictionary<string, object> ns2v = new Dictionary<string, object>();
+            foreach (FieldInfo fi in bindingFlags != null ? t.GetFields(bindingFlags.Value) : t.GetFields())
+                ns2v[fi.Name] = fi.GetValue(null);
+            return ns2v;
+        }
+
+        /// <summary>
+        /// For static
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="bindingFlags"></param>
+        /// <returns></returns>
+        public static Dictionary<string, object> GetPropertyNames2Value(Type t, BindingFlags? bindingFlags = BindingFlags.Public | BindingFlags.Static)
+        {
+            Dictionary<string, object> ns2v = new Dictionary<string, object>();
+            //foreach (System.ComponentModel.PropertyDescriptor pd in System.ComponentModel.TypeDescriptor.GetProperties(o))
+            //    ns2v[pd.Name] = pd.GetValue(o);
+            foreach (var pi in bindingFlags != null ? t.GetProperties(bindingFlags.Value) : t.GetProperties())
+                ns2v[pi.Name] = pi.GetValue(null);
             return ns2v;
         }
 

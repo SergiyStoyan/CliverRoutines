@@ -123,7 +123,7 @@ namespace Cliver
 
             void deleteDirectory(string dir)
             {
-                foreach (string file in Directory.GetFiles(directory))
+                foreach (string file in Directory.GetFiles(dir))
                 {
                     try
                     {
@@ -138,11 +138,11 @@ namespace Cliver
                     }
                 }
                 if (recursive)
-                    foreach (string d in Directory.GetDirectories(directory))
+                    foreach (string d in Directory.GetDirectories(dir))
                         deleteDirectory(d);
                 try
                 {
-                    Directory.Delete(directory, false);
+                    Directory.Delete(dir, false);
                 }
                 catch (Exception e)
                 {

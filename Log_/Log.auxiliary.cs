@@ -56,8 +56,8 @@ namespace Cliver
                                 if (askYesNo == null)
                                     Log.Main.Inform("Deleting session data including caches and logs older than " + firstLogTime.ToString());
                                 else
-                                if (!askYesNo(alert))
-                                    return;
+                                    if (!askYesNo(alert))
+                                        return;
                                 alert = null;
                             }
                             Log.Main.Inform("Deleting old directory: " + d.FullName);
@@ -249,20 +249,30 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Checks only references assemblies.
+        /// (!)Checks only assemblies referenced by the calling/entry assembly.
         /// It is fast because does not load assemblies.
         /// </summary>
-        /// <param name="names"></param>
+        /// <param name="assemblyNames"></param>
         /// <returns></returns>
-        static public string GetReferencedAssembliesInfo(params string[] names)
+        static public string GetReferencedAssembliesInfo(params string[] assemblyNames)
+        {
+            return GetReferencedAssembliesInfo(new Regex(string.Join("|", assemblyNames.Select(a => Regex.Escape(a)))));
+        }
+
+        /// <summary>
+        /// (!)Checks only assemblies referenced by the calling/entry assembly.
+        /// It is fast because does not load assemblies.
+        /// </summary>
+        /// <param name="assemblyNameFilter"></param>
+        /// <returns></returns>
+        static public string GetReferencedAssembliesInfo(Regex assemblyNameFilter)
         {
             StackTrace stackTrace = new StackTrace();
             Assembly logAssembly = Assembly.GetExecutingAssembly();
-            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != logAssembly).FirstOrDefault();
+            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault(a => a != logAssembly);
             if (callingAssembly == null)
                 callingAssembly = Assembly.GetEntryAssembly();
-            Regex filter = new Regex(string.Join("|", names.Select(a => Regex.Escape(a))));
-            IList<AssemblyName> @as = new List<AssemblyName>(callingAssembly.GetReferencedAssemblies().Where(a => filter.IsMatch(a.Name)));
+            IList<AssemblyName> @as = new List<AssemblyName>(callingAssembly.GetReferencedAssemblies().Where(a => assemblyNameFilter.IsMatch(a.Name)));
             @as.Insert(0, callingAssembly.GetName());
             return string.Join("\r\n", @as.Select(a => a.Name + " - " + a.Version));
         }
