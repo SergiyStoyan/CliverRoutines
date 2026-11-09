@@ -249,7 +249,7 @@ namespace Cliver
         }
 
         /// <summary>
-        /// Checks only references assemblies.
+        /// Checks only referenced assemblies.
         /// It is fast because does not load assemblies.
         /// </summary>
         /// <param name="names"></param>

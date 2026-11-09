@@ -7,7 +7,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-	<Version>6.63.0
+	<Version>6.63.1
 .$([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 1787830000)), 600))</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
