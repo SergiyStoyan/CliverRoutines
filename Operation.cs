@@ -38,6 +38,9 @@ namespace Cliver
 
         readonly public OperationController OperationController;
 
+        /// <summary>
+        /// (!)It must not be async, otherwise the invoker will not be able to catch exceptions.
+        /// </summary>
         protected abstract void Do();
     }
 
