@@ -258,7 +258,7 @@ namespace Cliver
         {
             StackTrace stackTrace = new StackTrace();
             Assembly logAssembly = Assembly.GetExecutingAssembly();
-            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != logAssembly).FirstOrDefault();
+            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault(a => a != logAssembly);
             if (callingAssembly == null)
                 callingAssembly = Assembly.GetEntryAssembly();
             Regex filter = new Regex(string.Join("|", names.Select(a => Regex.Escape(a))));
