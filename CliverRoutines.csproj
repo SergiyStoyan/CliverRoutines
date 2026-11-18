@@ -7,7 +7,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-	<Version>6.64.1
+	<Version>6.65.0
 .$([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 1787830000)), 600))</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
@@ -22,6 +22,13 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
+	
+	<Target Name="SetThreePartPackageVersion" BeforeTargets="GenerateNuspec">
+		<PropertyGroup>
+			<!-- Parses 1.2.3.4 and formats PackageVersion as 1.2.3 -->
+			<PackageVersion>$([System.Version]::Parse('$(Version)').ToString(3))</PackageVersion>
+		</PropertyGroup>
+	</Target>
   
   <PropertyGroup>
     <IncludeSymbols>true</IncludeSymbols>
@@ -45,7 +52,9 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>- GetTypes() fixed;
+    <PackageReleaseNotes>6.64 =&gt; 6.65
+- GetTypes() fixed;
+- (!)DateTimeRoutines upgraded;
 
 6.63 =&gt; 6.64
 - DeleteDirectory() fixed;

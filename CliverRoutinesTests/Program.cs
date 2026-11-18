@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cliver;
 
@@ -17,6 +18,11 @@ namespace CliverRoutinesTests
                 //    throw new Exception(s1);
                 //if (date2.DateTime != new DateTime(2020, 12, 21, 6, 0, 0))
                 //    throw new Exception(s1);
+
+                string dateTime = "30/6/2026";
+                DateTimeRoutines.TryParseDate(dateTime, new List<DateTimeRoutines.DateTimeFormat> { DateTimeRoutines.DateTimeFormat.USA_DATE, DateTimeRoutines.DateTimeFormat.UK_DATE },
+                    out DateTime result);
+                   
 
                 DateTimeRoutinesTests t = new DateTimeRoutinesTests();
                 t.TestDate();

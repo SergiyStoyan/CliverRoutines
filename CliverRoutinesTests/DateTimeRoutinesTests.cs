@@ -25,7 +25,7 @@ namespace CliverRoutinesTests
             foreach (DTTest test in get_tests1())
             {
                 DateTimeRoutines.ParsedDateTime t;
-                if (test.Test.TryParseDate(DateTimeRoutines.DateTimeFormat.USA_DATE, out t))
+                if (DateTimeRoutines.TryParseDate(test.Test, new DateTimeRoutines.DateTimeFormat[] { DateTimeRoutines.DateTimeFormat.USA_DATE }, out t))
                     Assert.AreEqual(test.Answer.Date, t.DateTime.Date);
                 else
                 {
@@ -41,11 +41,11 @@ namespace CliverRoutinesTests
             foreach (DTTest test in get_tests2())
             {
                 DateTimeRoutines.ParsedDateTime t;
-                if (test.Test.TryParseDateOrTime(DateTimeRoutines.DateTimeFormat.USA_DATE, out t))
+                if (DateTimeRoutines.TryParseDateOrTime(test.Test, new DateTimeRoutines.DateTimeFormat[] { DateTimeRoutines.DateTimeFormat.USA_DATE }, out t))
                 {
                     if (
-                        (!t.IsUtcOffsetFound || test.Answer.Kind != DateTimeKind.Utc || t.UtcDateTime != test.Answer)
-                        && (t.IsUtcOffsetFound || t.DateTime != test.Answer)
+                        (t.UtcDateTime == null || test.Answer.Kind != DateTimeKind.Utc || t.UtcDateTime != test.Answer)
+                        && (t.UtcDateTime != null || t.DateTime != test.Answer)
                         )
                         Assert.Fail(t.DateTime.ToString() + " <> " + test.Answer.ToString() + " and " + t.UtcDateTime.ToString() + " <> " + test.Answer.ToString());
                 }
@@ -60,17 +60,17 @@ namespace CliverRoutinesTests
             foreach (DTTest test in get_tests2())
             {
                 DateTimeRoutines.ParsedDateTime t;
-                if (test.Test.TryParseDateOrTime(DateTimeRoutines.DateTimeFormat.USA_DATE, out t))
+                if (DateTimeRoutines.TryParseDateOrTime(test.Test, new DateTimeRoutines.DateTimeFormat[] { DateTimeRoutines.DateTimeFormat.USA_DATE }, out t))
                 {
                     if (
-                        (!t.IsUtcOffsetFound || test.Answer.Kind != DateTimeKind.Utc || t.UtcDateTime.TimeOfDay != test.Answer.TimeOfDay)
-                        && (t.IsUtcOffsetFound || t.DateTime.TimeOfDay != test.Answer.TimeOfDay)
+                        (t.UtcDateTime == null || test.Answer.Kind != DateTimeKind.Utc || t.UtcDateTime.Value.TimeOfDay != test.Answer.TimeOfDay)
+                        && (t.UtcDateTime != null || t.DateTime.TimeOfDay != test.Answer.TimeOfDay)
                         )
-                        Assert.Fail(t.DateTime.TimeOfDay.ToString() + " <> " + test.Answer.TimeOfDay.ToString() + " and " + t.UtcDateTime.TimeOfDay.ToString() + " <> " + test.Answer.TimeOfDay.ToString());
+                        Assert.Fail(t.DateTime.TimeOfDay.ToString() + " <> " + test.Answer.TimeOfDay.ToString() + " and " + t.UtcDateTime.Value.TimeOfDay.ToString() + " <> " + test.Answer.TimeOfDay.ToString());
                 }
                 else
                     if (0 != test.Answer.Hour || 0 != test.Answer.Minute || 0 != test.Answer.Second)
-                    Assert.Fail("Time not found in " + test.Test);
+                        Assert.Fail("Time not found in " + test.Test);
             }
         }
 
