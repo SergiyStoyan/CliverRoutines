@@ -243,7 +243,7 @@ namespace Cliver
             }
             catch (ReflectionTypeLoadException e)
             {
-                if (typeLoadMode.HasFlag(TypeLoadMode.IgnoreAssemblyFileNotFound) || null != e.LoaderExceptions.FirstOrDefault(a => !(a is System.IO.FileNotFoundException)))
+                if (!typeLoadMode.HasFlag(TypeLoadMode.IgnoreAssemblyFileNotFound) || null != e.LoaderExceptions.FirstOrDefault(a => !(a is System.IO.FileNotFoundException)))
                     throw;
                 return e.Types.Where(t => t != null).ToArray();
             }
