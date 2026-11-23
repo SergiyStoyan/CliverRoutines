@@ -6,7 +6,6 @@
 
 using System;
 using Newtonsoft.Json;
-using System.Text;
 
 namespace Cliver
 {
@@ -43,7 +42,7 @@ namespace Cliver
         /// <summary>
         /// Decrypted value to be used in the custom code.
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public T Value
         {
             get

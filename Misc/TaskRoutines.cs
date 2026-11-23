@@ -12,6 +12,25 @@ namespace Cliver
     /// </summary>
     public static class TaskRoutines
     {
+        //!!!using .Wait() or .Result is generally discouraged due to deadlocks
+        //public static T RunSync2<T>(this Func<System.Threading.Tasks.Task<T>> f)
+        //{
+        //    try
+        //    {
+        //        return System.Threading.Tasks.Task.Run(f).Result;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //!!!using .Wait() or .Result is generally discouraged due to deadlocks
+        //public static void RunSync2(this Func<System.Threading.Tasks.Task> f)
+        //{
+        //    System.Threading.Tasks.Task.Run(f).Wait();
+        //}
+
         /// <summary>
         /// Execute synchronously an async Task<T> method which returns void.
         /// </summary>

@@ -166,7 +166,7 @@ namespace Cliver
 
         public static bool TryKill(this Process process, int timeoutMss = 1000, int pollTimeSpanMss = 300, int pollMinNumber = -1)
         {
-            return SleepRoutines.WaitForCondition(() =>
+            return WaitRoutines.WaitForCondition(() =>
                 {
                     try
                     {
