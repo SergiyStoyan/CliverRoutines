@@ -51,7 +51,7 @@ namespace Cliver
         //}
 
         /// <summary>
-        /// Must be called by the invoker.
+        /// (!)Must be called by the invoker of the operation.
         /// </summary>
         /// <returns></returns>
         public OperationStatus Perform()
@@ -109,6 +109,11 @@ namespace Cliver
         //    }
         //    return Status;
         //}
+
+        /// <summary>
+        /// (!)Must be called by the invoker of the operation.
+        /// </summary>
+        /// <returns></returns>
         async public Task<OperationStatus> PerformAsync()
         {
             return await Task.Run(Perform);
@@ -162,7 +167,7 @@ namespace Cliver
 
         /// <summary>
         /// Provides aborting mechanisms, usually by causing exceptions within the operation code.
-        /// Must be called from the operation method.
+        /// (!)Must be called from within the operation method.
         /// </summary>
         /// <param name="actions"></param>
         /// <exception cref="Exception"></exception>
@@ -174,12 +179,21 @@ namespace Cliver
         }
         List<Action> abortingActions = new List<Action>();
 
+        /// <summary>
+        /// (!)Must be called by the invoker of the operation.
+        /// </summary>
+        /// <param name="timeoutMss"></param>
+        /// <returns></returns>
         public bool Abort(int timeoutMss)
         {
             Aborting = true;
             abortingActions.ForEach(a => a());
             return WaitRoutines.WaitForCondition(() => { return Status >= OperationStatus.Running; }, timeoutMss, 100);
         }
+
+        /// <summary>
+        /// Indicates whether Abort() has been called.
+        /// </summary>
         public bool Aborting { get; private set; } = false;
 
         public enum OperationStatus
@@ -192,6 +206,11 @@ namespace Cliver
         }
         public OperationStatus Status { get; private set; } = OperationStatus.Created;
 
+        /// <summary>
+        /// (!)Must be called by the invoker of the operation.
+        /// </summary>
+        /// <param name="timeoutMss"></param>
+        /// <returns></returns>
         async public Task<bool> AbortAsync(int timeoutMss)
         {
             return await Task.Run(() => { return Abort(timeoutMss); });

@@ -49,7 +49,7 @@ namespace Example
         {
             try
             {
-                ServerSettings server2 = Config.CreateReloadedClone(Settings.Server);
+                ServerSettings server2 = Settings.Server.__CreateReloadedClone();
 
                 //expose server2 in an editing dialog and get new values
                 server2.Host = "ftp.server.com";

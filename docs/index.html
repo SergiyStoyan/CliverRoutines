@@ -114,7 +114,7 @@ setLicense();
 		
 <p>There can be any number of <a href='#settings_class'>settings types</a> defined in your code.
 
-			
+<p>All <code>Settings</code>-specific methods have the prefix __ to be easily distinguished from own methods of derived classes.
 			
 <p>Example of a <a href='#settings_class'>settings type</a>:			
 <script type="text/plain" class="language-csharp">public class GeneralSettings : Cliver.UserSettings //serialized to the user data directory.
@@ -122,13 +122,13 @@ setLicense();
 	public List<string> RecentFiles; 	
 	public Color HighlightColor = Color.Orange;
 	
-	protected override void Loaded()
+	protected override void __Loaded()
 	{
 		if(RecentFiles == null)
 			RecentFiles = new List<string>(); 
 	}
 	
-	protected override void Saving()
+	protected override void __Saving()
 	{
 		RecentFiles = RecentFiles.Distinct();
 	}
@@ -187,7 +187,7 @@ Hence, you can apply attributes provided by Newtonsoft.Json to <a href='#seriali
 
             <h4><a name="cliver_0portablesettings0">Cliver.PortableSettings0</a></h4>
 <a href="#cliver_portablesettings0"><code>Cliver.PortableSettings0</code></a> is a <a href='#cliver_settings'><code>Cliver.Settings</code></a> derivative which performs serialization directly to the app's directory. 
-<p><span class='attention'>(!)</span>In this case the <a href='#storage_file'>storage file</a> coincides with the <a href='#initial_file'>initial file</a> which thus will be ovewritten by <code>Save()</code> call.
+<p><span class='attention'>(!)</span>In this case the <a href='#storage_file'>storage file</a> coincides with the <a href='#initial_file'>initial file</a> which thus will be ovewritten by <code>__Save()</code> call.
 
 				    
 				   
@@ -272,13 +272,13 @@ Cliver.Config.Reload();</script>
 <h3><a name='storage_file'>Storage file</a></h3>
 	<a href='#storage_file'>Storage file</a> stores serialized data for one <a href='#settings_field'>settings field</a>. Thus, every <a href='#settings_field'>settings field</a> has its own <a href='#storage_file'>storage file</a>. 
 		
-		<p>It is (re)created by <code>Save()</code> method:
+		<p>It is (re)created by <code>__Save()</code> method:
 <script type="text/plain" class="language-csharp">public partial class Settings
 {
 	public static GeneralSettings General;
 }
 ...
-Settings.General.Save();</script>
+Settings.General.__Save();</script>
 			
 			
 			
@@ -326,7 +326,7 @@ The <a href='#storage_file'>storage file</a> path of <a href='#settings_field'>s
 			
 			<p>It is optional and has the same format as a <a href='#storage_file'>storage file</a>.
 			
-		<p><a href='#initial_file'>Initial file</a> is (re)read by <code>Reset()</code> method or, when no <a href='#storage_file'>storage file</a> exists, also by <code>Reload()</code> method.
+		<p><a href='#initial_file'>Initial file</a> is (re)read by <code>__Reset()</code> method or, when no <a href='#storage_file'>storage file</a> exists, also by <code>__Reload()</code> method.
 			
 			<p>It is supplied in the same directory as the application's entry assembly.
 		 
@@ -417,11 +417,11 @@ Settings.Connection.ClientPort = 234;
 Settings.Connection.Servers.Add(new Server {Name = "host1", Host = "123.123.123.123", Port = 345});
 ...
 //save on disk
-Settings.Connection.Save();
+Settings.Connection.__Save();
 //or, restore the previously saved values
-Settings.Connection.Reload();
+Settings.Connection.__Reload();
 //or, reset to the initial values
-Settings.Connection.Reset();
+Settings.Connection.__Reset();
 ...
 //pass to a function
 Server server = Settings.Connection.Servers.Find(a => a.Name == "host1");
@@ -458,7 +458,7 @@ class GeneralSettings : Cliver.UserSettings//UserSettings based class is seriali
 {
 	public Dictionary<string, User> Users = new Dictionary<string, User>();
 
-	protected override void Saving()
+	protected override void __Saving()
 	{
 		ConfigExample.Log.Inform0("Settings saving...: " + __Info.FullName + " with indention: " + __Info.Indented);
 	}
@@ -507,7 +507,7 @@ class GeneralSettings : Cliver.UserSettings//UserSettings based class is seriali
 
             <p>Sometimes it is handy to modify not a <a href='#settings_field'>settings field</a> itself but its clone and then replace it:
 <script type="text/plain" class="language-csharp">//create a clone
-GeneralSettings general2 = Settings.General.CreateClone();//!!!property __Info is not cloned here but references the same object.
+GeneralSettings general2 = Settings.General.__CreateClone();//!!!property __Info is not cloned here but references the same object.
 
 //modify
 general2.ClientPort = 123;//general2 is detached because it is not referenced by any settings field
@@ -515,19 +515,19 @@ general2.ClientPort = 123;//general2 is detached because it is not referenced by
 if(userOk())
 {
 	Settings.General = general2;//now general2 becomes attached
-	Settings.General.Save();
+	Settings.General.__Save();
 }</script>
 
 <p>Or, consider the opposite case: you need to save an edited <a href='#settings_field'>settings field</a> while its clone is in use and must remain unchanged until the end of the process so that the changes will come into play after restart:
 <script type="text/plain" class="language-csharp">//create a clone which should not be changed
-GeneralSettings general0 = Settings.General.CreateClone();
+GeneralSettings general0 = Settings.General.__CreateClone();
 //using it until the end of the process...
 
 ...
 //modify the original
 general.ClientPort = 123;
 //save it so that the changes will come into play after restart
-Settings.General.Save();</script>
+Settings.General.__Save();</script>
 
 
 
@@ -575,7 +575,7 @@ Settings.This = Settings1.This;
 //using Settings.This uniformly without regard to the actual derivative
 Process.Start(Settings.This.Uri);
 Settings.This.Uri = "http://www.help.com/doc3.html"; 
-Settings.This.Save();</script>
+Settings.This.__Save();</script>
 
 
 
@@ -655,7 +655,7 @@ class ServerSettings : Cliver.UserSettings//UserSettings based class is serializ
 
 <p>Now you can use it like this:
 <script type="text/plain" class="language-csharp">Settings.Server.Password.Value = password;
-Settings.Server.Save();
+Settings.Server.__Save();
 
 ...
 connect(Settings.Server.Host, Settings.Server.Password.Value);</script>
@@ -692,7 +692,7 @@ GeneralSettings general2 = Cliver.Serialization.Json.Deserialize(generalStr);
 //!!!do not forget to restore __Info as it was distorted by serialization
 general2.__Info = Settings.General.__Info;
 Settings.General = general2;
-Settings.General.Save();</script>
+Settings.General.__Save();</script>
 
 
 
@@ -705,16 +705,16 @@ Settings.General.Save();</script>
 
 
             <h3><a name=''>Upgrading settings type</a></h3>
-Sometimes, when you upgrade an application, a <a href='#settings_class'>settings type</a> in it is changed that way that the new application cannot deserialize properly a <a href='#storage_file'>storage file</a> produced by an older application. When it happens, <a href='#config'><code>Cliver.Config</code></a> engine calls method <code>UnsupportedFormatHandler()</code> which you can override.
+Sometimes, when you upgrade an application, a <a href='#settings_class'>settings type</a> in it is changed that way that the new application cannot deserialize properly a <a href='#storage_file'>storage file</a> produced by an older application. When it happens, <a href='#config'><code>Cliver.Config</code></a> engine calls method <code>__UnsupportedFormatHandler()</code> which you can override.
 
-<p><code>UnsupportedFormatHandler()</code> is called in the following cases:
+<p><code>__UnsupportedFormatHandler()</code> is called in the following cases:
 <br>- deserialization engine thew an exception meaning that the <a href='#settings_field'>settings field</a> could not be deserialized and is set to a default value;
 <br>- the <a href='#settings_field'>settings field</a> was deserialized but its type version is still not acceptable meaning that some restored data may be deteriorated and need amending. This can be the case only if attribute <code>TypeVersion</code> is specified;
 
 <p><b>TypeVersion attribute</b>
-<br>By adding the attribute <code>TypeVersion</code> to a certain <a href='#settings_class'>settings type</a> you assign a version to its definition in the code. When the application serializes an instance of this <a href='#settings_class'>settings type</a>, its version is stored in the <a href='#storage_file'>storage file</a> as <code>__TypeVersion</code> property. Each time when you alter the <a href='#settings_class'>settings type</a>'s definition, you should also alter its version specified by the attribute. Thus, when a newer application reads an older <a href='#storage_file'>storage file</a> or vice versa, an older application reads a newer <a href='#storage_file'>storage file</a>, the type version in the <a href='#storage_file'>storage file</a> does not correspond to the version set by the attribute and therefore <a href='#config'><code>Cliver.Config</code></a> engine will call <code>UnsupportedFormatHandler()</code>.
+<br>By adding the attribute <code>TypeVersion</code> to a certain <a href='#settings_class'>settings type</a> you assign a version to its definition in the code. When the application serializes an instance of this <a href='#settings_class'>settings type</a>, its version is stored in the <a href='#storage_file'>storage file</a> as <code>__TypeVersion</code> property. Each time when you alter the <a href='#settings_class'>settings type</a>'s definition, you should also alter its version specified by the attribute. Thus, when a newer application reads an older <a href='#storage_file'>storage file</a> or vice versa, an older application reads a newer <a href='#storage_file'>storage file</a>, the type version in the <a href='#storage_file'>storage file</a> does not correspond to the version set by the attribute and therefore <a href='#config'><code>Cliver.Config</code></a> engine will call <code>__UnsupportedFormatHandler()</code>.
 
-<p>No matter why <code>UnsupportedFormatHandler()</code> was called, within it you can provide a smooth migration of old data to the new format. See the example below:
+<p>No matter why <code>__UnsupportedFormatHandler()</code> was called, within it you can provide a smooth migration of old data to the new format. See the example below:
 
 <p>
 <script type="text/plain" class="language-csharp">//An example of upgrading a Settings type 
@@ -737,7 +737,7 @@ class TemplatesSettings : Cliver.UserSettings//UserSettings based class is seria
 	public List<Template> Templates = new List<Template> { new Template { Name = "test", Words = new List<string> { "apple", "box" } } };
 
 	//Here is your chance to upgrade the data to the current format.
-	override protected void UnsupportedFormatHandler(Exception deserializingException)
+	override protected void __UnsupportedFormatHandler(Exception deserializingException)
 	{
 		try
 		{
@@ -756,7 +756,7 @@ class TemplatesSettings : Cliver.UserSettings//UserSettings based class is seria
 				o["__TypeVersion"] = 200601;
 				//save
 				__Info.WriteStorageFileAsJObject(o);
-				Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
+				__Reload();//__UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
 				return;
 			}
 			if (__TypeVersion < 210301)
@@ -768,7 +768,7 @@ class TemplatesSettings : Cliver.UserSettings//UserSettings based class is seria
 				__Info.UpdateTypeVersionInStorageFileString(210301, ref s);
 				//save
 				__Info.WriteStorageFileAsString(s);
-				Reload();//UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
+				__Reload();//__UnsupportedFormatHandler() will be called again because __TypeVersion is still obsolete
 				return;
 			}
 			if (__TypeVersion < __Info.TypeVersion)
@@ -777,7 +777,7 @@ class TemplatesSettings : Cliver.UserSettings//UserSettings based class is seria
 					t.Name = Regex.Replace(t.Name, @"^test", "_TEST_");
 				//...
 				//save
-				Save();//<span class='attention'>(!)</span>when saving, the current type version is set
+				__Save();//<span class='attention'>(!)</span>when saving, the current type version is set
 				return;
 			}
 

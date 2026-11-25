@@ -7,7 +7,7 @@
     <Copyright>Sergiy Stoyan</Copyright>
     <Authors>Sergiy Stoyan</Authors>
     <Company>CliverSoft</Company>
-	<Version>7.0.0
+	<Version>7.1.0
 .$([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 1787830000)), 600))</Version>
     <Title>Cross-platform routines needed in the most applications.</Title>
     <PackageProjectUrl>https://github.com/sergiystoyan/CliverRoutines</PackageProjectUrl>
@@ -52,7 +52,12 @@
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageReleaseNotes>6.64 =&gt; 6.65
+    <PackageReleaseNotes>6.65 =&gt; 7.1
+- (!)all Settings methods got prefix __;
+- (!)DateTimeRoutines upgraded;
+- SleepRoutines =&gt; WaitRoutines;
+
+6.64 =&gt; 6.65
 - GetTypes() fixed;
 - (!)DateTimeRoutines upgraded;
 6.64 =&gt; 7.0

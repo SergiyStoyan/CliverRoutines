@@ -14,6 +14,7 @@ namespace Cliver
 {
     public partial class Config
     {
+        #region these methods are here to have 'this S settings' so as to cast the clone properly
         /// <summary>
         /// Creates a new instance of the given Settings field initiated with default values.
         /// Tries to load values from the initial file located in the app's directory. 
@@ -23,7 +24,7 @@ namespace Cliver
         /// <typeparam name="S"></typeparam>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static S CreateResetClone<S>(this S settings) where S : Settings, new()
+        public static S __CreateResetClone<S>(this S settings) where S : Settings, new()
         {
             if (settings.__Info == null)
                 throw new Exception("This method cannot be performed on a Settings object which has __Info not defined.");
@@ -40,7 +41,7 @@ namespace Cliver
         /// <typeparam name="S"></typeparam>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static S CreateReloadedClone<S>(this S settings) where S : Settings, new()
+        public static S __CreateReloadedClone<S>(this S settings) where S : Settings, new()
         {
             if (settings.__Info == null)
                 throw new Exception("This method cannot be performed on a Settings object which has __Info not defined.");
@@ -55,13 +56,14 @@ namespace Cliver
         /// <param name="settings"></param>
         /// <param name="jsonSerializerSettings">allows to customize cloning</param>
         /// <returns></returns>
-        public static S CreateClone<S>(this S settings, JsonSerializerSettings jsonSerializerSettings = null) where S : Settings, new()
+        public static S __CreateClone<S>(this S settings, JsonSerializerSettings jsonSerializerSettings = null) where S : Settings, new()
         {
             S s = Serialization.Json.Clone(settings, jsonSerializerSettings);
             if (settings.__Info != null)
                 s.__Info = settings.__Info;
             return s;
         }
+        #endregion
 
         /// <summary>
         /// Copies storage files of all the Settings fields in the application to the specified directory.
