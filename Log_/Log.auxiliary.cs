@@ -229,20 +229,39 @@ namespace Cliver
             return s;
         }
 
+        ///// <summary>
+        ///// (!)It is slow because it loads assemblies.
+        ///// </summary>
+        ///// <param name="namespaces"></param>
+        ///// <returns></returns>
+        //static public string GetAssembliesInfo(AssemblyRoutines.TypeLoadMode typeLoadMode, params string[] namespaces)
+        //{
+        //    StackTrace stackTrace = new StackTrace();
+        //    Assembly logAssembly = Assembly.GetExecutingAssembly();
+        //    Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault(a => a != logAssembly);
+        //    if (callingAssembly == null)
+        //        callingAssembly = Assembly.GetEntryAssembly();
+        //    return string.Join("\r\n",
+        //        AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaces.Select(a => Regex.Escape(a)))), typeLoadMode)
+        //            .Distinct()
+        //            .Select(a => a.GetName()).Select(a => a.Name + " - " + a.Version)
+        //        );
+        //}
+
         /// <summary>
         /// (!)It is slow because it loads assemblies.
         /// </summary>
-        /// <param name="namespaces"></param>
+        /// <param name="namespaceRegexPatterns"></param>
         /// <returns></returns>
-        static public string GetAssembliesInfo(AssemblyRoutines.TypeLoadMode typeLoadMode, params string[] namespaces)
+        static public string GetAssembliesInfo(AssemblyRoutines.TypeLoadMode typeLoadMode, params string[] namespaceRegexPatterns)
         {
             StackTrace stackTrace = new StackTrace();
             Assembly logAssembly = Assembly.GetExecutingAssembly();
-            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).Where(a => a != logAssembly).FirstOrDefault();
+            Assembly callingAssembly = stackTrace.GetFrames().Select(f => f.GetMethod().DeclaringType.Assembly).FirstOrDefault(a => a != logAssembly);
             if (callingAssembly == null)
                 callingAssembly = Assembly.GetEntryAssembly();
             return string.Join("\r\n",
-                AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaces.Select(a => Regex.Escape(a)))), typeLoadMode)
+                AssemblyRoutines.GetAssemblyBranchByNamespace(callingAssembly, new Regex(string.Join("|", namespaceRegexPatterns)), typeLoadMode)
                     .Distinct()
                     .Select(a => a.GetName()).Select(a => a.Name + " - " + a.Version)
                 );
